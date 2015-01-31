@@ -1,0 +1,70 @@
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 57
+Host:127.0.0.1
+
+{ "method": "optimaServer.ping", "params": [], "id": 1}
+
+
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 57
+Host:127.0.0.1
+
+{ "method": "system.listMethods", "params":[] , "id": 1}
+
+
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 91
+Host:127.0.0.1
+
+{ "method": "portfolioService.create" , "params": ["test port 2" , "test desc 2"], "id": 2}
+
+
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 98
+Host:127.0.0.1
+
+{ "method": "portfolioService.update" , "params": ["1" , "new Name" , "New Description"], "id": 2}
+
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 91
+Host:127.0.0.1
+
+{ "method": "taskService.findAllByProjectForCertainTask" , "params": ["1" , "6"], "id": 2}
+
+
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 109
+Host:127.0.0.1
+
+{ "method": "daysOffService.create" , "params": ["2013-12-13T00:00:00Z" , "VACATION", "1"], "id": 2}
+
+
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 86
+Host:127.0.0.1
+
+{ "method": "portfolioService.getPortfolioCashFlowData" , "params": ["1" ], "id": 2}
+
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 120
+Host:127.0.0.1
+
+{ "method": "portfolioService.getPortfolioDateRange" , "params": ["1" ], "id": 2}
+
+
+
+POST /Optima1.0/JSON-RPC HTTP/1.1
+Content-Type: text/json
+Content-Length: 129
+Host:127.0.0.1
+
+{ "method": "projectService.getSolutionCurrentPeriodCost" , "params": [1 , "20131223T00:00:00" , "20131226T00:00:00" ], "id": 2}
+

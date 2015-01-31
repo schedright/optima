@@ -1,0 +1,9 @@
+WebContent/js/jquery.base64.js
+WebContent/js/jquery.cookie.js
+WebContent/js/jquery.event.drag-2.2.js
+WebContent/js/jquery.fn.gantt.js
+WebContent/js/jsonrpc-min.js
+WebContent/js/slick.core.js
+WebContent/js/slick.dataview.js
+WebContent/js/slick.formatters.js
+WebContent/js/slick.grid.js

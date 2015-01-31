@@ -1,0 +1,111 @@
+<div class="form-section">
+	<div id="taskButtons" class="two-columns">
+
+		<button id="addTaskBtn" class="taskButton">Add New Task</button>
+		<!-- <button id="delTaskBtn" class="taskButton">Delete Task</button>
+		<button id="updTaskBtn" class="taskButton">Update Task</button> -->
+
+
+
+	</div>
+
+</div>
+<div id="tasksList"  class="form-section">
+	<div class="two-columns">
+
+		<label>Available Tasks</label>
+		<ul id="mainAllTasks" data-role="listview" data-inset="true"  class="draggable"></ul>
+	</div>
+	<div  class="two-columns">
+
+		<label>Drag here to delete</label>
+		<ul id="trash" class="draggable trash"></ul>
+	</div>
+
+
+
+
+</div>
+
+
+<div id="projTasksDialog">
+
+
+	<div class="form-section">
+
+		<div class="two-columns">
+
+			<label>Task Name</label> <input type="text" id="taskNameTxt" name="taskNameTxt" />
+
+		</div>
+
+
+		<div class="two-columns right">
+
+			<label>Duration (Days)</label> <input type="text" id="durationTxt" class="spin"
+				name="durationTxt" />
+
+		</div>
+	</div>
+
+	<div class="form-section">
+		<div class="two-columns">
+
+			<label>Task Description</label>
+
+			<textarea id="taskDescTxt" name="taskDescTxt"></textarea>
+
+		</div>
+	</div>
+
+	<div class="form-section">
+		<div class="two-columns">
+			<label>Uniform daily cost ($)</label> <input type="text" id="dailyCostTxt"
+				name="dailyCostTxt" />
+		</div>
+		<div class="two-columns right">
+			<label>Uniform daily income ($)</label> <input type="text" id="dailyIncomeTxt"
+				name="dailyIncomeTxt" />
+		</div>
+
+
+	</div>
+
+
+	<div class="form-section">
+		<div class="three-columns">
+			<label>Start Date (Tentative)</label> <input type="text" id="sDateTentative"
+				name="sDateTentative" class="datepicker" />
+		</div>
+		<div class="three-columns">
+			<label>Start Date (Scheduled)</label> <input type="text" id="sDateScheduled"
+				name="sDateScheduled" readonly />
+		</div>
+
+		<div class="three-columns">
+			<label>Start Date (Actual)</label> <input type="text" id="sDateActual"
+				name="sDateActual" class="datepicker" />
+		</div>
+
+
+	</div>
+
+	<div id="divTasksDepends" class="form-section">
+		<div class="two-columns">
+			<label>All Tasks</label>
+			<ul id="allTasks" class="sortable">
+			
+			</ul>
+		</div>
+		<div id="listConnect"></div>
+		<div class="two-columns">
+			<label>Dependencies</label>
+			<ul id="dependencies" class="sortable">
+
+			</ul>
+		</div>
+
+	</div>
+
+</div>
+

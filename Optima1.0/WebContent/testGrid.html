@@ -1,0 +1,153 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>SlickGrid example 1: Basic grid</title>
+  
+  <link rel="stylesheet" href="ui/southstreet/css/south-street/jquery-ui-1.10.3.custom.css" type="text/css"/>
+  <link rel="stylesheet" href="css/app.css"/>
+  <link rel="stylesheet" href="css/listview.css"/>
+  <link rel="stylesheet" href="css/slick.grid.css" type="text/css"/>
+<!--   <link rel="stylesheet" href="examples.css" type="text/css"/> -->
+</head>
+<body>
+
+<div id="main-content">
+ <div id="header" class="banner">
+ 	<h2><font color="white" >Optima Finance-Based Scheduling</font></h2>
+ </div>
+ <div id="moduleContainer">
+ 
+ <div id="main" style="width:100%;">
+
+ <div id="FinPeriods" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+  <h3 class="ui-widget-header">Payments</h3>
+  <div>
+   <div class="form-sction">
+	  <div class="two-columns">
+		<label for="projCodeSelect">Project Code</label> <select name="projCodeSelect"
+				id="projCodeSelect"
+				class="custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-all">
+		</select>
+		</div>
+	</div>
+	
+	<div class="form-section">
+				<label for="paymentTypeRadio">Payment Type</label>
+			<div id="paymentTypeRadio" >
+				<input type="radio" id="paymentTypeRadio1" name="paymentTypeRadio" />
+				<label for="paymentTypeRadio1">Advance Payment</label>
+			    <input type="radio" id="paymentTypeRadio2" name="paymentTypeRadio" checked="checked" /><label for="paymentTypeRadio2">Interim Payment</label>
+			</div>
+	</div>
+	<div class="form-section">
+		<div class="two-columns">
+			<label for="advancePaymentAmount">Advance Payment Amount</label>
+			<input type="text" id="advancePaymentAmount" name="advancePaymentAmount" class=""/>
+		</div>
+		<div class="two-columns right">
+			<label for="intremPaymentNumber">Interim Payment #</label>
+			<input type="text" id="intremPaymentNumber" name="intremPaymentNumber" class=""/>
+		</div>	
+	</div>
+	<div class="form-section">
+		<div class="two-columns">
+			<label for="paymentDate">Payment Date</label>
+			<input type="text" id="paymentDate" name="paymentDate" class=""/>
+		</div>
+	</div>
+	<div class="form-section">
+		<div class="two-columns">
+				<button id="addPayment">Add Payment</button>
+		</div>
+	</div>
+	
+	<table width="100%">
+	  <tr>
+	    <td valign="top" width="50%">
+	      <div id="myGrid" style="width:600px;height:500px;"></div>
+	    </td>
+	  </tr>
+	</table>
+	</div>
+</div>
+</div>
+</div>
+</div>
+
+<script src="ui/southstreet/js/jquery-1.9.1.js"></script>
+<script src="ui/southstreet/js/jquery-ui-1.10.3.custom.js"></script>
+<script src="js/jsonrpc-min.js"></script>
+<script src="js/jquery.fn.gantt.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script src="js/jquery.event.drag-2.2.js"></script>
+
+<script src="js/slick.core.js"></script>
+<script src="js/slick.grid.js"></script>
+   <script src="js/slick.formatters.js"></script>
+   
+   <style>
+       
+	  #toolbar {
+	    padding: 4px;
+	    display: inline-block;
+	  }
+	  /* support: IE7 */
+	  *+html #toolbar {
+	    display: inline;
+	  } 
+	  
+	  .test{}
+	  
+ </style>
+<script>
+
+
+  var grid;
+  var columns = [
+    {id: "title", name: "Title", field: "title"},
+    {id: "duration", name: "Duration", field: "duration"}
+
+  ];
+
+  var options = {
+    enableCellNavigation: true,
+    enableColumnReorder: false
+  };
+
+  $(function () {
+    var data = [];
+    for (var i = 0; i < 500; i++) {
+      data[i] = {
+        title: "Task " + i,
+        duration: "5 days",
+      };
+    }
+
+    grid = new Slick.Grid("#myGrid", data, columns, options);
+    
+
+	$( "#paymentTypeRadio" ).buttonset();
+	
+	 $('#paymentDate').datepicker({
+			showOn : "button",
+			buttonImage : "images/calendar.png",
+			buttonImageOnly : true
+		    });
+	
+	 $("#addPayment").button({
+			icons : {
+			    primary : "ui-icon-circle-plus"
+			},
+			text : true
+		    }).click( function() {
+		    	
+		    });
+	
+	 $("#FinPeriods").accordion();
+	 
+  })
+</script>
+</body>
+</html>
