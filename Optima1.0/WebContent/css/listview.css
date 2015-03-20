@@ -29,7 +29,7 @@ body{ background: #f5f5f5; font: 12px 'Segoe UI', 'Proxima Nova', 'Helvetica Neu
 .list-active{background: #039fd3 url(../images/listw.png) 50% no-repeat;}
 
 .prods-cnt{
-	width: 90%; 
+	width: 97%; 
 	float: left;
 	height:auto;
 	overflow: auto; 
@@ -37,7 +37,7 @@ body{ background: #f5f5f5; font: 12px 'Segoe UI', 'Proxima Nova', 'Helvetica Neu
 	margin: 40px auto;
 	background-color: #fafafa;
 	border: #ccc 1px dotted;
-	padding: 40px;
+	padding: 11px;
 }
 
 /* Grid Style */
@@ -143,3 +143,45 @@ body{ background: #f5f5f5; font: 12px 'Segoe UI', 'Proxima Nova', 'Helvetica Neu
     -moz-box-shadow:    0px 0px 10px rgba(50, 50, 50, 0.31);
     box-shadow:         0px 0px 5px rgba(50, 50, 50, 0.31);
 }
+
+.addPortfolioBtn{
+	border-radius: 3px;
+	width: 15px; 
+	height:15px; 
+	margin-left: 10px; 
+	float: left; 
+	cursor:  pointer; 
+	padding: 5px; 
+	background: url(../images/addPortfolioBtn.png) 50% no-repeat;
+	float: right;
+}
+.addPortfolioBtn:hover{background:url(../images/addPortfolioBtnw.png) 50% no-repeat;}
+.addPortfolioBtn-active{ background:url(../images/addPortfolioBtnw.png) 50% no-repeat; }
+
+.gridPortfolioBtn{
+	border-radius: 3px;
+	width: 15px; 
+	height:15px; 
+	margin-left: 10px; 
+	float: left; 
+	cursor:  pointer; 
+	padding: 5px; 
+	background: url(../images/gridPortfolioBtn.png) 50% no-repeat;
+	float: right;
+}
+.gridPortfolioBtn:hover{background:url(../images/gridPortfolioBtnw.png) 50% no-repeat;}
+.gridPortfolioBtn-active{ background:url(../images/gridPortfolioBtnw.png) 50% no-repeat; }
+
+.listPortfolioBtn{
+	border-radius: 3px;
+	width: 15px; 
+	height:15px; 
+	margin-left: 10px; 
+	float: left; 
+	cursor:  pointer; 
+	padding: 5px; 
+	background: url(../images/listsPortfolioBtn.png) 50% no-repeat; 
+	float: right;
+}
+.listPortfolioBtn:hover{background:url(../images/listsPortfolioBtnw.png) 50% no-repeat;}
+.listPortfolioBtn-active{ background:url(../images/listsPortfolioBtnw.png) 50% no-repeat; }

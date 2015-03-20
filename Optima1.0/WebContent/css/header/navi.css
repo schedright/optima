@@ -1,0 +1,97 @@
+@charset "utf-8";
+/*
+Template Name: PhotoFolio
+Author: <a href="http://www.os-templates.com/">OS Templates</a>
+Author URI: http://www.os-templates.com/
+Licence: Free to use under our free template licence terms
+Licence URI: http://www.os-templates.com/template-terms
+File: Navigation CSS
+*/
+
+#topbar ul{display:block; float:left; font-size:12px; font-family:Georgia, "Times New Roman", Times, serif; font-weight: bold;}
+#topbar ul, #topbar ul li{margin:0; padding:0; list-style:none;}
+#topbar ul#topnav{margin:0px 0 0 15px;}
+#topbar ul li{float:left; padding-right:30px; padding-left:10px;}
+#topbar ul li {height:40px; background:url('images/breadcrumb_divider_New.png') center right no-repeat;}
+#topbar ul li li{margin-left:-33px; margin-top:-12px;}
+#topbar ul li li{background-image:none; }
+#topbar ul li li.firstRowMenu {margin-left:-33px; margin-top:5px;}
+#topbar ul li a img{vertical-align: middle; padding-right:5px;}
+#topbar ul li a:link, #topbar ul li a:visited, #topbar ul li a:hover{display:block; margin:0; padding: 7px 0 0 0; color:#777; background-color:transparent;}
+#topbar ul ul li a:link, #topbar ul ul li a:visited{border:none;}
+#topbar ul li a:hover, #topbar ul li.active a{color:#ff8000; background-color:transparent;}
+#topbar ul li li a:link, #topbar ul li li a:visited{width:150px; float:none; margin:0; padding:7px 10px; font-size:12px; font-weight:normal; color:#555; background-color:#DDD; opacity: 0.9;}
+#topbar ul li li a:hover{color:#ff8000; background-color:#EEE;}
+#topbar ul ul{z-index:9999; position:absolute; left:-999em; height:auto; width:170px;}
+#topbar ul ul a{width:140px;}
+#topbar ul li:hover ul{left:auto;}
+#topbar ul li:hover{position:static;} 
+#topbar ul li.last{margin-right:0; background:url('images/breadcrumb_divider_last.png') center right no-repeat;}
+
+
+
+
+.breadcrumb a.first_bc{
+	-moz-border-radius: 4px 0 0 4px;
+    -webkit-border-radius: 4px 0 0 4px;
+    -khtml-border-radius: 4px 0 0 4px;
+    border-radius: 4px 0 0 4px;
+}	
+.breadcrumb a{
+	float: left;
+	color: #666;
+	font-size: 11px;
+
+	background: #f8f8f8 url('images/grad_menu.png') top left repeat-x;
+	
+	text-shadow: 0 1px 0 rgba(256,256,256,0.8);
+	   	    
+	-webkit-transition: all 0.3s linear;
+	-moz-transition: all 0.3s linear;
+	-ms-transition: all 0.3s linear;
+	-o-transition: all 0.3s linear;
+	transition: all 0.3s linear;	
+	
+    line-height: 20px;
+}
+.breadcrumb a:hover {
+	color:#7C0005;
+}
+.breadcrumb a span{
+	display: block;
+	line-height: 20px;
+	background:url('images/breadcrumb_divider.png') center right no-repeat;
+	padding: 0 20px 0 12px;
+}
+.breadcrumb a.last_bc span{
+	display: block;
+	line-height: 20px;
+	background:url('images/breadcrumb_divider_last.png') center right no-repeat;
+	padding: 0 20px 0 12px;
+}
+
+
+/* ----------------------------------------------Column Navigation------------------------------------- */
+
+#column .subnav{display:block; width:250px; padding:25px; background-color:#F9F9F9; margin-bottom:30px;}
+#column .subnav h2{margin:0 0 20px 0; padding:0 0 14px 0; font-size:20px; font-weight:normal; font-family:Georgia, "Times New Roman", Times, serif; color:#666666; background-color:#F9F9F9; line-height:normal; border-bottom:1px dotted #666666;}
+#column .subnav ul{margin:0; padding:0; list-style:none;}
+#column .subnav li{margin:0 0 3px 0; padding:0;}
+#column .subnav ul ul, #column .subnav ul ul ul, #column .subnav ul ul ul ul, #column .subnav ul ul ul ul ul{border-top:none; padding-top:0;}
+#column .subnav a{display:block; margin:0; padding:5px 10px 5px 20px; color:#666666; background:url("images/green_file.gif") no-repeat 10px center #F9F9F9; text-decoration:none; border-bottom:1px dotted #666666;}
+#column .subnav a:hover{color:#0BBDB2; background-color:#F9F9F9;}
+#column .subnav ul ul a, #column .subnav ul ul ul a, #column .subnav ul ul ul ul a, #column .subnav ul ul ul ul ul a{background:url("images/black_file.gif") no-repeat #F9F9F9;}
+#column .subnav ul ul a{padding-left:40px; background-position:30px center;}
+#column .subnav ul ul ul a{padding-left:50px; background-position:40px center;}
+#column .subnav ul ul ul ul a{padding-left:60px; background-position:50px center;}
+#column .subnav ul ul ul ul ul a{padding-left:70px; background-position:60px center;}
+
+/* ----------------------------------------------Pagination------------------------------------- */
+
+.pagination{display:block; width:100%; text-align:center; clear:both;}
+.pagination ul{margin:0; padding:0; list-style:none;}
+.pagination li{display:inline;}
+.pagination .next{margin:0;}
+.pagination a{display:inline-block; padding:2px 5px 3px 5px; margin:0 2px 0 0; border:1px solid #DFDFDF;}
+.pagination .current, .pagination .splitter{padding:6px; margin:0 2px 0 0;}
+.wrapper .pagination a:hover, .pagination .current, .pagination .splitter{color:#9B9B9B; background-color:#F9F9F9;}

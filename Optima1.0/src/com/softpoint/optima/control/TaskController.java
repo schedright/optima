@@ -407,6 +407,7 @@ public class TaskController {
 	}
 
 	protected void processTask(ProjectTask task, Project project, EntityController<ProjectTask> controller) throws EntityControllerException {
+		// Bug#1 Shifting is not working correctly when changing weekends! -- BassemVic
 		task = controller.find(ProjectTask.class, task.getTaskId());
 		calculateCalederDuration(project, task);
 		for (TaskDependency dependency : task.getAsDependency()) {

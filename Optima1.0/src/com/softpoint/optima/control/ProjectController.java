@@ -154,6 +154,7 @@ public class ProjectController {
 			project.setWeekendDays(weekendDay);
 			controller.merge(project);
 			// because we might have changed the weekend or the days off
+			// Bug#1 Shifting is not working correctly when changing weekends! -- BassemVic
 			TaskController taskController = new TaskController();
 			taskController.adjustStartDateBasedOnTaskDependency(session, key , false);
 			return new ServerResponse("0", "Success", project);
@@ -252,6 +253,23 @@ public class ProjectController {
 	}
 	
 	
+	
+	
+	public ServerResponse getOtherProjectsCurrentPeriodCost (HttpSession session, int projectId , Date from, Date to) {
+		
+		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		try {
+			Project project = controller.find(Project.class , projectId);
+			double otherProjectsCurrentPeriodCost = PaymentUtil.getOtherProjectsCurrentPeriodCost(project, from , to);	
+			return new ServerResponse("0", "Success", otherProjectsCurrentPeriodCost);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ServerResponse("PROJ0003" , String.format("Error looking up project %d: %s" , projectId , e.getMessage() ), e);
+		}
+	}
+	
+
 
 	public ServerResponse getSolutionCurrentPeriodCost (HttpSession session, int projectId , Date from, Date to) {
 		
@@ -330,7 +348,11 @@ public class ProjectController {
 			double leftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController , project.getPortfolio() , from, to);
 			double openBalance = PaymentUtil.getPortfolioOpenBalance(session, project.getPortfolio() , from);
 			double payment = PaymentUtil.getPortfolioPayment(from , to , paymentDetails , project.getPortfolio() , true);
+			
+			
 			double financeLimit = PaymentUtil.getFinanceLimit(session , project.getPortfolio().getPortfolioId() , from);
+			double financeLimitNextPeriod = PaymentUtil.getFinanceLimit(session , project.getPortfolio().getPortfolioId() , to);
+			
 			double cashOutOthers = PaymentUtil.getCashOutOtherProjects(session, project , from, to , solvedProjects); 
 			logger.info(String.format("Period: %s - %s", from.toString(), to.toString()) );
 			logger.info("Startup Data");
@@ -346,6 +368,7 @@ public class ProjectController {
 			List<ProjectTask> eligibleTasks  = null;
 			boolean completed = false;
 			double cashAvailable = financeLimit + openBalance + payment - leftOverCost  - cashOutOthers;
+			double cashAvailableNextPeriod = financeLimitNextPeriod + openBalance + payment - leftOverCost  - cashOutOthers;
 			
 			
 			Map<Integer, TaskState> taskStates = initTaskState(project , logger);
@@ -353,11 +376,18 @@ public class ProjectController {
 			int iteration = 0;
 			while (!completed) {
 				List<ProjectTask> currentEligibleSet = PaymentUtil.getEligibleTasks(project, from, to , true);
-				double eligibleTasksCurrentPeroidCost =  PaymentUtil.getEligiableTaskCurrentPeriodCost(currentEligibleSet, from , to);	
+				double eligibleTasksCurrentPeroidCost =  PaymentUtil.getEligiableTaskCurrentPeriodCost(currentEligibleSet, from , to);
+				
+				//Bug#4
+				double otherPojectsEligibleTasksCurrentPeroidCost =  PaymentUtil.getOtherProjectsCurrentPeriodCost(project, from , to);	
+				double otherPojectsEligibleTasksLeftOverCost =  PaymentUtil.getOtherProjectsLeftOverCost(project, from , to);	
+				//-------------
+				
 				double eligibleTasksLeftOverCost = PaymentUtil.getEligiableTaskLeftOverCost(currentEligibleSet, project, from, to);
 				double expectedCashIn = PaymentUtil.getPortfolioPayment(to , next, paymentDetails, project.getPortfolio() , false);
+				
 				double totalCostCurrent = eligibleTasksCurrentPeroidCost; // - eligiableTaskFinanceCost;
-				double leftOverNextCost = eligibleTasksLeftOverCost; // - nextPeriodLeftoverFinanceCost;
+				double leftOverNextCost = eligibleTasksLeftOverCost + otherPojectsEligibleTasksLeftOverCost; // - nextPeriodLeftoverFinanceCost;
 				
 				logger.info(String.format("Current eligible tasks cost (current period): %f" ,  eligibleTasksCurrentPeroidCost ));
 				logger.info(String.format("Current eligible tasks total cost: %f" ,  totalCostCurrent ));
@@ -368,16 +398,16 @@ public class ProjectController {
 				solutionOutput.info(String.format("Selected: Iteration [%d] R[Current]:[%.2f] Activities:[%s] Start [%s] Project Duration: [%d] C[Current]: [%f] R[Next]:[%f] Feasible: %s Raimining cash:[%f]%n" ,
 						iteration, cashAvailable , PaymentUtil.getEligibaleTaskNameList(currentEligibleSet), PaymentUtil.getTaskListStart(currentEligibleSet) , 
 						PaymentUtil.getProjectLength(project , outputFormat , solutionOutput) , totalCostCurrent,
-						cashAvailable - totalCostCurrent + expectedCashIn - leftOverNextCost, 
-						totalCostCurrent <= cashAvailable && cashAvailable - totalCostCurrent + expectedCashIn >= leftOverNextCost?"Yes":"No",
+						cashAvailableNextPeriod - totalCostCurrent + expectedCashIn - leftOverNextCost, 
+						totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent + expectedCashIn >= leftOverNextCost?"Yes":"No",
 								cashAvailable - totalCostCurrent < 0 ? 0: cashAvailable - totalCostCurrent )
 						);
 				
 				
-				if (totalCostCurrent <= cashAvailable && cashAvailable - totalCostCurrent + expectedCashIn >= leftOverNextCost ) {
+				if (totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent + expectedCashIn >= leftOverNextCost ) {
 					logger.info("######################################################################################");
 					logger.info(String.format("Solution Found: project tasks cost(elligibe) : %f  , cash before: %f , cash after: %f" , totalCostCurrent , cashAvailable , cashAvailable - totalCostCurrent ));
-				for (ProjectTask task : eligibleTasks) {
+					for (ProjectTask task : eligibleTasks) {
 						//task.setScheduledStartDate(PaymentUtil.getTaskDate(task));
 						logger.info(String.format("Task: %s , StartDate: %s" , task.getTaskName() , task.getScheduledStartDate()));
 					}
@@ -399,7 +429,8 @@ public class ProjectController {
 						while (PaymentUtil.isDayOff(calendar.getTime(), project.getDaysOffs()) 
 								|| PaymentUtil.isWeekendDay(calendar.getTime() ,  project.getWeekendDays()) );
 						
-						if (to.equals(calendar.getTime()) || to.after(calendar.getTime())) {
+						//Bug#2 Not checking all the cases
+						//if (to.equals(calendar.getTime()) || to.after(calendar.getTime())) {
 							noChange = false;
 							task.setCalendarStartDate(calendar.getTime());
 							PaymentUtil.adjustStartDateBasedOnTaskDependency(project);
@@ -410,14 +441,14 @@ public class ProjectController {
 							
 							double solutionEligibleTasksCurrentPeroidCost =  PaymentUtil.getEligiableTaskCurrentPeriodCost(solutionCurrenteligibleTasks, from , to);	
 							double solutionEligibleTasksLeftOverCost = PaymentUtil.getEligiableTaskLeftOverCost(solutionCurrenteligibleTasks, project, from, to);
-							double solutionExpectedCashIn = PaymentUtil.getPortfolioPayment(from , to , paymentDetails, project.getPortfolio() , false); 
+							double solutionExpectedCashIn = PaymentUtil.getPortfolioPayment(to , next , paymentDetails, project.getPortfolio() , false); 
 							double solutionTotalCostCurrent = solutionEligibleTasksCurrentPeroidCost;// - solutionEligiableTaskFinanceCost; 
 							
-							
+							double solutionOtherPojectsEligibleTasksLeftOverCost =  PaymentUtil.getOtherProjectsLeftOverCost(project, from , to);	
 							
 							int projectLength = PaymentUtil.getProjectLength(project , outputFormat , solutionOutput);
 							solution.setCurrentPeriodCost(solutionTotalCostCurrent);
-							solution.setLeftOversCost(solutionEligibleTasksLeftOverCost); // - solutionNextPeriodLeftOverFinanceCost);
+							solution.setLeftOversCost(solutionEligibleTasksLeftOverCost + solutionOtherPojectsEligibleTasksLeftOverCost); // - solutionNextPeriodLeftOverFinanceCost);
 						
 							solution.setIncome(solutionExpectedCashIn);
 							solution.setProjectLength(projectLength);
@@ -426,8 +457,8 @@ public class ProjectController {
 							solutionOutput.info(String.format("Iteration [%d] R[Current]:[%.2f] Activities:[%s] Start [%s] Project Duration: [%d] C[Current]: [%f] R[Next]:[%f] Feasible: %s Raimining cash:[%f]%n" ,
 									iteration, cashAvailable , PaymentUtil.getEligibaleTaskNameList(solutionCurrenteligibleTasks) , PaymentUtil.getTaskListStart(solutionCurrenteligibleTasks) , 
 									projectLength , solutionTotalCostCurrent,
-									cashAvailable - solutionTotalCostCurrent + solutionExpectedCashIn - solution.getLeftOversCost(), 
-									solutionTotalCostCurrent <= cashAvailable && cashAvailable - solutionTotalCostCurrent + solutionExpectedCashIn >= solution.getLeftOversCost()?"Yes":"No",
+									cashAvailableNextPeriod - solutionTotalCostCurrent + solutionExpectedCashIn - solution.getLeftOversCost(), 
+									solutionTotalCostCurrent <= cashAvailable && cashAvailableNextPeriod - solutionTotalCostCurrent + solutionExpectedCashIn >= solution.getLeftOversCost()?"Yes":"No",
 									cashAvailable - solutionTotalCostCurrent < 0 ? 0 :cashAvailable - solutionTotalCostCurrent  )
 									);
 							solutions.add(solution);
@@ -435,14 +466,14 @@ public class ProjectController {
 							task.setCalendarStartDate(taskDate);
 							resetTaskState(project , taskStates);
 							
-						} 
+						//} 
 					}
 					if (noChange) {
 						completed = true; // no tasks can be scheduled this period. Stop here
 						logger.info("All tasks are out of period - please solve for next period");
 					} else {
 					
-						TaskSolution nextIteration = PaymentUtil.findSolutionIteration(solutions, cashAvailable);
+						TaskSolution nextIteration = PaymentUtil.findSolutionIteration(solutions, cashAvailable, cashAvailableNextPeriod);
 						if (nextIteration != null) {
 							nextIteration.getTask().setCalendarStartDate(nextIteration.getStartDate());
 							

@@ -2,6 +2,8 @@
 
 $(document).ready( function() {
 	document.title = 'Portfolios';
+	$("#portfoliosNavBar").addClass("active");
+	
 	$('#main').tabs({ 
 	    activate: function (e, ui) { 
 	        $.cookie('pf-selected-tab', ui.newTab.index(), { path: '/' }); 

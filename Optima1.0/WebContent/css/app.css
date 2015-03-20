@@ -591,9 +591,12 @@ margin: 5px 0;
 	float:right
 }
 #projectTabs{
-	width: 1140px;
+	width: 960px;
 }
 
+#projectTabsNew{
+	width: 100%;
+}
  #loader-overlay{
  	/*display:none;*/
 	background: url("../images/ajax-loader.gif") #000 no-repeat 0 0  !important;
@@ -988,3 +991,42 @@ h2 {
       background-color: white;
     }
  
+ /****************************************************************************************/
+   .projbuttonDelete {
+    background-image: url(../images/deleteProj.png); /* 16px x 16px */
+    background-color: transparent; /* make the button transparent */
+    background-repeat: no-repeat;  /* make the background image appear only once */
+    background-position: 0px 0px;  /* equivalent to 'top left' */
+    border: none;           /* assuming we don't want any borders */
+    cursor: pointer;        /* make the cursor like hovering over an <a> element */
+    height: 16px;           /* make this the size of your image */
+    padding: 3px;
+    padding-left: 16px;     /* make text start to the right of the image */
+    vertical-align: middle; /* align the text vertically centered */
+    float:right;
+     border:1;
+   
+}
+
+ .projbuttonEdit {
+    background-image: url(../images/editProj.png); /* 16px x 16px */
+    background-color: transparent; /* make the button transparent */
+    background-repeat: no-repeat;  /* make the background image appear only once */
+    background-position: 0px 0px;  /* equivalent to 'top left' */
+    border: none;           /* assuming we don't want any borders */
+    cursor: pointer;        /* make the cursor like hovering over an <a> element */
+    height: 16px;           /* make this the size of your image */
+    padding: 3px;
+    padding-left: 16px;     /* make text start to the right of the image */
+    vertical-align: middle; /* align the text vertically centered */
+    float:right;
+    border:1;
+}
+
+ .projbuttonDelete:hover {
+	background: url(../images/deleteProjw.png) no-repeat;
+}
+
+ .projbuttonEdit:hover {
+	background: url(../images/editProjw.png) no-repeat;
+ }

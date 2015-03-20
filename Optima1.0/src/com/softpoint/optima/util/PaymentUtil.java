@@ -791,6 +791,56 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	}
 	
 	
+	public static double getOtherProjectsCurrentPeriodCost( Project project, Date start, Date end) {
+		double costAccumulator = 0;
+		Portfolio portfolio = project.getPortfolio();
+		List<Project> projects = portfolio.getProjects();
+		for (Project currentProject : projects) {
+			if (currentProject.getProjectId() != project.getProjectId()) {
+				List<ProjectTask> eligibleTasks = PaymentUtil.getEligibleTasks(currentProject, start, end , false);
+				costAccumulator += PaymentUtil.getEligiableTaskCurrentPeriodCost(eligibleTasks , start, end);
+			}
+		}
+		return costAccumulator;
+	}
+	
+	
+	public static double getOtherProjectsLeftOverCost( Project project, Date start, Date end) {
+		double costAccumulator = 0;
+		Portfolio portfolio = project.getPortfolio();
+		List<Project> projects = portfolio.getProjects();
+		for (Project currentProject : projects) {
+			if (currentProject.getProjectId() != project.getProjectId()) {
+				for (ProjectPayment payment: currentProject.getProjectPayments()) {
+					if (payment.getPaymentDate().equals(end)) {
+						List<ProjectTask> eligibleTasks = PaymentUtil.getEligibleTasks(currentProject, start, end , false);
+						Calendar calendar = Calendar.getInstance();
+						for (ProjectTask task : eligibleTasks) {
+							Date taskDate = task.getCalendarStartDate();
+							int taskLength = task.getCalenderDuration();
+							calendar.setTime(taskDate);
+							calendar.add(Calendar.DATE, taskLength);
+							Date taskEndDate = calendar.getTime();
+							if (taskEndDate.getTime() >= end.getTime()) {
+								int effictiveNumberOfDays = PaymentUtil.daysBetween(end, taskEndDate);
+								int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(task, end, taskEndDate); // What if taskEndDate > to?
+								effictiveNumberOfDays -= noOfWeekendDaysAndDaysOf;
+								costAccumulator += effictiveNumberOfDays * task.getUniformDailyCost().doubleValue();
+							}
+						}
+						int overheadDays = PaymentUtil.daysBetween(end, PaymentUtil.getNextEvent(project , end));
+						costAccumulator += overheadDays * project.getOverheadPerDay().doubleValue();
+						break;
+					}		
+				}
+			}
+		}
+		return costAccumulator;
+	}
+	
+	
+	
+	
 	public static double getEligiableTaskLeftOverCost( List<ProjectTask> eligibleTasks ,Project project, Date start, Date end) {
 		double costAccumulator = 0;
 		Calendar calendar = Calendar.getInstance();
@@ -975,6 +1025,15 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 				cal.setTime(task.getCalendarStartDate());
 				cal.add(Calendar.DATE, task.getCalenderDuration());
 				if (nextTaskStartDate == null || nextTaskStartDate.before(cal.getTime())) {
+					//BUG Previously does not consider the weekends and the daysOff
+					//nextTask.setCalendarStartDate(cal.getTime());
+					//Fix BUG - BassemVic
+
+					while (PaymentUtil.isDayOff(cal.getTime(), project.getDaysOffs())  
+							|| PaymentUtil.isWeekendDay(cal.getTime() ,  project.getWeekendDays()) )
+					{
+						cal.add(Calendar.DATE, 1);
+					}
 					nextTask.setCalendarStartDate(cal.getTime());
 				}
 				processTask(dependency.getDependent(), project);
@@ -1065,7 +1124,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	 * the feasible one If multiple select the maximum cost If none select the
 	 * minimum cost.
 	 */
-	public static TaskSolution findSolutionIteration(List<TaskSolution> solutions, double cashAvailable) {
+	public static TaskSolution findSolutionIteration(List<TaskSolution> solutions, double cashAvailable, double cashAvailableNextPeriod) {
 		if (null == solutions || solutions.isEmpty()) {
 			return null;
 		}
@@ -1088,7 +1147,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		
 		List<TaskSolution> feasibleProjectsSolutions = new ArrayList<TaskSolution>();
 		for (TaskSolution taskSolution : minimumProjectLengthSolutions) {
-			if (isFeasibleSolution(taskSolution, cashAvailable)) {
+			if (isFeasibleSolution(taskSolution, cashAvailable, cashAvailableNextPeriod)) {
 				feasibleProjectsSolutions.add(taskSolution);
 			}
 		}
@@ -1124,7 +1183,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		return minimumCostSolution;
 	}
 	
-	public static TaskSolution findBestFeasbileIteration(List<TaskSolution> solutions, double cashAvailable) {
+	public static TaskSolution findBestFeasbileIteration(List<TaskSolution> solutions, double cashAvailable, double cashAvailableNextPeriod) {
 		if (null == solutions || solutions.isEmpty()) {
 			return null;
 		}
@@ -1133,7 +1192,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		int projectLength = Integer.MAX_VALUE;
 		for (TaskSolution taskSolution : solutions) {
 			
-			if (isFeasibleSolution(taskSolution, cashAvailable)) {
+			if (isFeasibleSolution(taskSolution, cashAvailable, cashAvailableNextPeriod)) {
 				if (taskSolution.getProjectLength() < projectLength) {
 					minimumProjectLengthSolutions.clear();
 					minimumProjectLengthSolutions.add(taskSolution);
@@ -1191,18 +1250,18 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		}
 	}
 	
-	public static TaskSolution findBestIterationNew(List<TaskSolution> solutions, double cashAvailable) {
+	public static TaskSolution findBestIterationNew(List<TaskSolution> solutions, double cashAvailable, double cashAvailableNextPeriod) {
 		TaskSolution solution = null;
-		solution = PaymentUtil.findBestFeasbileIteration(solutions, cashAvailable);
+		solution = PaymentUtil.findBestFeasbileIteration(solutions, cashAvailable, cashAvailableNextPeriod);
 		if (solution == null) {
 			solution = PaymentUtil.findBestIteration(solutions);
 		}
 		return solution;
 	}
 
-	public static boolean isFeasibleSolution (TaskSolution solution, double cashAvailable) {
+	public static boolean isFeasibleSolution (TaskSolution solution, double cashAvailable,  double cashAvailableNextPeriod) {
 		// 				if (totalCostCurrent < cashAvailable && cashAvailable - totalCostCurrent + expectedCashIn > leftOverNextCost ) {
-		if (solution.getCurrentPeriodCost() < cashAvailable && cashAvailable - solution.getCurrentPeriodCost() + solution.getIncome() > solution.getLeftOversCost()) 
+		if (solution.getCurrentPeriodCost() < cashAvailable && cashAvailableNextPeriod - solution.getCurrentPeriodCost() + solution.getIncome() > solution.getLeftOversCost()) 
 			return true;
 		return false;
 	}
@@ -1357,7 +1416,8 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 						expectedPayment += PaymentUtil.getExpectedPayment(project,  detail.getPaymentStart(),  detail.getPaymentEnd(), to,  detail.getExtra(), 
 								detail.getRetained(), detail.getRepayment());
 					} else {
-						expectedPayment += PaymentUtil.getExpectedPayment(project,  from ,  to , to,  0, 0, 0);
+						//expectedPayment += PaymentUtil.getExpectedPayment(project,  from ,  to , to,  0, 0, 0);
+						expectedPayment += payment.getPaymentAmount().doubleValue();
 					}
 				} else if (payment.getPaymentDate().equals(from)) {
 					expectedPayment += payment.getPaymentAmount().doubleValue();
