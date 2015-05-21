@@ -5,12 +5,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import javax.servlet.http.HttpSession;
 
@@ -23,8 +25,11 @@ import org.json.JSONObject;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
+import com.softpoint.optima.control.PaymentController;
 import com.softpoint.optima.db.DaysOff;
+import com.softpoint.optima.db.PaymentType;
 import com.softpoint.optima.db.Portfolio;
+import com.softpoint.optima.db.PortfolioExtrapayment;
 import com.softpoint.optima.db.PortfolioFinance;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectPayment;
@@ -150,7 +155,35 @@ public class PaymentUtil {
 	}
 	
 	
-	
+	public static Date[] getPortofolioDateRangesNew( EntityController<?> controller, int portfolioId) throws EntityControllerException {
+		String query = "select min(calendar_start_date) , max(ADDDATE(calendar_start_date, calender_duration - 1))   from project_task where project_id in (select project_id from project where portfolio_id = ?1)";
+		List<?> results = controller.nativeQuery(query, portfolioId);
+		Date[] dates = new Date[2];
+		
+		if (results != null && results.size() > 0) {
+			Object[] values = (Object[]) results.get(0);
+			if (values[0] != null)
+				dates[0] = (Date) values[0];
+			if (values[1] != null) {
+				String endDate = (String) values[1];
+				try {
+					dates[1] = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(endDate);
+				} catch (ParseException e) {
+					
+					e.printStackTrace();
+				}
+				
+			}
+			
+			query = "select min(propused_start_date) from project where project_id in (select project_id from project where portfolio_id = ?1)";
+			results = controller.nativeQuery(query, portfolioId);
+			dates[0] = (Date) results.get(0);
+
+		}
+		return dates;
+	}
+		
+		
 	public static Date[] getPortofolioDateRanges( EntityController<?> controller, int portfolioId) throws EntityControllerException {
 		String query = "select min(calendar_start_date) , max(ADDDATE(calendar_start_date, calender_duration - 1))   from project_task where project_id in (select project_id from project where portfolio_id = ?1)";
 		List<?> results = controller.nativeQuery(query, portfolioId);
@@ -283,6 +316,7 @@ public class PaymentUtil {
 	
 	public static Date[] getProjectDateRanges( EntityController<?> controller, int projectId) throws EntityControllerException {
 		String query = "select min(calendar_start_date) , max(ADDDATE(calendar_start_date, calender_duration - 1))   from project_task where project_id  = ?1";
+		
 		List<?> results = controller.nativeQuery(query, projectId);
 		Date[] dates = new Date[2];
 		if (results != null && results.size() > 0) {
@@ -299,6 +333,10 @@ public class PaymentUtil {
 				}
 				
 			}
+			
+			query = "select propused_start_date from project where project_id  = ?1";
+			results = controller.nativeQuery(query, projectId);
+			dates[0] = (Date) results.get(0);
 
 		}
 //		Calendar calendar = Calendar.getInstance();
@@ -399,6 +437,27 @@ public class PaymentUtil {
 		return payments;
 	}
 	
+	
+	
+	public static double getProjectPaymentstNew(HttpSession session, Project project, Date currentDate) throws EntityControllerException {
+		EntityController<ProjectTask> controller = new EntityController<>(session.getServletContext());
+		double projectPayments = 0d;
+		Date[] projectBoundaries = PaymentUtil.getPortofolioDateRangesNew(controller, project.getPortfolio().getPortfolioId());
+		
+		List<ProjectPayment> payments = getProjectPayments(session, project,  projectBoundaries[1]);
+		
+		Iterator<ProjectPayment> iter = payments.iterator();
+		ProjectPayment currentPayment;
+		while (iter.hasNext()) {
+			currentPayment = iter.next();
+			if(DateUtils.isSameDay(currentDate, currentPayment.getPaymentDate())){
+				projectPayments = projectPayments + currentPayment.getPaymentAmount().doubleValue();
+				
+			}
+		}
+		return projectPayments;
+	}
+	
 	public static double getProjectPaymentst(Project project, Date currentDate) {
 		double projectPayments = 0d;
 		List<ProjectPayment> payments = project.getProjectPayments();
@@ -477,6 +536,52 @@ public class PaymentUtil {
 
 
 
+	public static Period findPaymentScheduleNew (HttpSession session , Date date, int portfolioId) throws OptimaException {
+		EntityController<ProjectPayment> controller = new EntityController<ProjectPayment>(session.getServletContext());
+		try {
+			Date[] projectBoundaries = PaymentUtil.getPortofolioDateRangesNew(controller, portfolioId);
+			Period boundaries = new Period(projectBoundaries[0] , projectBoundaries[1]); 
+			EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
+			Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
+			List<Project> projects = portfolio.getProjects();
+			
+			Comparator<Date> dateComparator = new DateComparator();
+	        PriorityQueue<Date> paymentsQueue = new PriorityQueue<Date>(dateComparator);
+
+			for (Project currentProject : projects) {
+				List<ProjectPayment> projectPayments = getProjectPayments(session, currentProject, projectBoundaries[1]);
+				
+				for (ProjectPayment projectPayment : projectPayments) {
+					paymentsQueue.add(projectPayment.getPaymentDate());
+				}
+			}
+			
+			List<PortfolioExtrapayment> extraPaymentsList = portfolio.getPortfolioExtrapayments();
+			for (PortfolioExtrapayment extraPayment : extraPaymentsList) {
+				paymentsQueue.add(extraPayment.getExtraPayment_date());
+			}
+			
+	        if(paymentsQueue != null)
+			{
+	        	while (paymentsQueue.size() != 0)
+		        {
+	        		Date paymentDate = paymentsQueue.remove();
+	        		if ( paymentDate.after(date) ) {
+						boundaries.setDateTo(paymentDate);	
+						return boundaries;
+					} else {
+						boundaries.setDateFrom(paymentDate);
+					}
+		        }
+				
+			}
+			return boundaries;
+		} catch (EntityControllerException e) {
+			return null;
+			
+		}
+	}
+	
 	public static Period findPaymentSchedule(HttpSession session , Date date, int portfolioId) throws OptimaException {
 		EntityController<ProjectPayment> controller = new EntityController<ProjectPayment>(session.getServletContext());
 		try {
@@ -554,6 +659,54 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		}
 		return daysBetween;
 	}
+
+	public static 	Map<String, DailyCashFlowMapEntity> getProjectCashFlowDataNew(HttpSession session, int projectId, Date from, Date to) throws OptimaException {
+		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		try {
+			
+			Map<String, DailyCashFlowMapEntity> results = new HashMap<String, DailyCashFlowMapEntity>();
+			
+			Project project = controller.find(Project.class , projectId);
+
+			
+			Calendar start = Calendar.getInstance();
+			start.setTime(from);
+			Calendar end = Calendar.getInstance();
+			end.setTime(to);
+			Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
+			Date projectStartDate = projectDates[0];
+			Date projectEndDate = projectDates[1];
+			
+			for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
+				DailyCashFlowMapEntity entity = new DailyCashFlowMapEntity();
+				entity.setPortfolioId(project.getPortfolio().getPortfolioId());
+				entity.setProjectId(project.getProjectId());
+				entity.setDay(date);
+				boolean includeOverhead = false;
+				if (   (date.equals(projectStartDate) || date.after(projectStartDate)) 
+					&& (date.before(projectEndDate) || date.equals(projectEndDate))) {
+					includeOverhead = true;
+				}
+				entity.setCashout(PaymentUtil.getDateTasksCashout(project, date , includeOverhead));
+				entity.setFinanceCost(PaymentUtil.getDateFinanceCost(project, date, results));
+				entity.setPayments(PaymentUtil.getProjectPaymentstNew(session,project, date));
+				entity.setBalance(PaymentUtil.getBalance(date, entity, results));
+				entity.setNetBalance(entity.getBalance() + entity.getFinanceCost());
+				
+				
+				results.put( PaymentUtil.dateOnlyFormat.format(date) + "," + project.getProjectId(), entity);
+			}
+
+			
+			
+			return results;
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	
 	
 	
 	public static 	Map<String, DailyCashFlowMapEntity> getProjectCashFlowData(HttpSession session, int projectId, Date from, Date to) throws OptimaException {
@@ -621,6 +774,17 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		if (financeLimit == null || financeLimit.isEmpty()) return 0d;
 		return financeLimit.get(0).doubleValue();
 	}
+	
+	public static double getExtraPayment(HttpSession session, int portfolioId, Date fromDate) throws EntityControllerException {
+		EntityController<PortfolioFinance> financeController = new EntityController<PortfolioFinance>(session.getServletContext());
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		String theDate = format.format(fromDate);
+		
+		@SuppressWarnings("unchecked")
+		List<BigDecimal> extraPayment = (List<BigDecimal>) financeController.nativeQuery("Select  extraPayment_amount from portfolio_extrapayment where portfolio_id = ? and extraPayment_date = ? order by extraPayment_date asc" , portfolioId , theDate);
+		if (extraPayment == null || extraPayment.isEmpty()) return 0d;
+		return extraPayment.get(0).doubleValue();
+	}
 
 	public static List<ProjectTask> getEligibleTasks(Project project, Date from, Date to , boolean useCalDate) {
 		List<ProjectTask> projectTasks = project.getProjectTasks();
@@ -640,7 +804,53 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		}
 		return eligibleTasks;
 	}
+	
+	
+	public static List<ProjectTask> getCurrentTasks(Project project, Date from, Date to , boolean useCalDate) {
+		List<ProjectTask> projectTasks = project.getProjectTasks();
+		List<ProjectTask> currentTasks = new ArrayList<ProjectTask>();
+		Calendar calendar = Calendar.getInstance();
+		for (ProjectTask currentTask : projectTasks) {
+			Date taskDate = PaymentUtil.getTaskDate(currentTask);
+			if (useCalDate && currentTask.getCalendarStartDate() != null) {
+				taskDate = currentTask.getCalendarStartDate();
+			}
+			calendar.setTime(taskDate);
+			calendar.add(Calendar.DATE, currentTask.getCalenderDuration() - 1);
+			Date taskEndDate = calendar.getTime();
+			// From or To?
+			if(taskDate.before(to) && ( taskEndDate.after(from) || taskEndDate.equals(from) )){
+				currentTasks.add(currentTask);
+			}	
+			
+		}
+		return currentTasks;
+	}
 
+	public static double getPortfolioOpenBalanceNew(HttpSession session, Portfolio portfolio, Date from) {
+		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+		List<Project> projects = portfolio.getProjects();
+		double balanceAccumulator = 0;
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(from);
+		calendar.add(Calendar.DATE, -1);
+		Map<String, DailyCashFlowMapEntity> cashFlowInfo = null;
+		for (Project project : projects) {
+			try {
+				Date projectStartDate = PaymentUtil.getProjectDateRanges(controller, project.getProjectId())[0];
+				if (projectStartDate != null) { // has some tasks or payments.
+					cashFlowInfo = PaymentUtil.getProjectCashFlowDataNew(session, project.getProjectId(), projectStartDate , calendar.getTime());
+					DailyCashFlowMapEntity previousDay = PaymentUtil.getPreviousDayInfo(from , cashFlowInfo, project.getProjectId());
+					balanceAccumulator += previousDay == null? 0 : previousDay.getBalance() ;
+				}
+			} catch (EntityControllerException | OptimaException e) {
+				
+				e.printStackTrace();
+			}
+		}
+		return balanceAccumulator;
+	}
+	
 	public static double getPortfolioOpenBalance(HttpSession session, Portfolio portfolio, Date from) {
 		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
 		List<Project> projects = portfolio.getProjects();
@@ -665,6 +875,74 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		return balanceAccumulator;
 	}
 
+
+	//Finance cost for left overs 
+	public static double getPortfolioFinanceCostNew(HttpSession session, Portfolio portfolio, Date from, Date to) throws EntityControllerException, OptimaException {
+		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+		Map<String, DailyCashFlowMapEntity> cashFlowInfo = null;
+		Date taskEndDate ; 
+		Date taskDate ;
+		Calendar calendar = Calendar.getInstance();
+		List<ProjectTask> tasks;
+		double balanceCounter = 0;
+		double financeCostCounter = 0;
+		
+		List<Project> projects = portfolio.getProjects();
+		for (Project currentProject : projects) {
+			Date projectStartDate = PaymentUtil.getProjectDateRanges(controller, currentProject.getProjectId())[0];
+			if (projectStartDate != null) {
+				cashFlowInfo = PaymentUtil.getProjectCashFlowDataNew(session, currentProject.getProjectId(), projectStartDate , calendar.getTime());
+	
+				Calendar prevDay = Calendar.getInstance();
+				prevDay.setTime(from);
+				prevDay.add(Calendar.DATE, -1);
+				
+				DailyCashFlowMapEntity previousDay = PaymentUtil.getPreviousDayInfo(from , cashFlowInfo, currentProject.getProjectId());
+				
+				double firstDateFinanceCost = PaymentUtil.getDateFinanceCost(currentProject, from, cashFlowInfo); 
+				financeCostCounter += firstDateFinanceCost;
+				double firstDayBalance = previousDay == null? 0 : previousDay.getBalance() ;
+				double projectPayment = PaymentUtil.getProjectPaymentstNew(session, currentProject, from);
+				firstDayBalance += projectPayment;
+				balanceCounter = firstDayBalance;
+	
+				Calendar start = Calendar.getInstance();
+				start.setTime(from);
+				Calendar end = Calendar.getInstance();
+				end.setTime(to);
+				
+				for (Date date = start.getTime() ; start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
+					
+					if (!PaymentUtil.isDayOff(date,currentProject.getDaysOffs()) && ! PaymentUtil.isWeekendDay(date,currentProject.getWeekendDays())) {
+						tasks = currentProject.getProjectTasks();
+						for (ProjectTask currentTask : tasks) {
+					
+							taskDate = PaymentUtil.getTaskDate(currentTask);
+							calendar.setTime(taskDate);
+							calendar.add(Calendar.DATE, currentTask.getCalenderDuration() - 1);
+							taskEndDate = calendar.getTime();
+							if (taskDate.before(from) && ( taskEndDate.after(from) || taskEndDate.equals(from)) && ( date.after(taskDate)  || date.equals(taskDate) ) && 
+									(date.before(taskEndDate) || date.equals(taskEndDate) )){
+								balanceCounter -= currentTask.getUniformDailyCost().doubleValue();		
+	
+							}
+						}
+					}
+					balanceCounter -= currentProject.getOverheadPerDay().doubleValue();
+					if (balanceCounter < 0) {
+						financeCostCounter += balanceCounter * currentProject.getInterestRate().doubleValue();
+						// balanceCounter -= balanceCounter * currentProject.getDailyInterestRate().doubleValue();	
+					}
+					
+				}
+			}
+			
+		}
+		
+		
+		return financeCostCounter;
+	}
+	
 	//Finance cost for left overs 
 	public static double getPortfolioFinanceCost(HttpSession session, Portfolio portfolio, Date from, Date to) throws EntityControllerException, OptimaException {
 		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
@@ -804,6 +1082,39 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		return costAccumulator;
 	}
 	
+
+	public static double getOtherProjectsLeftOverCostNew(HttpSession session, Project project, Date start, Date end, Date projectExpectedEndDate) throws EntityControllerException {
+		double costAccumulator = 0;
+		Portfolio portfolio = project.getPortfolio();
+		List<Project> projects = portfolio.getProjects();
+		for (Project currentProject : projects) {
+			if (currentProject.getProjectId() != project.getProjectId()) {
+				for (ProjectPayment payment: currentProject.getProjectPayments()) {
+					if (payment.getPaymentDate().equals(end)) {
+						List<ProjectTask> eligibleTasks = PaymentUtil.getEligibleTasks(currentProject, start, end , false);
+						Calendar calendar = Calendar.getInstance();
+						for (ProjectTask task : eligibleTasks) {
+							Date taskDate = task.getCalendarStartDate();
+							int taskLength = task.getCalenderDuration();
+							calendar.setTime(taskDate);
+							calendar.add(Calendar.DATE, taskLength);
+							Date taskEndDate = calendar.getTime();
+							if (taskEndDate.getTime() >= end.getTime()) {
+								int effictiveNumberOfDays = PaymentUtil.daysBetween(end, taskEndDate);
+								int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(task, end, taskEndDate); // What if taskEndDate > to?
+								effictiveNumberOfDays -= noOfWeekendDaysAndDaysOf;
+								costAccumulator += effictiveNumberOfDays * task.getUniformDailyCost().doubleValue();
+							}
+						}
+						int overheadDays = PaymentUtil.daysBetween(end, PaymentUtil.getNextEventNew(session, project , end, projectExpectedEndDate));
+						costAccumulator += overheadDays * project.getOverheadPerDay().doubleValue();
+						break;
+					}		
+				}
+			}
+		}
+		return costAccumulator;
+	}
 	
 	public static double getOtherProjectsLeftOverCost( Project project, Date start, Date end) {
 		double costAccumulator = 0;
@@ -841,6 +1152,27 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	
 	
 	
+	public static double getEligiableTaskLeftOverCostNew(HttpSession session, List<ProjectTask> eligibleTasks ,Project project, Date start, Date end, Date projectExpectedEndDate) throws EntityControllerException {
+		double costAccumulator = 0;
+		Calendar calendar = Calendar.getInstance();
+		for (ProjectTask task : eligibleTasks) {
+			Date taskDate = task.getCalendarStartDate();
+			int taskLength = task.getCalenderDuration();
+			calendar.setTime(taskDate);
+			calendar.add(Calendar.DATE, taskLength);
+			Date taskEndDate = calendar.getTime();
+			if (taskEndDate.getTime() >= end.getTime()) {
+				int effictiveNumberOfDays = PaymentUtil.daysBetween(end, taskEndDate);
+				int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(task, end, taskEndDate); // What if taskEndDate > to?
+				effictiveNumberOfDays -= noOfWeekendDaysAndDaysOf;
+				costAccumulator += effictiveNumberOfDays * task.getUniformDailyCost().doubleValue();
+			}
+		}
+		int overheadDays = PaymentUtil.daysBetween(end, PaymentUtil.getNextEventNew(session, project , end, projectExpectedEndDate));
+		costAccumulator += overheadDays * project.getOverheadPerDay().doubleValue();
+		return costAccumulator;
+	}
+	
 	public static double getEligiableTaskLeftOverCost( List<ProjectTask> eligibleTasks ,Project project, Date start, Date end) {
 		double costAccumulator = 0;
 		Calendar calendar = Calendar.getInstance();
@@ -862,6 +1194,45 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		return costAccumulator;
 	}
 
+	private static Date getNextEventNew(HttpSession session, Project project, Date end, Date projectExpectedEndDate) throws EntityControllerException {
+		int startsAfter = Integer.MAX_VALUE;
+		ProjectPayment nextPayment = null;
+		List<ProjectPayment> projectPayments = getProjectPayments(session, project, projectExpectedEndDate);
+		for (ProjectPayment payment : projectPayments) {
+			Date paymentDate = payment.getPaymentDate();
+			if (paymentDate.getTime() > end.getTime()) {
+				int startsAfterTmp = PaymentUtil.daysBetween(end, paymentDate);
+				if (startsAfterTmp < startsAfter) {
+					startsAfter = startsAfterTmp;
+					nextPayment = payment;
+				}
+			}
+		}
+		PortfolioFinance nextFinanceChange = null;
+		int financeChangeAfter = Integer.MAX_VALUE;
+		for (PortfolioFinance finance : project.getPortfolio().getPortfolioFinances()) {
+			Date financeDate = finance.getFinanceUntillDate();
+			if (financeDate.getTime() > end.getTime()) {
+				int startsAfterTmp = PaymentUtil.daysBetween(end, financeDate);
+				if (startsAfterTmp < financeChangeAfter) {
+					financeChangeAfter = startsAfterTmp;
+					nextFinanceChange = finance;
+				}
+			}
+		}
+		
+		if (startsAfter <= financeChangeAfter && nextPayment != null) { 
+			return nextPayment.getPaymentDate();
+		} else if (nextFinanceChange != null) {
+			return nextFinanceChange.getFinanceUntillDate();
+		}
+		if (nextPayment == null && nextFinanceChange == null && project.getProposedFinishDate() != null ){
+			return project.getProposedFinishDate();
+		}
+		return end;
+		
+	}
+	
 	private static Date getNextEvent(Project project, Date end) {
 		int startsAfter = Integer.MAX_VALUE;
 		ProjectPayment nextPayment = null;
@@ -900,6 +1271,73 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		
 	}
 
+	
+	public static double getEligiableTaskFinanceCostNew(HttpSession session , Project project,
+			List<ProjectTask> eligibleTasks , Date from , Date to) throws EntityControllerException , OptimaException {
+		EntityController<Project> controller = new EntityController<>(session.getServletContext());
+		Date projectStartDate = PaymentUtil.getProjectDateRanges(controller, project.getProjectId())[0];
+		if (projectStartDate == null) {
+			return 0;
+		}
+		Calendar firstDateCal = Calendar.getInstance();
+		firstDateCal.setTime(from);
+		firstDateCal.add(Calendar.DATE, -1);
+		Map<String, DailyCashFlowMapEntity> cashFlowInfo = PaymentUtil.getProjectCashFlowData(session, project.getProjectId(), projectStartDate , firstDateCal.getTime());
+		
+		DailyCashFlowMapEntity previousDay = PaymentUtil.getPreviousDayInfo(from, cashFlowInfo, project.getProjectId());
+		
+		Calendar calendar = Calendar.getInstance();
+
+		double firstDateFinanceCost = PaymentUtil.getDateFinanceCost(project, from, cashFlowInfo); 
+		double financeCostCounterEligibleTasks = 0;
+		financeCostCounterEligibleTasks += firstDateFinanceCost;
+		double financeCostCounterLeftovers = 0 ;
+		financeCostCounterLeftovers += firstDateFinanceCost;
+		
+		double firstDayBalance = previousDay == null? 0 : previousDay.getBalance() ;
+		firstDayBalance += PaymentUtil.getProjectPaymentstNew(session, project, from);
+		double balanceCounterEligibleTasks = firstDayBalance;
+		double balanceCounterLeftovers = firstDayBalance;
+		
+		Calendar start = Calendar.getInstance();
+		start.setTime(from);
+		Calendar end = Calendar.getInstance();
+		end.setTime(to);
+		
+		for (Date date = start.getTime() ; start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
+			if (!PaymentUtil.isDayOff(date,project.getDaysOffs()) && ! PaymentUtil.isWeekendDay(date,project.getWeekendDays())) {
+				
+				for (ProjectTask currentTask : project.getProjectTasks()) {
+					Date taskDate = PaymentUtil.getTaskDate(currentTask);
+					calendar.setTime(taskDate);
+					calendar.add(Calendar.DATE, currentTask.getCalenderDuration() - 1);
+					Date taskEndDate = calendar.getTime();
+					if (( taskDate.after(from) || taskDate.equals(from) )&& taskDate.before(to) && ( date.after(taskDate) || date.equals(taskDate) ) 
+							&& ( date.before(taskEndDate) || date.equals(taskEndDate))){
+						balanceCounterEligibleTasks -= currentTask.getUniformDailyCost().doubleValue();		
+					} else if (taskDate.before(from) && ( taskEndDate.after(from) || taskEndDate.equals(from)) && ( date.after(taskDate) || date.equals(taskDate) ) 
+							&& ( date.before(taskEndDate) || date.equals(taskEndDate))) {
+						balanceCounterEligibleTasks -= currentTask.getUniformDailyCost().doubleValue();
+						balanceCounterLeftovers -= currentTask.getUniformDailyCost().doubleValue();
+						
+					}
+				}
+			}
+			balanceCounterEligibleTasks -= project.getOverheadPerDay().doubleValue();
+			balanceCounterLeftovers -= project.getOverheadPerDay().doubleValue();
+			
+			if (balanceCounterLeftovers < 0) {
+				financeCostCounterLeftovers += balanceCounterLeftovers * project.getInterestRate().doubleValue();
+			}
+			if (balanceCounterEligibleTasks < 0) {
+				financeCostCounterEligibleTasks += balanceCounterEligibleTasks * project.getInterestRate().doubleValue();
+			}
+		}
+
+		return financeCostCounterEligibleTasks - financeCostCounterLeftovers;
+	}
+	
+	
 	public static double getEligiableTaskFinanceCost(HttpSession session , Project project,
 			List<ProjectTask> eligibleTasks , Date from , Date to) throws EntityControllerException , OptimaException {
 		EntityController<Project> controller = new EntityController<>(session.getServletContext());
@@ -1306,7 +1744,6 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		}
 	}
 	
-	
 	public static double getExpectedPayment ( Project project, Date paymentStart, Date paymentEnd, Date to,
 			double extraPayments, double retainagePercentage, double advancedPaymentDeduction){
 		
@@ -1318,9 +1755,33 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 
 		double totalTasksPayment = getExpectedPaymentNoAdjustments(project,
 				paymentStart, paymentEnd);
-		totalTasksPayment -= ((totalTasksPayment * retainagePercentage) / 100.0);
+		totalTasksPayment -= (totalTasksPayment * retainagePercentage /100);
 		totalTasksPayment += extraPayments;
 		totalTasksPayment -= advancedPaymentDeduction;
+		
+		return totalTasksPayment;
+
+		}
+	
+	
+	public static double getExpectedPaymentNew (HttpSession session, Project project, Date paymentStart, Date paymentEnd, Date to,
+			double extraPayments, double retainagePercentage, double advancedPaymentDeduction, Date projectExpectedEndDate, boolean applyRetainedAmount) throws EntityControllerException{
+		
+		Date periodStart = getProjectPaymentCycleStartNew(session, project , to, projectExpectedEndDate);
+		
+		if (periodStart == null) {
+			return 0.0; //-- no period for that project
+		}
+		double totalTasksPayment = 0;
+		if(paymentStart != null && paymentEnd != null)
+			totalTasksPayment = getExpectedPaymentNoAdjustments(project,paymentStart, paymentEnd);
+		if(applyRetainedAmount)
+		{
+			totalTasksPayment -= (totalTasksPayment * retainagePercentage);
+			totalTasksPayment += extraPayments;
+			totalTasksPayment -= advancedPaymentDeduction;
+			
+		}
 		
 		return totalTasksPayment;
 
@@ -1365,8 +1826,39 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	}
 	
 	
-
-
+	private static Date getProjectPaymentCycleStartNew(HttpSession session, Project project, Date periodEnd, Date projectExpectedEndDate) throws EntityControllerException {
+		ProjectPayment startPayment = null;
+		int minNumberOfDays = Integer.MAX_VALUE;
+		List<ProjectPayment> projectPayments = getProjectPayments(session, project, projectExpectedEndDate);
+		for (ProjectPayment payment : projectPayments) {
+			if (payment.getPaymentDate().before(periodEnd)) {
+				int numberOfDays = daysBetween(payment.getPaymentDate() , periodEnd);
+				if (numberOfDays < minNumberOfDays) {
+					startPayment = payment;
+					minNumberOfDays = numberOfDays;
+				}
+			}
+		}
+		if (startPayment == null) {
+			
+			boolean firstDate = true; 
+			Date startDate = null;
+			for (ProjectTask task : project.getProjectTasks()) {
+				if (firstDate) {
+					startDate = getTaskDate(task);
+					firstDate = false;
+				} else {
+					Date taskStartDate = getTaskDate(task); 
+					if (taskStartDate.before(startDate)) {					
+						startDate =  taskStartDate;
+					}
+				}
+			}
+			return startDate;
+		} else {
+			return startPayment.getPaymentDate();
+		}
+	}
 
 	private static Date getProjectPaymentCycleStart(Project project,
 			Date periodEnd) {
@@ -1402,6 +1894,82 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		}
 	}
 	
+	public static List<ProjectPayment> getProjectPayments(HttpSession session, Project project, Date projectExpectedEndDate) throws EntityControllerException {
+		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		List<ProjectPayment> projectPayments = new ArrayList<ProjectPayment>();
+		Date projectStartDate = project.getPropusedStartDate(); 
+		if(projectStartDate == null)
+		{
+			String query = "select min(calendar_start_date) from project_task where project_id = ?";
+			List<?> results = controller.nativeQuery(query, project.getProjectId());
+			if (results != null && results.size() > 0) {
+				projectStartDate = (Date) results.get(0);
+			}
+		}
+			
+		int paymentRequestPeriod = project.getPaymentRequestPeriod();
+		int collectionPeriod = project.getCollectPaymentPeriod();
+		
+		boolean reachProjectEnd = false;
+		int i=1;
+		//Add projectStartDate
+		ProjectPayment projectPayment = new ProjectPayment();
+		
+		projectPayment.setPaymentAmount(project.getAdvancedPaymentAmount());
+		
+		projectPayment.setPaymentDate(projectStartDate);
+		
+		PaymentType paymentType = new PaymentType();
+		paymentType.setPaymentTypeId(1);  //Advance
+		paymentType.setPaymentType("Advance");  //Advance
+		projectPayment.setPaymentType(paymentType);
+
+		projectPayments.add(projectPayment);
+		while(!reachProjectEnd){
+			Calendar cal = Calendar.getInstance();
+	        cal.setTime(projectStartDate);
+	        cal.add(Calendar.DATE, i*paymentRequestPeriod+collectionPeriod);
+	        Date paymentDate = cal.getTime();
+	        projectPayment = new ProjectPayment();
+	        
+	        cal = Calendar.getInstance();
+	        cal.setTime(paymentDate);
+	        cal.add(Calendar.DATE, -1 * collectionPeriod);
+	        Date paymentEnd = cal.getTime();
+	        
+	        cal = Calendar.getInstance();
+	        cal.setTime(paymentEnd);
+	        cal.add(Calendar.DATE, -1 * paymentRequestPeriod);
+	        Date paymentStart = cal.getTime();
+	        
+	        double paymentAmount = getExpectedPaymentNoAdjustments(project,paymentStart, paymentEnd);
+				
+	        double retainagePercentage = project.getRetainedPercentage().doubleValue();
+	        double advancedPaymentDeduction = paymentAmount  * project.getAdvancedPaymentPercentage().doubleValue();
+	        		
+	        		
+	        		
+	        paymentAmount -= (paymentAmount * retainagePercentage);
+	        paymentAmount -= advancedPaymentDeduction;
+			
+		
+			projectPayment.setPaymentAmount(new BigDecimal(paymentAmount));
+			
+			
+			projectPayment.setPaymentDate(paymentDate);
+			paymentType = new PaymentType();
+			paymentType.setPaymentTypeId(2); //Interim
+			paymentType.setPaymentType("Intrim");  //Interim
+			projectPayment.setPaymentType(paymentType);
+			projectPayments.add(projectPayment);
+	        
+			i++;
+	        if(paymentDate.after(projectExpectedEndDate))
+	        	reachProjectEnd = true;
+		}
+		return projectPayments;
+	}
+	
 	
 	public static double getPortfolioPayment(Date from , Date to, Map<Integer , ProjectPaymentDetail> paymentDetails , Portfolio portfolio, boolean doNotCalculate) {
 		double expectedPayment = 0;
@@ -1415,6 +1983,33 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 					if (detail != null) {
 						expectedPayment += PaymentUtil.getExpectedPayment(project,  detail.getPaymentStart(),  detail.getPaymentEnd(), to,  detail.getExtra(), 
 								detail.getRetained(), detail.getRepayment());
+					} else {
+						//expectedPayment += PaymentUtil.getExpectedPayment(project,  from ,  to , to,  0, 0, 0);
+						expectedPayment += payment.getPaymentAmount().doubleValue();
+					}
+				} else if (payment.getPaymentDate().equals(from)) {
+					expectedPayment += payment.getPaymentAmount().doubleValue();
+				}
+			}
+		
+		}
+		return expectedPayment;
+	}
+	
+
+	public static double getPortfolioPaymentNew(HttpSession session, Date from , Date to, Map<Integer , ProjectPaymentDetail> paymentDetails , Portfolio portfolio, boolean doNotCalculate, Date[] projectBoundaries) throws EntityControllerException {
+		double expectedPayment = 0;
+		
+		for (Project project : portfolio.getProjects()) {
+			List<ProjectPayment> projectPayments = getProjectPayments(session, project, projectBoundaries[1]);
+			ProjectPaymentDetail detail = paymentDetails.get(project.getProjectId());
+			
+			for (ProjectPayment payment: projectPayments) {
+				
+				if (!doNotCalculate && payment.getPaymentType().getPaymentType().equalsIgnoreCase("Intrim") && payment.getPaymentDate().equals(from) && payment.getPaymentAmount().doubleValue() == 0) {
+					if (detail != null) {
+						expectedPayment += PaymentUtil.getExpectedPaymentNew(session, project,  detail.getPaymentStart(),  detail.getPaymentEnd(), to,  detail.getExtra(), 
+								detail.getRetained(), detail.getRepayment(), projectBoundaries[1], true);
 					} else {
 						//expectedPayment += PaymentUtil.getExpectedPayment(project,  from ,  to , to,  0, 0, 0);
 						expectedPayment += payment.getPaymentAmount().doubleValue();
@@ -1559,4 +2154,77 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		}
 		return paymentDetails;
 	}
+	
+	public static Map<Integer, ProjectPaymentDetail> getPaymentDetailsNew(HttpSession session , int projectId, Date from, Date to) {
+		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		ProjectPaymentDetail paymentDetail = new ProjectPaymentDetail();
+		Map<Integer , ProjectPaymentDetail> paymentDetails = new HashMap<Integer, ProjectPaymentDetail>();
+		try {
+			
+			Project project = controller.find(Project.class , projectId);
+			Date[] projectBoundaries = PaymentUtil.getPortofolioDateRanges(controller, project.getPortfolio().getPortfolioId());
+			
+			Date projectStartDate = project.getPropusedStartDate(); 
+			if(projectStartDate == null)
+			{
+				String query = "select min(calendar_start_date) from project_task where project_id = ?";
+				List<?> results = controller.nativeQuery(query, project.getProjectId());
+				if (results != null && results.size() > 0) {
+					projectStartDate = (Date) results.get(0);
+				}
+			}
+			
+			int paymentRequestPeriod = project.getPaymentRequestPeriod();
+			int collectionPeriod = project.getCollectPaymentPeriod();
+			
+			boolean reachProjectEnd = false;
+			int i=1;
+			while(!reachProjectEnd){
+				Calendar cal = Calendar.getInstance();
+		        cal.setTime(projectStartDate);
+		        cal.add(Calendar.DATE, i*paymentRequestPeriod+collectionPeriod);
+		        Date collectionDate = cal.getTime();
+		        if(collectionDate.getTime() >= from.getTime() && collectionDate.getTime() < to.getTime())
+		        {
+			        cal.setTime(projectStartDate);
+			        cal.add(Calendar.DATE, (i-1)*paymentRequestPeriod);
+			        paymentDetail.setPaymentStart(cal.getTime());
+			        
+			        cal.setTime(projectStartDate);
+			        cal.add(Calendar.DATE, (i)*paymentRequestPeriod);
+			        paymentDetail.setPaymentEnd(cal.getTime()); 
+	
+		        }
+		        i++;
+		        if(collectionDate.after(projectBoundaries[1]))
+		        	reachProjectEnd = true;
+			}
+			
+			List<PortfolioExtrapayment> extraPaymentsList = project.getPortfolio().getPortfolioExtrapayments();
+			for (PortfolioExtrapayment extraPayment : extraPaymentsList) {
+				if(extraPayment.getExtraPayment_date().getTime() >= from.getTime() && extraPayment.getExtraPayment_date().getTime() < to.getTime())
+		        {
+					paymentDetail.setExtra(extraPayment.getExtraPayment_amount().doubleValue());
+					paymentDetail.setPayment(extraPayment.getExtraPayment_amount().doubleValue());
+	
+		        }
+			}
+			
+			paymentDetail.setProjectId(projectId);
+			paymentDetail.setRetained(project.getRetainedPercentage().doubleValue());
+			paymentDetail.setProject(project.getProjectCode());
+			paymentDetail.setRepayment(project.getAdvancedPaymentPercentage().doubleValue() * project.getAdvancedPaymentAmount().doubleValue());
+			
+			
+			paymentDetails.put(paymentDetail.getProjectId(), paymentDetail);
+			
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+		}
+		return paymentDetails;
+	}
+	
+	
 }
+
+

@@ -37,6 +37,18 @@ $(function() {
 	max : 100000,
 	step : 1
     });
+    
+    $("#retainedPercentageTxt").pcntspinner({
+    	min : 0,
+    	max : 100000,
+    	step : 1
+        });
+    
+    $("#advancedPaymentPercentage").pcntspinner({
+    	min : 0,
+    	max : 100000,
+    	step : 1
+        });
 
     $(".spin").spinner({
 	min : 0,
@@ -494,9 +506,6 @@ $(function() {
 	$("#projTasksDialog").data("task", null).dialog('option', 'title', 'Add New Task').dialog('open');
     });
 
-    $('#closeProjectBtn').on('click', function() {
-	close();
-    });
 
     $('#saveProjectBtn').on(
 	    'click',
@@ -505,6 +514,14 @@ $(function() {
 		$("#projnameTxt").removeClass("ui-state-error");
 		$("#interestRateTxt").removeClass("ui-state-error");
 		$("#overHeadPerDayTxt").removeClass("ui-state-error");
+		$("#retainedPercentageTxt").removeClass("ui-state-error");
+		
+		$("#advPaymentAmountTxt").removeClass("ui-state-error");
+		$("#delayPenaltyTxt").removeClass("ui-state-error");
+		$("#collectPaymentPeriodTxt").removeClass("ui-state-error");
+		$("#payRequestsPeriodTxt").removeClass("ui-state-error");
+		
+		$("#advancedPaymentPercentage").removeClass("ui-state-error");
 		var bValid = true;
 
 		bValid = bValid && checkLength($("#projnameTxt"), "projnameTxt", 3, 128);
@@ -518,6 +535,26 @@ $(function() {
 		    $("#interestRateTxt").addClass("ui-state-error");
 		    bValid = false;
 		}
+		
+		var retainedPercentageTxt = $("#retainedPercentageTxt").val();
+		
+		if (retainedPercentageTxt.match("\%$") == "%") {
+			retainedPercentageTxt = retainedPercentageTxt.substr(0, retainedPercentageTxt.length - 1);
+		}
+		if (!/^-?\d*\.?\d*$/.test(retainedPercentageTxt)) {
+		    $("#retainedPercentageTxt").addClass("ui-state-error");
+		    bValid = false;
+		}
+		
+		var advancedPaymentPercentage = $("#advancedPaymentPercentage").val();
+
+		if (advancedPaymentPercentage.match("\%$") == "%") {
+			advancedPaymentPercentage = advancedPaymentPercentage.substr(0, advancedPaymentPercentage.length - 1);
+		}
+		if (!/^-?\d*\.?\d*$/.test(advancedPaymentPercentage)) {
+		    $("#advancedPaymentPercentage").addClass("ui-state-error");
+		    bValid = false;
+		}
 
 		var overHeadPerDayTxt = $("#overHeadPerDayTxt").val();
 
@@ -525,6 +562,23 @@ $(function() {
 		    $("#overHeadPerDayTxt").addClass("ui-state-error");
 		    bValid = false;
 		}
+		
+		
+		var advPaymentAmountTxt = $("#advPaymentAmountTxt").val();
+		if (!/^-?\d*\.?\d*$/.test(advPaymentAmountTxt)) {
+			$("#advPaymentAmountTxt").addClass("ui-state-error");
+		    bValid = false;
+		}
+		
+		var delayPenaltyTxt = $("#delayPenaltyTxt").val();
+		if (!/^-?\d*\.?\d*$/.test(delayPenaltyTxt)) {
+			$("#delayPenaltyTxt").addClass("ui-state-error");
+		    bValid = false;
+		}
+		
+		var collectPaymentPeriodTxt = $("#collectPaymentPeriodTxt").val();
+		var payRequestsPeriodTxt = $("#payRequestsPeriodTxt").val();
+		
 		var pStartDateTxt = $("#pStartDateTxt").val();
 		if (pStartDateTxt != null && pStartDateTxt.length != 0) {
 		    pStartDateTxt = new Date(pStartDateTxt);
@@ -541,13 +595,13 @@ $(function() {
 
 		if (bValid) {
 			var interestRateValue = parseFloat(interestRateTxt) / ( 100*360.0 );
+			var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
+			var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
 		
-		    var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt")
-			    .val(), $("#projectDescTxt").val(), $("#projStreet").val(), $(
-			    "#projectCity option:selected").val(), $("#projectProv option:selected").val(), $(
-			    "#projectCountry option:selected").val(), $("#projPostCode").val(), pStartDateTxt,
-			    pFinishDateTxt, interestRateValue, overHeadPerDayTxt, $("#portfolioId").val(), $(
-				    "#projectClient").val(), $("#weDays option:selected").val(), 0, 0);
+		    var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt").val(), $("#projectDescTxt").val(), $("#projStreet").val(),
+		    		$("#projectCity option:selected").val(), $("#projectProv option:selected").val(), $("#projectCountry option:selected").val(), $("#projPostCode").val(), pStartDateTxt,
+			    pFinishDateTxt, interestRateValue, overHeadPerDayTxt, $("#portfolioId").val(), $("#projectClient").val(), $("#weDays option:selected").val(),
+			    retainedPercentageValue, advancedPaymentPercentageValue, advPaymentAmountTxt, delayPenaltyTxt, collectPaymentPeriodTxt, payRequestsPeriodTxt);
 		    if (call.result == 0) {
 			alert("Project updated successfully");
 			location.reload(true);
@@ -668,7 +722,15 @@ $(function() {
 	    $("#interestRateTxt").val(roundToThreePlaces( parseFloat(pData.interestRate) * 100 * 360));
 
 	    $("#overHeadPerDayTxt").val(pData.overheadPerDay);
+	    $("#retainedPercentageTxt").val(pData.retainedPercentage*100);
+	    $("#advancedPaymentPercentage").val(pData.advancedPaymentPercentage*100);
+	    
+	    $("#advPaymentAmountTxt").val(pData.advancedPaymentAmount);
+	    $("#delayPenaltyTxt").val(pData.delayPenaltyAmount);
+	    $("#collectPaymentPeriodTxt").val(pData.collectPaymentPeriod);
+	    $("#payRequestsPeriodTxt").val(pData.paymentRequestPeriod);
 
+	    
 	} else {
 	    alert("Error: " + projCall.message);
 	}

@@ -10,3 +10,7 @@ portfolio_id int(11),
 extraPayment_amount decimal(19,3),
 extraPayment_date date
 );
+
+ALTER TABLE portfolio_extraPayment ADD 
+FOREIGN KEY (portfolio_id) REFERENCES portfolio(portfolio_id) 
+ON UPDATE CASCADE ON DELETE CASCADE;

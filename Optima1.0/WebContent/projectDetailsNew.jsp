@@ -11,6 +11,7 @@
 			<li><a href="#projCalendar">Project Calendar</a></li>
 			<li><a href="#projTasks">Project Tasks</a></li>
 			<li><a href="#projFinanceData">Project Financial Data</a></li>
+			<li><a href="#financialPeriodsData">Financial Periods</a></li>
 		</ul>
 		<div id="projInfo">
 			<%@ include file="views/projectInfo.html"%>
@@ -23,13 +24,18 @@
 			<%@ include file="views/projectTasks.html"%>
 		</div>
 		<div id="projFinanceData">
-			<%@ include file="views/projectFinance.html"%>
+			<%@ include file="views/projectFinanceNew.html"%>
 		</div>
+		
+		<div id="financialPeriodsData">
+			<%@ include file="views/projectFinancialPeriods.html"%>
+		</div>
+		
+		
 		<div class="form-section" >
 			<div id="projectButtons" class="ui-dialog-buttonset">
 				<button id="resetSchedulingBtn">Reset Project Scheduling</button>
 				<button id="saveProjectBtn">Save Project</button>
-				<button id="closeProjectBtn">Close</button>
 			</div>
 		</div>
 
@@ -44,7 +50,7 @@
 	
 </script>
 
-<script src="js/project.js">
+<script src="js/projectNew.js">
 	
 </script>
 

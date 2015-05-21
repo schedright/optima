@@ -208,3 +208,79 @@ div.wrapper h1, div.wrapper h2, div.wrapper h3, div.wrapper h4, div.wrapper h5, 
 .accordionAfterBtn{
 	margin-top: 38px;
 }
+
+/********************************************************************/
+  display:table;         
+ .div-table{
+  width:auto;         
+  background-color:#eee;         
+  border:1px solid  #666666;         
+  border-spacing:5px;/*cellspacing:poor IE support for  this*/
+}
+.div-row-red{
+  display:table-row;
+  width:auto;
+  clear:both;
+  background-color:#ffbbbb;    
+}
+.div-row-gray{
+  display:table-row;
+  width:auto;
+  clear:both;
+  background-color:#eee;  
+}
+
+.div-row-grayInfo{
+  display:table-row;
+  width:auto;
+  clear:both;
+  background-color:#e0e0e0; 
+  font-size:11; 
+}
+
+.div-row-green{
+  display:table-row;
+  width:auto;
+  clear:both;
+  background-color:#d5feab;  
+}
+.div-row-blue{
+  display:table-row;
+  width:auto;
+  clear:both;
+  background-color:#abc8f3;  
+}
+
+.div-row-orange{
+  display:table-row;
+  width:auto;
+  clear:both;
+  background-color:#ffcd9b;  
+}
+
+
+.div-table-header{
+  display:table-row;
+  width:auto;
+  clear:both;
+}
+
+.div-table-col-title{
+  float:left;/*fix for  buggy browsers*/
+  display:table-column;         
+  width:100px;         
+}
+.div-table-col-s{
+  float:left;/*fix for  buggy browsers*/
+  display:table-column;         
+  width:300px;         
+}
+
+
+.div-table-col-l{
+  float:left;/*fix for  buggy browsers*/
+  display:table-column;         
+  width:500px;         
+}
+
+

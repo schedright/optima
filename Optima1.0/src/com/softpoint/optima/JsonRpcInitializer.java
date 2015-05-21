@@ -10,6 +10,7 @@ import org.jabsorb.JSONRPCBridge;
 
 import com.softpoint.optima.control.ClientController;
 import com.softpoint.optima.control.DaysOffController;
+import com.softpoint.optima.control.ExtraPaymentController;
 import com.softpoint.optima.control.FinanceController;
 import com.softpoint.optima.control.LocationInfoController;
 import com.softpoint.optima.control.PaymentController;
@@ -37,6 +38,7 @@ public class JsonRpcInitializer implements ServletContextListener {
 		globalBridge.registerObject("clientService" , new ClientController());
 		globalBridge.registerObject("daysOffService" , new DaysOffController());
 		globalBridge.registerObject("financeService" , new FinanceController());
+		globalBridge.registerObject("extraPaymentService" , new ExtraPaymentController());
 		globalBridge.registerObject("taskService" , new TaskController());
 		globalBridge.registerObject("paymentService" , new PaymentController());
 		

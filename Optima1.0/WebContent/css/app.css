@@ -124,7 +124,7 @@ border-top:1px solid #DDD;
 float:left;
 height:23px;
 border-bottom:1px solid #DDD;
-background-color:#f6f6f6;
+background-color:#FFF0D3;
 margin:0;
 }
 
@@ -143,7 +143,7 @@ width:225px;
 
 .fn-gantt .spacer {
 border-bottom:none;
-background-color:#f6f6f6;
+background-color:#FFF0D3;
 margin:-2px 0 1px;
 }
 
@@ -193,13 +193,13 @@ margin:0 0 0 -1px;
 }
 
 .fn-gantt .sa,.fn-gantt .sn {
-color:#939496;
-background-color:#f5f5f5;
+color:#000;
+background-color:#FDD587;
 text-align:center;
 }
 
 .fn-gantt .wd {
-background-color:#f6f6f6;
+background-color:#FFF0D3;
 text-align:center;
 }
 
@@ -209,7 +209,7 @@ overflow:hidden;
 border-left:1px solid #DDD;
 border-bottom:1px solid #DDD;
 height:23px;
-background-color:#f6f6f6;
+background-color:#FFF0D3;
 font-weight:700;
 font-size:11px;
 color:#484a4d;
@@ -259,11 +259,11 @@ font-size:11px;
 }
 
 .fn-gantt .ganttRed {
-background-color:#F9C4E1;
+background-color:#FFA500;
 }
 
 .fn-gantt .ganttRed .fn-label {
-color:#78436D !important;
+color:#000 !important;
 }
 
 .fn-gantt .ganttGreen {
@@ -284,7 +284,7 @@ color:#714715 !important;
 
 .fn-gantt .bottom {
 clear:both;
-background-color:#f6f6f6;
+background-color:#FFF0D3;
 width:100%;
 }
 
@@ -550,7 +550,7 @@ margin-top:2px;
 }
 
 .slick-row.even {
-background: #bec;
+background: rgba(236, 205, 149, 0.98)
 }
 .slick-row.totalRow{
 	background: #F5DEB3;
@@ -1030,3 +1030,43 @@ h2 {
  .projbuttonEdit:hover {
 	background: url(../images/editProjw.png) no-repeat;
  }
+ 
+ .notShiftedTaskLogo{
+	background: url(../images/notShiftedTaskLogo.png) no-repeat;
+	padding-left:25px;
+}
+
+.shiftedTaskInLogo{
+	background: url(../images/shiftedTaskInLogo.png) no-repeat;
+	padding-left:25px;
+}
+
+.shiftedTaskOutLogo{
+	background: url(../images/shiftedTaskOutLogo.png) no-repeat;
+	padding-left:25px;
+}
+
+#loading-indicator {
+  	display : block;
+    position : fixed;
+    z-index: 10000;
+    background-color:#222;
+    opacity : 0.9;
+    background-repeat : no-repeat;
+    background-position : center;
+    left : 0;
+    bottom : 0;
+    right : 0;
+    top : 0;
+}
+
+#loading-indicator-image {
+  	left : 50%;
+    top : 50%;
+    position : absolute;
+    z-index : 101;
+    width : 220px;
+    margin-left : -110px;
+    margin-top : -200px;
+}
+

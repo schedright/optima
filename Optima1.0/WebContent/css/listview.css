@@ -148,7 +148,7 @@ body{ background: #f5f5f5; font: 12px 'Segoe UI', 'Proxima Nova', 'Helvetica Neu
 	border-radius: 3px;
 	width: 15px; 
 	height:15px; 
-	margin-left: 10px; 
+	margin-left: 3px; 
 	float: left; 
 	cursor:  pointer; 
 	padding: 5px; 
@@ -158,11 +158,40 @@ body{ background: #f5f5f5; font: 12px 'Segoe UI', 'Proxima Nova', 'Helvetica Neu
 .addPortfolioBtn:hover{background:url(../images/addPortfolioBtnw.png) 50% no-repeat;}
 .addPortfolioBtn-active{ background:url(../images/addPortfolioBtnw.png) 50% no-repeat; }
 
+.deletePortfolioBtn{
+	border-radius: 3px;
+	width: 15px; 
+	height:15px; 
+	margin-left: 3px; 
+	float: left; 
+	cursor:  pointer; 
+	padding: 5px; 
+	background: url(../images/deletePortfolioBtn.png) 50% no-repeat;
+	float: right;
+}
+.deletePortfolioBtn:hover{background:url(../images/deletePortfolioBtnw.png) 50% no-repeat;}
+.deletePortfolioBtn-active{ background:url(../images/deletePortfolioBtnw.png) 50% no-repeat; }
+
+.editPortfolioBtn{
+	border-radius: 3px;
+	width: 15px; 
+	height:15px; 
+	margin-left: 3px; 
+	float: left; 
+	cursor:  pointer; 
+	padding: 5px; 
+	background: url(../images/editPortfolioBtn.png) 50% no-repeat;
+	float: right;
+}
+.editPortfolioBtn:hover{background:url(../images/editPortfolioBtnw.png) 50% no-repeat;}
+.editPortfolioBtn-active{ background:url(../images/editPortfolioBtnw.png) 50% no-repeat; }
+
+
 .gridPortfolioBtn{
 	border-radius: 3px;
 	width: 15px; 
 	height:15px; 
-	margin-left: 10px; 
+	margin-left: 3px; 
 	float: left; 
 	cursor:  pointer; 
 	padding: 5px; 
@@ -176,7 +205,7 @@ body{ background: #f5f5f5; font: 12px 'Segoe UI', 'Proxima Nova', 'Helvetica Neu
 	border-radius: 3px;
 	width: 15px; 
 	height:15px; 
-	margin-left: 10px; 
+	margin-left: 3px; 
 	float: left; 
 	cursor:  pointer; 
 	padding: 5px; 

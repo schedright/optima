@@ -20,20 +20,40 @@ $(function() {
 			step : 0.1
 		    });
 	  
-	var advancePaymentRepayment = $("#advancePaymentRepayment").val();
-	var extraPayment = $("#extraPayment").val();
-	var reatainedPercentage = $("#reatainedPercentage").val().replace('%' ,'');
+	  
+	    $("#mainAllProjects").sortable({
+			revert : true,
+			items : "li"
+		    });
+
+		var projectsList = rpcClient.projectService.findAllByPortfolio(portfolioId);
+		if (projectsList.result == 0) {
+		    var projectsData = projectsList.data.list;
+
+		
+		    fillProjectList(projectsData);
+		}
+	    
+
 	
-	if (advancePaymentRepayment == null || advancePaymentRepayment.length == 0 ) {
-		advancePaymentRepayment = 0;
-	};
-	if (reatainedPercentage == null || reatainedPercentage.length == 0 ) {
-		reatainedPercentage = 0;
-	};
-	
-	if (extraPayment == null || extraPayment.length == 0 ) {
-		extraPayment = 0;
-	};
+    $("#mainAllProjects").droppable(
+		    {
+			accept : "#dependencies li",
+			hoverClass : "ui-state-hover",
+			drop : function(ev, ui) {
+
+			    var remDepCall = rpcClient.taskService.removeTaskDependency(task.taskId,
+				    ui.draggable.attr("id"));
+			    if (remDepCall.result == 0) {
+				ui.draggable.remove();
+				$(this).append(ui.draggable);
+				return true;
+			    } else {
+				return false;
+			    }
+			}
+		    });
+
 	
     $("#findFinalSolBtn").button(
       		 {
@@ -44,21 +64,28 @@ $(function() {
       			 
       		 }
       	 ).click(function(){
-      		alert("This page is trying to find the solution for Portfolio:" + portfolioId + "<br>" + 
-      				"Advance Payment Repayment" + advancePaymentRepayment + "<br>" + 
-      				"Reatained Percentage" + reatainedPercentage + "<br>" + 
-      				"Extra Payment" + extraPayment);
+      		$('#loading-indicator').show();
+      		var projectsAccordingToPriority = $("#mainAllProjects").find('li');
+      		var projectID = projectsAccordingToPriority[0].id;
+      		var priorityOrder = "";
+      		var separator = "";
+      		for (var i = 0; i < projectsAccordingToPriority.length; i++) {
+      			priorityOrder = priorityOrder + separator + projectsAccordingToPriority[i].id;
+      			separator = ",";
+      		}
       		
-      		/*rpcClient.projectService.getPeriodSolution( function(result , exception) {
-      			if (result.result == 0) {
-      				var data = result.data.list;
-      			} else {
-      				 alert("Error generating solution: " + result.message);
-      			} 
-      		});*/
-      	});
-      		
-	
+  			 rpcClient.projectService.getSolution( function(result , exception) {
+  			if (result.result == 0) {
+  				var data = result.data;
+  				$("#schedResults").html('');
+  				$("#schedResults").append(data); 
+  				$('#loading-indicator').hide();
+  			 } else {
+  				 alert("Error generating solution: " + result.message);
+  			 }
+  		 }, projectID, "", priorityOrder); 
+  			 
+  	 });
 
 });
 
@@ -73,4 +100,16 @@ function getURLVariables() {
 	}
 
 	return getVars;
+}
+
+function fillProjectList(data) {
+	$("#mainAllProjects").html('');
+	for (var i = 0; i < data.length; i++) {
+		var li = $('<li></li>').addClass('ui-state-default').attr('id',  data[i].projectId).text(data[i].projectCode);
+		li.attr('title', (data[i].projectCode));
+		li.attr('description', (data[i].projectDescription));
+
+		$("#mainAllProjects").append(li);
+	}
+	
 }

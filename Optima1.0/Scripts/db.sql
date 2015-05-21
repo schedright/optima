@@ -116,7 +116,7 @@ day_off DATE,
 dayoff_type varchar(50)
 );
 
-ALTER TABLE days_off ADD UNIQUE (project_id,day_off);
+ALTER TABLE Days_off ADD UNIQUE (project_id,day_off);
 
 ALTER TABLE Days_off ADD 
 FOREIGN KEY (project_id) REFERENCES project(project_id) 

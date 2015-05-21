@@ -154,7 +154,7 @@ $(document).ready( function() {
 	        					 $('#projectProvince option:selected').val(),
 	        					 $('#projectCountry option:selected').val(),
 	        					 $("#projectPostalCode").val(), 
-	        					 null , null , 0.0 , 0.0 , portfolioId , -1, -1);
+	        					 null , null , 0.0 , 0.0 , portfolioId , -1, -1, 0, 0, 0, 0, 0, 0);
 	        					
 	        		 } else {
 	        			 call =  rpcClient.projectService.update( projectId , 
@@ -166,7 +166,7 @@ $(document).ready( function() {
 	        					 $('#projectProvince option:selected').val(),
 	        					 $('#projectCountry option:selected').val(),
 	        					 $("#projectPostalCode").val(), 
-	        					 null , null , 0.0 , 0.0 , portfolioId , -1, -1);
+	        					 null , null , 0.0 , 0.0 , portfolioId , -1, -1, 0, 0, 0, 0, 0, 0);
 	        		 }
 	        		  if (call.result == 0) {
 	        			 $( this ).dialog( "close" );

@@ -376,38 +376,51 @@ $(function() {
 															   		if (result.result == 0) { 
 																   		var pExtraCachColumns = [ { id : "finance", name : "Finance",  field : "finance",  minWidth : 120 , formatter : Slick.Formatters.Currency} ,
 																				   	                  { id : "balance", name : "Balance",  field : "balance",  minWidth : 120 , formatter : Slick.Formatters.Currency} ,
+																				   	                  { id : "paymentCurrent", name : "Payment current",  field : "paymentCurrent",  minWidth : 120 , formatter : Slick.Formatters.Currency} ,
+																				   	                  { id : "cashoutCurrent", name : "Cash Out current",  field : "cashoutCurrent",  minWidth : 120 , formatter : Slick.Formatters.Currency},
 																				   	                  { id : "currentCost", name : "Current Cost",  field : "currentCost",  minWidth : 120 , formatter : Slick.Formatters.Currency} ,
-																				   	                  { id : "payment", name : "Payment",  field : "payment",  minWidth : 120 , formatter : Slick.Formatters.Currency} ,
-																				   	                  { id : "cashoutCurrent", name : "Cashout Current",  field : "cashoutCurrent",  minWidth : 120 , formatter : Slick.Formatters.Currency},
-																				   	                  { id : "cashoutNext", name : "Cash Out Next",  field : "cashoutNext",  minWidth : 120 , formatter : Slick.Formatters.Currency},
+																				   	                  { id : "paymentNext", name : "Payment Next",  field : "paymentNext",  minWidth : 120 , formatter : Slick.Formatters.Currency} ,
+																				   	                  { id : "cashoutNext", name : "Cash Out next",  field : "cashoutNext",  minWidth : 120 , formatter : Slick.Formatters.Currency},
 																				   	                  { id : "extraCash", name : "Extra Cash",  field : "extraCash",  minWidth : 120 , formatter : Slick.Formatters.Currency}];
-																		var extraPaymentCurrentPeriod = result.data;
-																		var pExtraCachData = [];
-																		//alert("currentFinancingLimit: " + currentFinancingLimit + "\n" + "totalOpenBalance: " + totalOpenBalance + "\n" + "totalCashout: " + totalCashout + "\n" + "extraPaymentCurrentPeriod: " + extraPaymentCurrentPeriod);
-																   		pExtraCachData[0] = {
-																   				"finance" :	currentFinancingLimit,
-																   				"balance" : totalOpenBalance,
-																   				"currentCost" : totalCurrentCost + solvedProjectsCost,
-																   				"payment" : extraPaymentCurrentPeriod,
-																   				"cashoutCurrent" : cashoutCurrent,
-																   				"cashoutNext" : totalCashout,
-																   				"extraCash" : currentFinancingLimit + totalOpenBalance - totalCurrentCost - solvedProjectsCost -  totalCashout - cashoutCurrent /*+ totalFinanceCost*/ + extraPaymentCurrentPeriod
-																   		};
-																   		
-																   	 var pExtraCashCurPeriodGrid = new Slick.Grid("#extraCashtNextPeriodGrid", pExtraCachData , pExtraCachColumns, {
-																   		    editable : true,
-																   		    enableAddRow : true,
-																   		    enableCellNavigation : true,
-																   		    enableColumnReorder : true
-																   		});
+																		var extraPaymentNextPeriod = result.data;
+																		
+																		var extraPaymentCurrentPeriod = 0;
+																		rpcClient.portfolioService.getExtraCachCurrentPeriod( function(result , exception) {
+																	   		if (result.result == 0) { 
+																	   			extraPaymentCurrentPeriod = result.data;
+																				var pExtraCachData = [];
+																				//alert("currentFinancingLimit: " + currentFinancingLimit + "\n" + "totalOpenBalance: " + totalOpenBalance + "\n" + "totalCashout: " + totalCashout + "\n" + "extraPaymentCurrentPeriod: " + extraPaymentCurrentPeriod);
+																		   		pExtraCachData[0] = {
+																		   				"finance" :	currentFinancingLimit,
+																		   				"balance" : totalOpenBalance,
+																		   				"paymentCurrent" : extraPaymentCurrentPeriod,
+																		   				"cashoutCurrent" : cashoutCurrent,
+																		   				"currentCost" : totalCurrentCost + solvedProjectsCost,
+																		   				"paymentNext" : extraPaymentNextPeriod,
+																		   				"cashoutNext" : totalCashout,																   				
+																		   				"extraCash" : currentFinancingLimit + extraPaymentNextPeriod + totalOpenBalance - totalCurrentCost - solvedProjectsCost -  totalCashout - cashoutCurrent /*+ totalFinanceCost*/ + extraPaymentCurrentPeriod
+																		   		};
+																		   		
+																		   	 var pExtraCashCurPeriodGrid = new Slick.Grid("#extraCashtNextPeriodGrid", pExtraCachData , pExtraCachColumns, {
+																		   		    editable : true,
+																		   		    enableAddRow : true,
+																		   		    enableCellNavigation : true,
+																		   		    enableColumnReorder : true
+																		   		});
+																	   		} else {
+																	   			 alert(result.message);
+																	   		 }
+																	   	} , portfolioId , fromDate , toDate);
+																		
+
 															   		} else {
 															   			alert(result.message);
 															   		}
 															   		 
-															   	 } , portfolioId , toDate, nextPeriodEndDate , JSON.stringify(adjustmentInformation));
-													   		 } else {
-													   			 alert(result.message);
-													   		 }
+																   	 } , portfolioId , toDate, nextPeriodEndDate , JSON.stringify(adjustmentInformation));
+														   		 } else {
+														   			 alert(result.message);
+														   		 }
 													   	 } , portfolioId , toDate);
 										
 												 }

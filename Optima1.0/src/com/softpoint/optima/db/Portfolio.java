@@ -1,16 +1,8 @@
 package com.softpoint.optima.db;
 
 import java.io.Serializable;
+import javax.persistence.*;
 import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 
 
 /**
@@ -18,6 +10,8 @@ import javax.persistence.OneToMany;
  * 
  */
 @Entity
+@Table(name="portfolio")
+@NamedQuery(name="Portfolio.findAll", query="SELECT p FROM Portfolio p")
 public class Portfolio implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -31,6 +25,10 @@ public class Portfolio implements Serializable {
 
 	@Column(name="portfolio_name")
 	private String portfolioName;
+
+	//bi-directional many-to-one association to PortfolioExtrapayment
+	@OneToMany(mappedBy="portfolio")
+	private List<PortfolioExtrapayment> portfolioExtrapayments;
 
 	//bi-directional many-to-one association to PortfolioFinance
 	@OneToMany(mappedBy="portfolio" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
@@ -67,6 +65,28 @@ public class Portfolio implements Serializable {
 		this.portfolioName = portfolioName;
 	}
 
+	public List<PortfolioExtrapayment> getPortfolioExtrapayments() {
+		return this.portfolioExtrapayments;
+	}
+
+	public void setPortfolioExtrapayments(List<PortfolioExtrapayment> portfolioExtrapayments) {
+		this.portfolioExtrapayments = portfolioExtrapayments;
+	}
+
+	public PortfolioExtrapayment addPortfolioExtrapayment(PortfolioExtrapayment portfolioExtrapayment) {
+		getPortfolioExtrapayments().add(portfolioExtrapayment);
+		portfolioExtrapayment.setPortfolio(this);
+
+		return portfolioExtrapayment;
+	}
+
+	public PortfolioExtrapayment removePortfolioExtrapayment(PortfolioExtrapayment portfolioExtrapayment) {
+		getPortfolioExtrapayments().remove(portfolioExtrapayment);
+		portfolioExtrapayment.setPortfolio(null);
+
+		return portfolioExtrapayment;
+	}
+
 	public List<PortfolioFinance> getPortfolioFinances() {
 		return this.portfolioFinances;
 	}
@@ -74,7 +94,21 @@ public class Portfolio implements Serializable {
 	public void setPortfolioFinances(List<PortfolioFinance> portfolioFinances) {
 		this.portfolioFinances = portfolioFinances;
 	}
-	
+
+	public PortfolioFinance addPortfolioFinance(PortfolioFinance portfolioFinance) {
+		getPortfolioFinances().add(portfolioFinance);
+		portfolioFinance.setPortfolio(this);
+
+		return portfolioFinance;
+	}
+
+	public PortfolioFinance removePortfolioFinance(PortfolioFinance portfolioFinance) {
+		getPortfolioFinances().remove(portfolioFinance);
+		portfolioFinance.setPortfolio(null);
+
+		return portfolioFinance;
+	}
+
 	public List<Project> getProjects() {
 		return this.projects;
 	}
@@ -82,5 +116,19 @@ public class Portfolio implements Serializable {
 	public void setProjects(List<Project> projects) {
 		this.projects = projects;
 	}
-	
+
+	public Project addProject(Project project) {
+		getProjects().add(project);
+		project.setPortfolio(this);
+
+		return project;
+	}
+
+	public Project removeProject(Project project) {
+		getProjects().remove(project);
+		project.setPortfolio(null);
+
+		return project;
+	}
+
 }

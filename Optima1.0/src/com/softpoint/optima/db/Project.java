@@ -1,9 +1,7 @@
 package com.softpoint.optima.db;
 
 import java.io.Serializable;
-
 import javax.persistence.*;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +12,8 @@ import java.util.List;
  * 
  */
 @Entity
+@Table(name="project")
+@NamedQuery(name="Project.findAll", query="SELECT p FROM Project p")
 public class Project implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -21,6 +21,21 @@ public class Project implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="project_id")
 	private int projectId;
+
+	@Column(name="advanced_payment_percentage")
+	private BigDecimal advancedPaymentPercentage;
+	
+	@Column(name="advanced_payment_amount")
+	private BigDecimal advancedPaymentAmount;
+	
+	@Column(name="delay_penalty_amount")
+	private BigDecimal delayPenaltyAmount;
+	
+	@Column(name="collect_payment_period")
+	private int collectPaymentPeriod;
+	
+	@Column(name="payment_request_period")
+	private int paymentRequestPeriod;
 
 	@Column(name="interest_rate")
 	private BigDecimal interestRate;
@@ -43,45 +58,48 @@ public class Project implements Serializable {
 	@Column(name="project_name")
 	private String projectName;
 
-    @Temporal( TemporalType.DATE)
+	@Temporal(TemporalType.DATE)
 	@Column(name="proposed_finish_date")
 	private Date proposedFinishDate;
 
-    @Temporal( TemporalType.DATE)
+	@Temporal(TemporalType.DATE)
 	@Column(name="propused_start_date")
 	private Date propusedStartDate;
+
+	@Column(name="retained_percentage")
+	private BigDecimal retainedPercentage;
 
 	//bi-directional many-to-one association to DaysOff
 	@OneToMany(mappedBy="project" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
 	private List<DaysOff> daysOffs;
 
 	//bi-directional many-to-one association to Client
-    @ManyToOne
+	@ManyToOne
 	@JoinColumn(name="client_id")
 	private Client client;
 
 	//bi-directional many-to-one association to LocationInfo
-    @ManyToOne
+	@ManyToOne
 	@JoinColumn(name="project_address_city")
 	private LocationInfo city;
 
 	//bi-directional many-to-one association to LocationInfo
-    @ManyToOne
+	@ManyToOne
 	@JoinColumn(name="project_address_province")
 	private LocationInfo province;
 
 	//bi-directional many-to-one association to LocationInfo
-    @ManyToOne
+	@ManyToOne
 	@JoinColumn(name="project_address_country")
 	private LocationInfo country;
 
 	//bi-directional many-to-one association to Portfolio
-    @ManyToOne
+	@ManyToOne
 	@JoinColumn(name="portfolio_id")
 	private Portfolio portfolio;
 
 	//bi-directional many-to-one association to WeekendDay
-    @ManyToOne
+	@ManyToOne
 	@JoinColumn(name="Weekend_days_id")
 	private WeekendDay weekendDays;
 
@@ -93,8 +111,8 @@ public class Project implements Serializable {
 	@OneToMany(mappedBy="project" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
 	private List<ProjectTask> projectTasks;
 
-    public Project() {
-    }
+	public Project() {
+	}
 
 	public int getProjectId() {
 		return this.projectId;
@@ -103,6 +121,47 @@ public class Project implements Serializable {
 	public void setProjectId(int projectId) {
 		this.projectId = projectId;
 	}
+
+	public BigDecimal getAdvancedPaymentPercentage() {
+		return this.advancedPaymentPercentage;
+	}
+
+	public void setAdvancedPaymentPercentage(BigDecimal advancedPaymentPercentage) {
+		this.advancedPaymentPercentage = advancedPaymentPercentage;
+	}
+	
+	public BigDecimal getAdvancedPaymentAmount() {
+		return advancedPaymentAmount;
+	}
+
+	public void setAdvancedPaymentAmount(BigDecimal advancedPaymentAmount) {
+		this.advancedPaymentAmount = advancedPaymentAmount;
+	}
+
+	public BigDecimal getDelayPenaltyAmount() {
+		return delayPenaltyAmount;
+	}
+
+	public void setDelayPenaltyAmount(BigDecimal delayPenaltyAmount) {
+		this.delayPenaltyAmount = delayPenaltyAmount;
+	}
+
+	public int getCollectPaymentPeriod() {
+		return collectPaymentPeriod;
+	}
+
+	public void setCollectPaymentPeriod(int collectPaymentPeriod) {
+		this.collectPaymentPeriod = collectPaymentPeriod;
+	}
+
+	public int getPaymentRequestPeriod() {
+		return paymentRequestPeriod;
+	}
+
+	public void setPaymentRequestPeriod(int paymentRequestPeriod) {
+		this.paymentRequestPeriod = paymentRequestPeriod;
+	}
+
 
 	public BigDecimal getInterestRate() {
 		return this.interestRate;
@@ -176,6 +235,14 @@ public class Project implements Serializable {
 		this.propusedStartDate = propusedStartDate;
 	}
 
+	public BigDecimal getRetainedPercentage() {
+		return this.retainedPercentage;
+	}
+
+	public void setRetainedPercentage(BigDecimal retainedPercentage) {
+		this.retainedPercentage = retainedPercentage;
+	}
+
 	public List<DaysOff> getDaysOffs() {
 		return this.daysOffs;
 	}
@@ -183,7 +250,21 @@ public class Project implements Serializable {
 	public void setDaysOffs(List<DaysOff> daysOffs) {
 		this.daysOffs = daysOffs;
 	}
-	
+
+	public DaysOff addDaysOff(DaysOff daysOff) {
+		getDaysOffs().add(daysOff);
+		daysOff.setProject(this);
+
+		return daysOff;
+	}
+
+	public DaysOff removeDaysOff(DaysOff daysOff) {
+		getDaysOffs().remove(daysOff);
+		daysOff.setProject(null);
+
+		return daysOff;
+	}
+
 	public Client getClient() {
 		return this.client;
 	}
@@ -191,7 +272,7 @@ public class Project implements Serializable {
 	public void setClient(Client client) {
 		this.client = client;
 	}
-	
+
 	public LocationInfo getCity() {
 		return this.city;
 	}
@@ -199,7 +280,7 @@ public class Project implements Serializable {
 	public void setCity(LocationInfo city) {
 		this.city = city;
 	}
-	
+
 	public LocationInfo getProvince() {
 		return this.province;
 	}
@@ -207,7 +288,7 @@ public class Project implements Serializable {
 	public void setProvince(LocationInfo province) {
 		this.province = province;
 	}
-	
+
 	public LocationInfo getCountry() {
 		return this.country;
 	}
@@ -215,7 +296,7 @@ public class Project implements Serializable {
 	public void setCountry(LocationInfo country) {
 		this.country = country;
 	}
-	
+
 	public Portfolio getPortfolio() {
 		return this.portfolio;
 	}
@@ -223,7 +304,7 @@ public class Project implements Serializable {
 	public void setPortfolio(Portfolio portfolio) {
 		this.portfolio = portfolio;
 	}
-	
+
 	public WeekendDay getWeekendDays() {
 		return this.weekendDays;
 	}
@@ -231,7 +312,7 @@ public class Project implements Serializable {
 	public void setWeekendDays(WeekendDay weekendDays) {
 		this.weekendDays = weekendDays;
 	}
-	
+
 	public List<ProjectPayment> getProjectPayments() {
 		return this.projectPayments;
 	}
@@ -239,7 +320,21 @@ public class Project implements Serializable {
 	public void setProjectPayments(List<ProjectPayment> projectPayments) {
 		this.projectPayments = projectPayments;
 	}
-	
+
+	public ProjectPayment addProjectPayment(ProjectPayment projectPayment) {
+		getProjectPayments().add(projectPayment);
+		projectPayment.setProject(this);
+
+		return projectPayment;
+	}
+
+	public ProjectPayment removeProjectPayment(ProjectPayment projectPayment) {
+		getProjectPayments().remove(projectPayment);
+		projectPayment.setProject(null);
+
+		return projectPayment;
+	}
+
 	public List<ProjectTask> getProjectTasks() {
 		return this.projectTasks;
 	}
