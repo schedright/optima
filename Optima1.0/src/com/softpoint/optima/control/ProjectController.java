@@ -371,10 +371,18 @@ public class ProjectController {
 			SimpleDateFormat format = new SimpleDateFormat("dd MMM, yyyy");
 			
 			TaskController taskController = new TaskController();
+			
+			HashMap<Integer, Boolean> flagToStop = new HashMap<Integer, Boolean>();
+			HashMap<Integer, Date> proposedLastDate = new HashMap<Integer, Date>();
+			
 			for(Project proj : project.getPortfolio().getProjects())
 			{
 				taskController.resetScheduling(session, proj.getProjectId());
+				flagToStop.put(proj.getProjectId(), false);
+				proposedLastDate.put(proj.getProjectId(), proj.getProposedFinishDate());
+				//getlastDayBeforeScheduling(proj)
 			}
+			
 			
 			
 			String finalSolution = "";
@@ -384,9 +392,11 @@ public class ProjectController {
 			Date lastDate = projectBoundaries[1];
 			ServerResponse solution;
 			
+			
 			boolean cannotCompleteSolution = false;
 			HashMap<Integer, Integer> stoppedProjects = new HashMap<Integer, Integer>();
 			HashMap<Integer, Integer> completedProjects = new HashMap<Integer, Integer>();
+			
 			
 			Hashtable<Integer, Double> totalRetainedAmount = new Hashtable();
 			
@@ -418,17 +428,23 @@ public class ProjectController {
 						{
 							finalSolution = finalSolution + "<div class='div-row-blue'>Project: " + solvedProject.getProjectCode() + "</div>";
 							
-							solution = getPeriodSolutionNew(session, currentProjectID, currentPeriod.getCurrent().getDateFrom(), currentPeriod.getCurrent().getDateTo(), currentPeriod.getNext().getDateTo(), solvedProjects, outputFormat, totalRetainedAmount, totalAdvancedPaymentAmount, solutionInformation);
+							solution = getPeriodSolutionNew(session, currentProjectID, currentPeriod.getCurrent().getDateFrom(), currentPeriod.getCurrent().getDateTo(), currentPeriod.getNext().getDateTo(), solvedProjects, outputFormat, totalRetainedAmount, totalAdvancedPaymentAmount, completedProjects, solutionInformation);
 
 							String solutionSummary ="";
 							
+							
 							String currentSolInfo = solutionInformation.get(currentProjectID);
+							
 							String[] currentSolInfoArray = currentSolInfo.split(",");
 							
 							solutionSummary = solutionSummary + "<div class='div-row-grayInfo'>";
 							double cashAvailableCurrent = new Double(currentSolInfoArray[0]);
 							double totalCostCurrent = new Double(currentSolInfoArray[1]);
 							double cashAvailableNext = new Double(currentSolInfoArray[2]);
+							
+							double payment = new Double(currentSolInfoArray[8]);
+							
+							
 							if(cashAvailableCurrent<totalCostCurrent)
 								solutionSummary = solutionSummary + "Initial: CashAvailableCurrent:" + "<font color='red'>" + currentSolInfoArray[0] + "</font>" + " TotalCostCurrent:" + "<font color='red'>" + currentSolInfoArray[1] + "</font>";
 							else
@@ -441,7 +457,11 @@ public class ProjectController {
 							
 							
 							List<SolvedTask> solvedTasks = (List<SolvedTask>) solution.getData();
-							if(solvedTasks!=null && solvedTasks.size()!=0 && atLeastOneTaskAtCurrentPeriod(solvedTasks,currentPeriod.getCurrent().getDateTo())){
+							
+							cashAvailableNext = new Double(currentSolInfoArray[6]);
+							
+							if((payment>0 || !flagToStop.get(currentProjectID)) && cashAvailableNext>0){
+								//solvedTasks!=null && solvedTasks.size()!=0 && atLeastOneTaskAtCurrentPeriod(solvedTasks,currentPeriod.getCurrent().getDateTo())){
 								
 								for (ProjectTask task : solvedProject.getProjectTasks()) {
 									for (SolvedTask solvedTask : solvedTasks) {
@@ -477,32 +497,87 @@ public class ProjectController {
 									if(stoppedProjects.size() == project.getPortfolio().getProjects().size()){
 										cannotCompleteSolution = true;
 									}
-									solutionSummary = solutionSummary + "<div class='div-row-gray'>" +  "Not Task to schedule in this period (Project stopped!)" +"</div>" ;
+									solutionSummary = solutionSummary + "<div class='div-row-gray'>" +  "Project stopped!" +"</div>" ;
 								}else
 									solutionSummary = solutionSummary + "<div class='div-row-gray'>" +  "Project didn't start yet!" +"</div>" ;
 							}
+							
+							
+							if(payment<=0){
+								if(flagToStop.get(currentProjectID)== null)
+									flagToStop.put(currentProjectID, true);
+								else
+									flagToStop.replace(currentProjectID, true);
+							}else{
+								if(flagToStop.get(currentProjectID)== null)
+									flagToStop.put(currentProjectID, false);
+								else
+									flagToStop.replace(currentProjectID, false);
+							}
+							
+							
 							if(getScheduledTasksCount(solvedProject,currentPeriod.getCurrent().getDateTo())==solvedProject.getProjectTasks().size() && completedProjects.get(currentProjectID) == null){
 								int paymentRequestPeriod = solvedProject.getPaymentRequestPeriod();
 								Calendar calendar = Calendar.getInstance();
-								Date nextToDate = currentPeriod.getNext().getDateTo();
+								Date nextToDate = currentPeriod.getCurrent().getDateTo();
 								calendar.setTime(nextToDate);
 								calendar.add(Calendar.DATE, paymentRequestPeriod);
-								
-								
 								Date lastPaymentDate = calendar.getTime();
 								
-								Map<Integer, ProjectPaymentDetail> paymentDetails = PaymentUtil.getPaymentDetailsNew(session, currentProjectID, currentPeriod.getNext().getDateTo(), lastPaymentDate);
-								ProjectPaymentDetail detail = paymentDetails.get(currentProjectID);
-								double lastPaymentValue = PaymentUtil.getExpectedPaymentNew(session, solvedProject,  detail.getPaymentStart(),  detail.getPaymentEnd(), lastPaymentDate,  detail.getExtra(), detail.getRetained(), detail.getRepayment(), projectBoundaries[1],false);
+								List<ProjectTask> completetedProjectTasks = solvedProject.getProjectTasks();
+								for(ProjectTask completetedTask: completetedProjectTasks)
+								{
+									if(completetedTask.getScheduledStartDate()!=null)
+										calendar.setTime(completetedTask.getScheduledStartDate());
+									else{
+										calendar.setTime(completetedTask.getCalendarStartDate());
+										System.out.println(completetedTask.getTaskName());
+									}
+									calendar.add(Calendar.DATE, completetedTask.getDuration());
+									Date completedTaskEndDate = calendar.getTime();
+									
+									if(completedTaskEndDate.getTime() > lastPaymentDate.getTime())
+										lastPaymentDate = completedTaskEndDate;
+								}
+								
+								
+								double lastPaymentValue = PaymentUtil.getExpectedPaymentNew(session, solvedProject,  currentPeriod.getCurrent().getDateFrom(),  currentPeriod.getCurrent().getDateTo(), lastPaymentDate,  0, solvedProject.getRetainedPercentage().doubleValue(), solvedProject.getAdvancedPaymentPercentage().doubleValue(), projectBoundaries[1], true);
 								//double lastPaymentValue = PaymentUtil.getPortfolioPaymentNew(session, currentPeriod.getNext().getDateTo(), lastPaymentDate, paymentDetails , solvedProject.getPortfolio() , false, projectBoundaries);
-								lastPaymentValue = lastPaymentValue + totalRetainedAmount.get(currentProjectID);
+								
+								double originalLastPayment = lastPaymentValue / (1.0-project.getRetainedPercentage().doubleValue()-project.getAdvancedPaymentPercentage().doubleValue());
+								double originalBeforeLastPayment = payment / (1.0-project.getRetainedPercentage().doubleValue()-project.getAdvancedPaymentPercentage().doubleValue());
+								if(totalRetainedAmount.get(projectId)==null){
+									totalRetainedAmount.put(projectId, (originalLastPayment+originalBeforeLastPayment) * project.getRetainedPercentage().doubleValue());
+								}else{
+									totalRetainedAmount.replace(projectId, totalRetainedAmount.get(projectId) + (originalLastPayment+originalBeforeLastPayment) * project.getRetainedPercentage().doubleValue());
+								}
+									
+								lastPaymentValue = lastPaymentValue + totalRetainedAmount.get(currentProjectID).doubleValue();
+								
+								double delayPenalty = 0;
+								Date lastDayAfterScheduling = getlastDayAfterScheduling(solvedProject);
+								long days = 0;
+								if(proposedLastDate.get(solvedProject.getProjectId())!=null)
+								{
+									days = (lastDayAfterScheduling.getTime() - proposedLastDate.get(solvedProject.getProjectId()).getTime()) / (1000 * 60 * 60 * 24);
+								}
+								if(days > 0)
+									delayPenalty = -1 * days * solvedProject.getDelayPenaltyAmount().doubleValue();
+								
+								lastPaymentValue = lastPaymentValue + delayPenalty;
 								
 								String lastPaymentDateString = format.format(lastPaymentDate);
-								String lastPaymentStartString = format.format(detail.getPaymentStart());
-								String lastPaymentToString = format.format(detail.getPaymentEnd());
+								String lastPaymentStartString = format.format( currentPeriod.getCurrent().getDateFrom());
+								String lastPaymentToString = format.format(currentPeriod.getCurrent().getDateTo());
 								
 								solutionSummary = solutionSummary + "<div class='div-row-orange'>" +  "Last Payment:" + lastPaymentValue + " At: " + lastPaymentDateString +"</div>" ;
-								solutionSummary = solutionSummary + "<div class='div-row-orange'>" +  "Last Payment = Payment (" + lastPaymentStartString + " - " + lastPaymentToString + ") " + (lastPaymentValue-totalRetainedAmount.get(currentProjectID).doubleValue()) + " + Retained amount: " + totalRetainedAmount.get(currentProjectID).floatValue() +"</div>" ;
+								solutionSummary = solutionSummary + "<div class='div-row-orange'>" +  "Last Payment = Payment (" + lastPaymentStartString + " - " + lastPaymentToString + ") " + (lastPaymentValue + delayPenalty - totalRetainedAmount.get(currentProjectID).doubleValue()) + " + Retained amount: " + totalRetainedAmount.get(currentProjectID).floatValue() + " + Delay Penalty: " + delayPenalty +"</div>" ;
+								
+								double balance = PaymentUtil.getPortfolioOpenBalanceNew(session, project.getPortfolio() , lastPaymentDate); //balance that is accumulated from the previous period
+ 								System.out.println(balance);
+								
+								solutionSummary = solutionSummary + "<div class='div-row-orange'>" +  "Profit:" + (lastPaymentValue + balance) +"</div>" ;
+								
 								completedProjects.put(currentProjectID, 1);
 								//set flag Done
 							}
@@ -516,9 +591,9 @@ public class ProjectController {
 							else
 								solutionSummary = solutionSummary + "Final: CashAvailableCurrent:" + "<font color='blue'>" + currentSolInfoArray[4] + "</font>" + " TotalCostCurrent:" + "<font color='blue'>" + currentSolInfoArray[5] + "</font>";
 							if(cashAvailableNext<0)
-								solutionSummary = solutionSummary + " CashAvailableNext:" + "<font color='red'>" + currentSolInfoArray[6] + "</font>";
+								solutionSummary = solutionSummary + " CashAvailableNext:" + "<font color='red'>" + currentSolInfoArray[6] + "</font>" + " Payment: " + payment;
 							else
-								solutionSummary = solutionSummary + " CashAvailableNext:" + "<font color='blue'>" + currentSolInfoArray[6] + "</font>";
+								solutionSummary = solutionSummary + " CashAvailableNext:" + "<font color='blue'>" + currentSolInfoArray[6] + "</font>" + " Payment: " + payment;
 							solutionSummary = solutionSummary + "</div>";
 							
 							finalSolution = finalSolution +  solutionSummary;
@@ -547,6 +622,52 @@ public class ProjectController {
 		
 	}
 	
+
+	private Date getlastDayBeforeScheduling(Project project) {
+		Date lastDay = new Date(0);
+		List<ProjectTask> tasks = project.getProjectTasks();
+		for(ProjectTask task: tasks)
+		{
+			Date taskEndDate = null;
+			if(task.getCalendarStartDate()!=null)
+				taskEndDate = task.getCalendarStartDate();
+			
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(taskEndDate);
+			calendar.add(Calendar.DATE, task.getDuration());
+			taskEndDate = calendar.getTime();
+			
+			if(lastDay.getTime() < taskEndDate.getTime())
+				lastDay = taskEndDate;
+				
+		}
+		return lastDay;
+	}
+
+
+	private Date getlastDayAfterScheduling(Project project) {
+		Date lastDay = new Date(0);
+		List<ProjectTask> tasks = project.getProjectTasks();
+		for(ProjectTask task: tasks)
+		{
+			Date taskEndDate;
+			if(task.getScheduledStartDate()!=null)
+				taskEndDate = task.getScheduledStartDate();
+			else
+				taskEndDate = task.getCalendarStartDate();
+			
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(taskEndDate);
+			calendar.add(Calendar.DATE, task.getDuration());
+			taskEndDate = calendar.getTime();
+			
+			if(lastDay.getTime() < taskEndDate.getTime())
+				lastDay = taskEndDate;
+				
+		}
+		return lastDay;
+	}
+
 
 	private boolean atLeastOneTaskAtCurrentPeriod(List<SolvedTask> solvedTasks, Date to) {
 		
@@ -710,13 +831,15 @@ public class ProjectController {
 		
 	}
 
-	public ServerResponse  getPeriodSolutionNew (HttpSession session , int projectId, Date from , Date to , Date next , String solvedProjects , String outputFormat, Hashtable<Integer, Double> totalRetainedAmount, Hashtable<Integer, Double> totalAdvancedPaymentAmount, Hashtable<Integer, String> solutionInformation) {
+	public ServerResponse  getPeriodSolutionNew (HttpSession session , int projectId, Date from , Date to , Date next , String solvedProjects , String outputFormat,
+			Hashtable<Integer, Double> totalRetainedAmount, Hashtable<Integer, Double> totalAdvancedPaymentAmount, HashMap<Integer, Integer> completedProjects, Hashtable<Integer, String> solutionInformation) {
 		Map<Integer, ProjectPaymentDetail> paymentDetails = PaymentUtil.getPaymentDetailsNew(session, projectId, from, to);
 		
 		EntityController<Project> projectController = new EntityController<>(session.getServletContext());
 		EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
 		EntityController<ProjectPayment> controller = new EntityController<ProjectPayment>(session.getServletContext());
 
+		double paymentCurrent = 0;
 		try {
 			
 			solutionLock.lock();
@@ -736,27 +859,15 @@ public class ProjectController {
 			solutionOutput.info("Project Name:" + project.getProjectCode() + " - " + project.getProjectName());
 			logger.info("######################################################################################");
 			logger.info("Generating solution");
-			double leftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController , project.getPortfolio() , from, to); //Overhead current + cost of any task starts before this period and still not finished 
+			double leftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController , project.getPortfolio() , from, to, completedProjects); //Overhead current + cost of any task starts before this period and still not finished 
 			double openBalance = PaymentUtil.getPortfolioOpenBalanceNew(session, project.getPortfolio() , from); //balance that is accumulated from the previous period
+			
 			
 			Date[] projectBoundaries = PaymentUtil.getPortofolioDateRanges(controller, project.getPortfolio().getPortfolioId());
 			
 			double payment = PaymentUtil.getPortfolioPaymentNew(session, from , to , paymentDetails , project.getPortfolio() , false, projectBoundaries);
 			
-			
-			double originalPayment = payment / (1.0-project.getRetainedPercentage().doubleValue()-project.getAdvancedPaymentPercentage().doubleValue());
-			
-			if(totalRetainedAmount.get(projectId)==null)
-				totalRetainedAmount.put(projectId, originalPayment * project.getRetainedPercentage().doubleValue());
-			else
-				totalRetainedAmount.replace(projectId, totalRetainedAmount.get(projectId)+originalPayment * project.getRetainedPercentage().doubleValue());
-			
-			if(totalAdvancedPaymentAmount.get(projectId)==null)
-				totalAdvancedPaymentAmount.put(projectId, originalPayment*project.getAdvancedPaymentPercentage().doubleValue());
-			else
-				totalAdvancedPaymentAmount.replace(projectId, totalAdvancedPaymentAmount.get(projectId) + originalPayment * project.getAdvancedPaymentAmount().doubleValue());
-			
-				
+			paymentCurrent = payment;
 			
 			double financeLimit = PaymentUtil.getFinanceLimit(session , project.getPortfolio().getPortfolioId() , from);
 			double extraPayment = PaymentUtil.getExtraPayment(session , project.getPortfolio().getPortfolioId() , from);
@@ -802,16 +913,19 @@ public class ProjectController {
 				
 				//Bug#4
 				double otherPojectsEligibleTasksCurrentPeroidCost =  PaymentUtil.getOtherProjectsCurrentPeriodCost(project, from , to);	
-				double otherPojectsEligibleTasksLeftOverCost =  PaymentUtil.getOtherProjectsLeftOverCostNew(session, project, from , to, projectBoundaries[1]);	
+				double otherPojectsEligibleTasksLeftOverCost =  PaymentUtil.getOtherProjectsLeftOverCostNew(session, project, from , to, projectBoundaries[1], completedProjects);	
 				//-------------
 				
 				//TODO Input Parameter should consider all tasks going through the current period
 				
 				List<ProjectTask> currentTaskSet = PaymentUtil.getCurrentTasks(project, from, to , true);
-				double eligibleTasksLeftOverCost = PaymentUtil.getEligiableTaskLeftOverCost(currentTaskSet, project, from, to);
+				
+				double eligibleTasksLeftOverCost = PaymentUtil.getEligiableTaskLeftOverCostNew(session, currentTaskSet, project, from, to, projectBoundaries[1]);
 
 				paymentDetails = PaymentUtil.getPaymentDetailsNew(session, projectId, to, next);
 				double expectedCashIn = PaymentUtil.getPortfolioPaymentNew(session, to , next, paymentDetails, project.getPortfolio() , false, projectBoundaries);
+				
+				paymentCurrent = expectedCashIn;
 				
 				double totalCostCurrent = eligibleTasksCurrentPeroidCost; // - eligiableTaskFinanceCost;
 				double leftOverNextCost = eligibleTasksLeftOverCost + otherPojectsEligibleTasksLeftOverCost; // - nextPeriodLeftoverFinanceCost;
@@ -881,9 +995,10 @@ public class ProjectController {
 							
 							paymentDetails = PaymentUtil.getPaymentDetailsNew(session, projectId, to, next);
 							double solutionExpectedCashIn = PaymentUtil.getPortfolioPaymentNew(session, to , next , paymentDetails, project.getPortfolio() , false, projectBoundaries); 
+							
 							double solutionTotalCostCurrent = solutionEligibleTasksCurrentPeroidCost;// - solutionEligiableTaskFinanceCost; 
 							
-							double solutionOtherPojectsEligibleTasksLeftOverCost =  PaymentUtil.getOtherProjectsLeftOverCostNew(session, project, from , to, projectBoundaries[1]);	
+							double solutionOtherPojectsEligibleTasksLeftOverCost =  PaymentUtil.getOtherProjectsLeftOverCostNew(session, project, from , to, projectBoundaries[1], completedProjects);	
 							
 							int projectLength = PaymentUtil.getProjectLength(project , outputFormat , solutionOutput);
 							solution.setCurrentPeriodCost(solutionTotalCostCurrent);
@@ -929,7 +1044,24 @@ public class ProjectController {
 				}
 				iteration++;
 			}
-			solutionInformation.put(projectId, initialInfo + "," + solInfo);
+			solutionInformation.put(projectId, initialInfo + "," + solInfo + "," + paymentCurrent);
+			
+			if(from.getTime() != project.getPropusedStartDate().getTime())
+			{
+				double originalPayment = payment / (1.0-project.getRetainedPercentage().doubleValue()-project.getAdvancedPaymentPercentage().doubleValue());
+				
+				if(totalRetainedAmount.get(projectId)==null)
+					totalRetainedAmount.put(projectId, originalPayment * project.getRetainedPercentage().doubleValue());
+				else
+					totalRetainedAmount.replace(projectId, totalRetainedAmount.get(projectId)+originalPayment * project.getRetainedPercentage().doubleValue());
+				
+				if(totalAdvancedPaymentAmount.get(projectId)==null)
+					totalAdvancedPaymentAmount.put(projectId, originalPayment*project.getAdvancedPaymentPercentage().doubleValue());
+				else
+					totalAdvancedPaymentAmount.replace(projectId, totalAdvancedPaymentAmount.get(projectId) + originalPayment * project.getAdvancedPaymentAmount().doubleValue());
+				
+			}
+
 			
 			List<SolvedTask> solvedTasks = new ArrayList<>();
 			for (ProjectTask task : eligibleTasks) {
@@ -984,7 +1116,7 @@ public class ProjectController {
 			solutionOutput.info("Project Name:" + project.getProjectCode() + " - " + project.getProjectName());
 			logger.info("######################################################################################");
 			logger.info("Generating solution");
-			double leftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController , project.getPortfolio() , from, to);
+			double leftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController , project.getPortfolio() , from, to, null);
 			double openBalance = PaymentUtil.getPortfolioOpenBalance(session, project.getPortfolio() , from);
 			double payment = PaymentUtil.getPortfolioPayment(from , to , paymentDetails , project.getPortfolio() , true);
 			

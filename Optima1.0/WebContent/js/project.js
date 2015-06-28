@@ -651,7 +651,7 @@ $(function() {
 	    if (pData.propusedStartDate != null) {
 		$("#pStartDateTxt").val(fmt2.format(new Date(pData.propusedStartDate.time)));
 	    }
-	    if (pData.pFinishDateTxt != null) {
+	    if (pData.proposedFinishDate != null) {
 		$("#pFinishDateTxt").val(new Date(fmt2.format(pData.proposedFinishDate.time)));
 	    }
 	    if (pData.weekendDays != null) {

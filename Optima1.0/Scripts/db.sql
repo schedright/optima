@@ -191,8 +191,8 @@ payment_type_id INT,
 payment_amount numeric(19,3),
 payment_date date, 
 payment_interim_number varchar(64)
-
 );
+
 create index project_payment_date_idx on project_payment(payment_date);
 
 ALTER TABLE project_payment ADD 

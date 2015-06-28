@@ -1,4 +1,4 @@
-use Optima;
+use optima;
 
 alter table project change daily_interest_rate interest_rate numeric(9,3);
 

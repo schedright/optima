@@ -90,7 +90,7 @@ public class PaymentUtil {
 	}
 
 	
-	public static double getPortfolioLeftOverCost(EntityController<Portfolio> controller , Portfolio portfolio , Date from , Date to) {
+	public static double getPortfolioLeftOverCost(EntityController<Portfolio> controller , Portfolio portfolio , Date from , Date to, HashMap<Integer, Integer> completedProjects) {
 		List<Project> projects = portfolio.getProjects();
 		double portfolioLeftOvers = 0;
 		for (Project project : projects) {
@@ -102,7 +102,10 @@ public class PaymentUtil {
 				Date projectStartDate = projectDates[0];
 				
 				if (projectStartDate != null && projectStartDate.getTime() < to.getTime() && projectEndDate.getTime() >= from.getTime()) {
-					portfolioLeftOvers += getLeftOverCost( project, from, to,projectStartDate, projectEndDate );
+					if(completedProjects!=null && completedProjects.get(project.getProjectId())!=null)
+						portfolioLeftOvers += getLeftOverCost( project, from, to,projectStartDate, projectEndDate,  true);
+					else
+						portfolioLeftOvers += getLeftOverCost( project, from, to,projectStartDate, projectEndDate,  false);
 				}
 			} catch (EntityControllerException e) {
 				e.printStackTrace();
@@ -110,12 +113,16 @@ public class PaymentUtil {
 		}
 		return portfolioLeftOvers;
 	}
-	public static double getLeftOverCost(Project project , Date from , Date to , Date projectStartDate , Date projectEndDate) {
+	
+	public static double getLeftOverCost(Project project , Date from , Date to , Date projectStartDate , Date projectEndDate, boolean projectCompleted) {
 		List<ProjectTask> tasks = project.getProjectTasks();
 		int numberOfDays = 0;
 		
 		numberOfDays = PaymentUtil.daysBetween(PaymentUtil.maxDate(from, projectStartDate) , PaymentUtil.minDate(to, projectEndDate));
 		double taskCostCounter = 0;
+		
+		int diffInDays = 0;
+		long maxEndTime = 0;
 		for (ProjectTask currentTask : tasks) {
 			
 			Date taskDate = PaymentUtil.getTaskDate(currentTask);
@@ -124,7 +131,6 @@ public class PaymentUtil {
 			calendar.add(Calendar.DATE, currentTask.getCalenderDuration());
 			Date taskEndDate = calendar.getTime();
 			
-				
 			if (taskDate.before(from) && taskEndDate.after(from)){
 				
 				int taskDaysAfterPeriodStart = PaymentUtil.daysBetween(PaymentUtil.maxDate(from, projectStartDate), taskEndDate);
@@ -136,7 +142,11 @@ public class PaymentUtil {
 				Calendar endEffectiveDate = Calendar.getInstance();
 				endEffectiveDate.setTime(from);
 				endEffectiveDate.add(Calendar.DATE, effictiveNumberOfDays);
-				// task cost 
+				// task cost
+				
+				if(endEffectiveDate.getTime().getTime() > maxEndTime)
+					maxEndTime = endEffectiveDate.getTime().getTime();
+					
 				int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(currentTask, from, endEffectiveDate.getTime()); 
 				
 				effictiveNumberOfDays -= noOfWeekendDaysAndDaysOf;
@@ -147,8 +157,15 @@ public class PaymentUtil {
 			}
 			
 		}
-		
+		if(projectCompleted){
+			if(from.getTime() < maxEndTime){
+				diffInDays = (int) (maxEndTime - from.getTime()) / (1000 * 60 * 60 * 24);
+				numberOfDays = diffInDays;
+			}
+		}
+			
 		double overhead =  project.getOverheadPerDay().doubleValue() * numberOfDays;
+		System.out.println(project.getProjectId() + "-" + numberOfDays);
 		double cashout = taskCostCounter +  overhead;
 		return cashout;
 		
@@ -1083,12 +1100,14 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	}
 	
 
-	public static double getOtherProjectsLeftOverCostNew(HttpSession session, Project project, Date start, Date end, Date projectExpectedEndDate) throws EntityControllerException {
+	public static double getOtherProjectsLeftOverCostNew(HttpSession session, Project project, Date start, Date end, Date projectExpectedEndDate, HashMap<Integer, Integer> completedProjects) throws EntityControllerException {
 		double costAccumulator = 0;
+		int maxEffictiveNumberOfDays = 0;
 		Portfolio portfolio = project.getPortfolio();
 		List<Project> projects = portfolio.getProjects();
 		for (Project currentProject : projects) {
 			if (currentProject.getProjectId() != project.getProjectId()) {
+				Integer projId = completedProjects.get(currentProject.getProjectId());
 				for (ProjectPayment payment: currentProject.getProjectPayments()) {
 					if (payment.getPaymentDate().equals(end)) {
 						List<ProjectTask> eligibleTasks = PaymentUtil.getEligibleTasks(currentProject, start, end , false);
@@ -1101,12 +1120,20 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 							Date taskEndDate = calendar.getTime();
 							if (taskEndDate.getTime() >= end.getTime()) {
 								int effictiveNumberOfDays = PaymentUtil.daysBetween(end, taskEndDate);
+								if(maxEffictiveNumberOfDays < effictiveNumberOfDays)
+									maxEffictiveNumberOfDays = effictiveNumberOfDays;
 								int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(task, end, taskEndDate); // What if taskEndDate > to?
 								effictiveNumberOfDays -= noOfWeekendDaysAndDaysOf;
 								costAccumulator += effictiveNumberOfDays * task.getUniformDailyCost().doubleValue();
 							}
 						}
-						int overheadDays = PaymentUtil.daysBetween(end, PaymentUtil.getNextEventNew(session, project , end, projectExpectedEndDate));
+						int overheadDays = 0;
+						
+						if(projId !=null)
+						{
+							overheadDays = maxEffictiveNumberOfDays; 
+						}else
+							overheadDays = PaymentUtil.daysBetween(end, PaymentUtil.getNextEventNew(session, project , end, projectExpectedEndDate));
 						costAccumulator += overheadDays * project.getOverheadPerDay().doubleValue();
 						break;
 					}		
@@ -1139,6 +1166,8 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 								costAccumulator += effictiveNumberOfDays * task.getUniformDailyCost().doubleValue();
 							}
 						}
+						
+						
 						int overheadDays = PaymentUtil.daysBetween(end, PaymentUtil.getNextEvent(project , end));
 						costAccumulator += overheadDays * project.getOverheadPerDay().doubleValue();
 						break;
@@ -1152,9 +1181,10 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	
 	
 	
-	public static double getEligiableTaskLeftOverCostNew(HttpSession session, List<ProjectTask> eligibleTasks ,Project project, Date start, Date end, Date projectExpectedEndDate) throws EntityControllerException {
+	public static double getEligiableTaskLeftOverCostNew(HttpSession session, List<ProjectTask> eligibleTasks ,Project project, Date start, Date end,  Date projectExpectedEndDate) throws EntityControllerException {
 		double costAccumulator = 0;
 		Calendar calendar = Calendar.getInstance();
+		Date nextEventDate = PaymentUtil.getNextEventNew(session, project , end, projectExpectedEndDate);
 		for (ProjectTask task : eligibleTasks) {
 			Date taskDate = task.getCalendarStartDate();
 			int taskLength = task.getCalenderDuration();
@@ -1162,13 +1192,16 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 			calendar.add(Calendar.DATE, taskLength);
 			Date taskEndDate = calendar.getTime();
 			if (taskEndDate.getTime() >= end.getTime()) {
-				int effictiveNumberOfDays = PaymentUtil.daysBetween(end, taskEndDate);
-				int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(task, end, taskEndDate); // What if taskEndDate > to?
+				Date endOfEffectiveDays = taskEndDate;
+				if(nextEventDate.before(taskEndDate))
+					 endOfEffectiveDays = nextEventDate;
+				int effictiveNumberOfDays = PaymentUtil.daysBetween(end, endOfEffectiveDays);
+				int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(task, end, endOfEffectiveDays); // What if taskEndDate > to?
 				effictiveNumberOfDays -= noOfWeekendDaysAndDaysOf;
 				costAccumulator += effictiveNumberOfDays * task.getUniformDailyCost().doubleValue();
 			}
 		}
-		int overheadDays = PaymentUtil.daysBetween(end, PaymentUtil.getNextEventNew(session, project , end, projectExpectedEndDate));
+		int overheadDays = PaymentUtil.daysBetween(end, nextEventDate);
 		costAccumulator += overheadDays * project.getOverheadPerDay().doubleValue();
 		return costAccumulator;
 	}
@@ -1176,6 +1209,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	public static double getEligiableTaskLeftOverCost( List<ProjectTask> eligibleTasks ,Project project, Date start, Date end) {
 		double costAccumulator = 0;
 		Calendar calendar = Calendar.getInstance();
+		Date nextEventDate = PaymentUtil.getNextEvent(project , end);
 		for (ProjectTask task : eligibleTasks) {
 			Date taskDate = task.getCalendarStartDate();
 			int taskLength = task.getCalenderDuration();
@@ -1183,13 +1217,16 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 			calendar.add(Calendar.DATE, taskLength);
 			Date taskEndDate = calendar.getTime();
 			if (taskEndDate.getTime() >= end.getTime()) {
-				int effictiveNumberOfDays = PaymentUtil.daysBetween(end, taskEndDate);
-				int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(task, end, taskEndDate); // What if taskEndDate > to?
+				Date endOfEffectiveDays = taskEndDate;
+				if(nextEventDate.before(taskEndDate))
+					 endOfEffectiveDays = nextEventDate;
+				int effictiveNumberOfDays = PaymentUtil.daysBetween(end, endOfEffectiveDays);
+				int noOfWeekendDaysAndDaysOf = PaymentUtil.getNoOfWeekEndDaysAndDaysOff(task, end, endOfEffectiveDays); // What if taskEndDate > to?
 				effictiveNumberOfDays -= noOfWeekendDaysAndDaysOf;
 				costAccumulator += effictiveNumberOfDays * task.getUniformDailyCost().doubleValue();
 			}
 		}
-		int overheadDays = PaymentUtil.daysBetween(end, PaymentUtil.getNextEvent(project , end));
+		int overheadDays = PaymentUtil.daysBetween(end, nextEventDate);
 		costAccumulator += overheadDays * project.getOverheadPerDay().doubleValue();
 		return costAccumulator;
 	}
@@ -1775,15 +1812,16 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		double totalTasksPayment = 0;
 		if(paymentStart != null && paymentEnd != null)
 			totalTasksPayment = getExpectedPaymentNoAdjustments(project,paymentStart, paymentEnd);
+		double totalTasksPaymentAfterReduction = totalTasksPayment;
 		if(applyRetainedAmount)
 		{
-			totalTasksPayment -= (totalTasksPayment * retainagePercentage);
-			totalTasksPayment += extraPayments;
-			totalTasksPayment -= advancedPaymentDeduction;
+			totalTasksPaymentAfterReduction  = totalTasksPayment - (totalTasksPayment * retainagePercentage);
+			totalTasksPaymentAfterReduction += extraPayments;
+			totalTasksPaymentAfterReduction -= totalTasksPayment * advancedPaymentDeduction;
 			
 		}
 		
-		return totalTasksPayment;
+		return totalTasksPaymentAfterReduction;
 
 		}
 
@@ -2213,7 +2251,8 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 			paymentDetail.setProjectId(projectId);
 			paymentDetail.setRetained(project.getRetainedPercentage().doubleValue());
 			paymentDetail.setProject(project.getProjectCode());
-			paymentDetail.setRepayment(project.getAdvancedPaymentPercentage().doubleValue() * project.getAdvancedPaymentAmount().doubleValue());
+			//paymentDetail.setRepayment(project.getAdvancedPaymentPercentage().doubleValue() * project.getAdvancedPaymentAmount().doubleValue());
+			paymentDetail.setRepayment(project.getAdvancedPaymentPercentage().doubleValue());
 			
 			
 			paymentDetails.put(paymentDetail.getProjectId(), paymentDetail);

@@ -388,15 +388,14 @@ public class TaskController {
 			if (resetFirst) {
 				Project project = controller.find(Project.class, projectId);
 				taskController.dml(ProjectTask.class, "Update ProjectTask t set t.calendarStartDate = null , t.scheduledStartDate = null where t.project = ?1", project);
-				
 			}
+			
 			// We need to reread the project here in all cases.
 			Project project = controller.find(Project.class, projectId);
 			List<ProjectTask> rootTasks = getRootTasks(project, taskController);
 			for (ProjectTask task : rootTasks) {
 				processTask(task, project, taskController);
 			}
-
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
 		} finally {
@@ -408,6 +407,7 @@ public class TaskController {
 
 	protected void processTask(ProjectTask task, Project project, EntityController<ProjectTask> controller) throws EntityControllerException {
 		// Bug#1 Shifting is not working correctly when changing weekends! -- BassemVic
+		System.out.println(task.getTaskId());
 		task = controller.find(ProjectTask.class, task.getTaskId());
 		calculateCalederDuration(project, task);
 		for (TaskDependency dependency : task.getAsDependency()) {
@@ -460,7 +460,7 @@ public class TaskController {
 	 * @param project
 	 * @return
 	 */
-	private List<ProjectTask> getRootTasks(Project project, EntityController<ProjectTask> controller) throws EntityControllerException {
+	public List<ProjectTask> getRootTasks(Project project, EntityController<ProjectTask> controller) throws EntityControllerException {
 		ArrayList<ProjectTask> rootTasks = new ArrayList<ProjectTask>();
 		for (ProjectTask task : project.getProjectTasks()) {
 			if (task.getAsDependent() == null || task.getAsDependent().isEmpty()) {

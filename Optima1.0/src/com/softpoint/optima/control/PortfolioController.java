@@ -1399,7 +1399,7 @@ public class PortfolioController {
 		EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
 			try {
 				Portfolio protfolio = portController.find(Portfolio.class, portfolioId);
-				double totalPortfolioLeftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController , protfolio, from, to);
+				double totalPortfolioLeftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController , protfolio, from, to, null);
 				return new ServerResponse("0", "Success", totalPortfolioLeftOverCost);
 				
 			} catch (Exception e) {
