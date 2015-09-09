@@ -253,12 +253,15 @@
             // **Render the grid**
             render: function (element) {
                 var content = $('<div class="fn-content"/>');
+                var subContent = $('<div class="scoll-container"/>');
+                content.append(subContent);
                 var $leftPanel = core.leftPanel(element);
-                content.append($leftPanel);
+                subContent.append($leftPanel);
                 var $rightPanel = core.rightPanel(element, $leftPanel);
                 var mLeft, hPos;
-
-                content.append($rightPanel);
+                
+                subContent.append($rightPanel);
+//                subContent.floatingScrollbar();
                 content.append(core.navigation(element));
 
                 var $dataPanel = $rightPanel.find(".dataPanel");

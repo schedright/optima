@@ -1,4 +1,4 @@
- var rpcClient = new JSONRpcClient("http://localhost:8080/Optima1.0/JSON-RPC");
+ var rpcClient = new JSONRpcClient("./JSON-RPC");
     function checkLength( o, n, min, max ) {
       if ( o.val().length > max || o.val().length < min ) {
         o.addClass( "ui-state-error" );

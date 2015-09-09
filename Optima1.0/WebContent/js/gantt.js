@@ -80,7 +80,7 @@ $("#tasksGantt").gantt({
 
 	waitText : "Please wait...",
 
-	itemsPerPage : 16,
+	itemsPerPage : 1000,
 
 	scrollToToday : true,
 

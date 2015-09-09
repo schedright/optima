@@ -6,109 +6,108 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-
 /**
  * The persistent class for the project database table.
  * 
  */
 @Entity
-@Table(name="project")
-@NamedQuery(name="Project.findAll", query="SELECT p FROM Project p")
+@Table(name = "project")
+@NamedQuery(name = "Project.findAll", query = "SELECT p FROM Project p")
 public class Project implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="project_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "project_id")
 	private int projectId;
 
-	@Column(name="advanced_payment_percentage")
+	@Column(name = "advanced_payment_percentage")
 	private BigDecimal advancedPaymentPercentage;
-	
-	@Column(name="advanced_payment_amount")
+
+	@Column(name = "advanced_payment_amount")
 	private BigDecimal advancedPaymentAmount;
-	
-	@Column(name="delay_penalty_amount")
+
+	@Column(name = "delay_penalty_amount")
 	private BigDecimal delayPenaltyAmount;
-	
-	@Column(name="collect_payment_period")
+
+	@Column(name = "collect_payment_period")
 	private int collectPaymentPeriod;
-	
-	@Column(name="payment_request_period")
+
+	@Column(name = "payment_request_period")
 	private int paymentRequestPeriod;
 
-	@Column(name="interest_rate")
+	@Column(name = "interest_rate")
 	private BigDecimal interestRate;
 
-	@Column(name="overhead_per_day")
+	@Column(name = "overhead_per_day")
 	private BigDecimal overheadPerDay;
 
-	@Column(name="project_address_postal_code")
+	@Column(name = "project_address_postal_code")
 	private String projectAddressPostalCode;
 
-	@Column(name="project_address_street")
+	@Column(name = "project_address_street")
 	private String projectAddressStreet;
 
-	@Column(name="project_code")
+	@Column(name = "project_code")
 	private String projectCode;
 
-	@Column(name="project_description")
+	@Column(name = "project_description")
 	private String projectDescription;
 
-	@Column(name="project_name")
+	@Column(name = "project_name")
 	private String projectName;
 
 	@Temporal(TemporalType.DATE)
-	@Column(name="proposed_finish_date")
+	@Column(name = "proposed_finish_date")
 	private Date proposedFinishDate;
 
 	@Temporal(TemporalType.DATE)
-	@Column(name="propused_start_date")
+	@Column(name = "propused_start_date")
 	private Date propusedStartDate;
 
-	@Column(name="retained_percentage")
+	@Column(name = "retained_percentage")
 	private BigDecimal retainedPercentage;
 
-	//bi-directional many-to-one association to DaysOff
-	@OneToMany(mappedBy="project" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	// bi-directional many-to-one association to DaysOff
+	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
 	private List<DaysOff> daysOffs;
 
-	//bi-directional many-to-one association to Client
+	// bi-directional many-to-one association to Client
 	@ManyToOne
-	@JoinColumn(name="client_id")
+	@JoinColumn(name = "client_id")
 	private Client client;
 
-	//bi-directional many-to-one association to LocationInfo
+	// bi-directional many-to-one association to LocationInfo
 	@ManyToOne
-	@JoinColumn(name="project_address_city")
+	@JoinColumn(name = "project_address_city")
 	private LocationInfo city;
 
-	//bi-directional many-to-one association to LocationInfo
+	// bi-directional many-to-one association to LocationInfo
 	@ManyToOne
-	@JoinColumn(name="project_address_province")
+	@JoinColumn(name = "project_address_province")
 	private LocationInfo province;
 
-	//bi-directional many-to-one association to LocationInfo
+	// bi-directional many-to-one association to LocationInfo
 	@ManyToOne
-	@JoinColumn(name="project_address_country")
+	@JoinColumn(name = "project_address_country")
 	private LocationInfo country;
 
-	//bi-directional many-to-one association to Portfolio
+	// bi-directional many-to-one association to Portfolio
 	@ManyToOne
-	@JoinColumn(name="portfolio_id")
+	@JoinColumn(name = "portfolio_id")
 	private Portfolio portfolio;
 
-	//bi-directional many-to-one association to WeekendDay
+	// bi-directional many-to-one association to WeekendDay
 	@ManyToOne
-	@JoinColumn(name="Weekend_days_id")
+	@JoinColumn(name = "Weekend_days_id")
 	private WeekendDay weekendDays;
 
-	//bi-directional many-to-one association to ProjectPayment
-	@OneToMany(mappedBy="project" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	// bi-directional many-to-one association to ProjectPayment
+	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
 	private List<ProjectPayment> projectPayments;
 
-	//bi-directional many-to-one association to ProjectTask
-	@OneToMany(mappedBy="project" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	// bi-directional many-to-one association to ProjectTask
+	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
 	private List<ProjectTask> projectTasks;
 
 	public Project() {
@@ -129,7 +128,7 @@ public class Project implements Serializable {
 	public void setAdvancedPaymentPercentage(BigDecimal advancedPaymentPercentage) {
 		this.advancedPaymentPercentage = advancedPaymentPercentage;
 	}
-	
+
 	public BigDecimal getAdvancedPaymentAmount() {
 		return advancedPaymentAmount;
 	}
@@ -161,7 +160,6 @@ public class Project implements Serializable {
 	public void setPaymentRequestPeriod(int paymentRequestPeriod) {
 		this.paymentRequestPeriod = paymentRequestPeriod;
 	}
-
 
 	public BigDecimal getInterestRate() {
 		return this.interestRate;
@@ -342,5 +340,5 @@ public class Project implements Serializable {
 	public void setProjectTasks(List<ProjectTask> projectTasks) {
 		this.projectTasks = projectTasks;
 	}
-	
+
 }
