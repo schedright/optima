@@ -82,7 +82,6 @@ public class OptimaLogFactory {
 			}
 		}
 
-		
 		public Logger getProjectOutput(String projectCode) {
 			FileAppender fileAppender = null;
 			
@@ -111,5 +110,31 @@ public class OptimaLogFactory {
 				return null;
 			}
 		}
-	
+
+		public Logger getProjectCSVOutput(String fileName) {
+			FileAppender fileAppender = null;
+			
+			try {
+				fileAppender = new FileAppender(outputLayout, context.getRealPath( "/logs" + File.separator + fileName + ".csv"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			if (fileAppender != null)
+			{
+				
+				
+				Logger outputLogger = Logger.getLogger(fileName+"cvs");
+				outputLogger.addAppender(fileAppender);
+				
+				
+				return outputLogger;
+
+			}
+			else
+			{
+				return null;
+			}
+		}
+		
 }

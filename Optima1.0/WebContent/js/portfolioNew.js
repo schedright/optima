@@ -275,15 +275,16 @@ $(document).ready( function() {
 				
 				if (result2.result == 0) {
 					 var projects = result2.data;
-					 if (projects != null && projects.list.length != 0 ) {
+					 if (projects != null) {
 						 projectsHtml += " <div class=\"prods-cnt\">";
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "list\" class=\"listPortfolioBtn\"></div>";
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "grid\" class=\"gridPortfolioBtn\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "list\" class=\"listPortfolioBtn\" title=\"List View\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "grid\" class=\"gridPortfolioBtn\" title=\"Grid View\"></div>";
 						 
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "delete\" class=\"deletePortfolioBtn\"></div>";
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "edit\" class=\"editPortfolioBtn\"></div>";
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "add\" class=\"addPortfolioBtn\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "delete\" class=\"deletePortfolioBtn\" title=\"Delete Portfolio\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "edit\" class=\"editPortfolioBtn\" title=\"Edit Portfolio\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "add\" class=\"addPortfolioBtn\" title=\"Add Project\"></div>";
 						 projectsHtml += "<div class=\"clear\"></div>";
+						 if (projects.list.length != 0 ) {
 						for (var j = 0; j < projects.list.length; j++) {
 							var contents = projects.list[j].projectName + "[" + projects.list[j].projectDescription + "]" ;
 							projectsHtml += " <div class=\"prod-box shadow\"> "
@@ -294,7 +295,7 @@ $(document).ready( function() {
 							+ "<div class=\"projectDescCls\">" + contents + "</div>"
 							+ "</div>";
 						} 	
-						
+						 }
 						projectsHtml += "</div>";
 					}	
 				} 
@@ -343,9 +344,9 @@ $(document).ready( function() {
 						    			+ " <form>"
 						    			+ " <fieldset>"
 						    			+ " <label for=\"portName\">Name</label>"
-						    			+ " <input type=\"text\" name=\"ePortName\" id=\"ePortName\" class=\"text ui-widget-content ui-corner-all\" />"
+						    			+ " <input type=\"text\" name=\"ePortName\" id=\"ePortName\" class=\"text ui-widget-content ui-corner-all\"  placeholder=\"Enter Portfolio Name, from 3 to 32 characters\" />"
 						    			+ " <label for=\"portDescription\">Description</label>"
-						    			+ " <input type=\"text\" name=\"ePortDescription\" id=\"ePortDescription\" value=\"\" class=\"text ui-widget-content ui-corner-all\" />"
+						    			+ " <input type=\"text\" name=\"ePortDescription\" id=\"ePortDescription\" value=\"\" class=\"text ui-widget-content ui-corner-all\" placeholder=\"Enter Description, from 1 to 1024 characters\"/>"
 						    			+ " </fieldset>"
 						    			+ " </form>"
 						    			+ " </div>");
@@ -530,8 +531,9 @@ $(document).ready( function() {
 			                    $.cookie('saved_index_pf', null);
 			                    $.cookie('saved_index_pf', $("#accordion")
 			                            .accordion("option", "active"));
+			                    location.reload(false);
 			                },
-			                active: parseInt($.cookie('saved_index_pf')),
+			                active: isNaN(parseInt($.cookie('saved_index_pf')))?0:parseInt($.cookie('saved_index_pf')),
 				      heightStyle: "content"
 			    });
 			}

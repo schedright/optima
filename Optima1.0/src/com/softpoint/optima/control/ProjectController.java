@@ -856,6 +856,9 @@ public class ProjectController {
 			OptimaLogFactory factory = (OptimaLogFactory)session.getServletContext().getAttribute(JsonRpcInitializer.__LOG__FACTORY);
 			Logger logger = factory.getProjectLogger(project.getProjectCode());
 			Logger solutionOutput = factory.getProjectOutput(project.getProjectCode());
+			Logger csvLogger = factory.getProjectCSVOutput(solutionOutput.getName());
+			csvLogger.info("All Trials for project '" + project.getProjectCode() + " - " + project.getProjectName());
+			
 			solutionOutput.info("Project Name:" + project.getProjectCode() + " - " + project.getProjectName());
 			logger.info("######################################################################################");
 			logger.info("Generating solution");
@@ -935,6 +938,12 @@ public class ProjectController {
 				logger.info(String.format("Expected Cash: %f" ,  expectedCashIn ));
 				logger.info(String.format("Current eligible tasks cost (leftover next period): %f" ,  eligibleTasksLeftOverCost ));
 				logger.info(String.format("Current eligible tasks leftover total cost (leftover next period): %f" ,  leftOverNextCost ));
+				
+				writeTrialToCSVFile(csvLogger,iteration, cashAvailable , currentEligibleSet, 
+						PaymentUtil.getProjectLength(project , outputFormat , solutionOutput) , totalCostCurrent,
+						cashAvailableNextPeriod - totalCostCurrent + expectedCashIn - leftOverNextCost, 
+						totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent + expectedCashIn >= leftOverNextCost?"Yes":"No",
+								cashAvailable - totalCostCurrent < 0 ? 0: cashAvailable - totalCostCurrent);
 				
 				solutionOutput.info(String.format("Selected: Iteration [%d] R[Current]:[%.2f] Activities:[%s] Start [%s] Project Duration: [%d] C[Current]: [%f] R[Next]:[%f] Feasible: %s Raimining cash:[%f]%n" ,
 						iteration, cashAvailable , PaymentUtil.getEligibaleTaskNameList(currentEligibleSet), PaymentUtil.getTaskListStart(currentEligibleSet) , 
@@ -1086,7 +1095,67 @@ public class ProjectController {
 		
 	}
 
-	
+    public static Date addDays(Date date, int days)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days); //minus number would decrement the days
+        return cal.getTime();
+    }
+    public static long differenceInDays(Date start, Date end) {
+    	Calendar calendar1 = Calendar.getInstance();
+        Calendar calendar2 = Calendar.getInstance();
+        calendar1.setTime(start);
+        calendar2.setTime(end);
+        long milliseconds1 = calendar1.getTimeInMillis();
+        long milliseconds2 = calendar2.getTimeInMillis();
+        long diff = milliseconds2 - milliseconds1;
+        long diffDays = diff / (24 * 60 * 60 * 1000);
+        return diffDays;
+    }
+
+	private void writeTrialToCSVFile(Logger csvLogger, int iteration, double cashAvailable,
+			List<ProjectTask> currentEligibleSet, int projectLength, double totalCostCurrent, double d, String string,
+			double e) {
+		if (true) {
+			return;
+		}
+		csvLogger.info("Iteration " + iteration);
+		
+		Date start = null;
+		Date end = null;
+		for (ProjectTask task : currentEligibleSet) {
+			Date taskStart = task.getCalendarStartDate();
+			Date taskEnd = addDays(task.getCalendarStartDate(),task.getCalenderDuration());
+			if (start==null) {
+				start = taskStart;
+			}
+			if (end==null) {
+				end = taskEnd;
+			}
+			
+			if (taskStart.before(start)) {
+				start = taskStart;
+			}
+			if (taskEnd.after(end)) {
+				end = taskEnd;
+			}
+		}
+		long daysCount = differenceInDays(start, end) + 1;
+		
+		//write header
+		String header = ",";
+		Date index = start;
+		while (differenceInDays(index, end)>0) {
+			header = header + new SimpleDateFormat("dd/MM").format(index) + ",";
+			index = addDays(index, 1);
+		}
+		
+		csvLogger.info(header);
+		
+	}
+
+
 	private boolean isPaymentAtThisPeriod(HttpSession session, Date from, Date to, Project project, EntityController<ProjectPayment> controller, Date[] projectBoundaries) {
 		try {
 			List<ProjectPayment> projectPayments = PaymentUtil.getProjectPayments(session, project, projectBoundaries[1]);

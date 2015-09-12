@@ -150,7 +150,7 @@ $(function() {
 	    formatter : formatter
 	}, {
 	    id : "projectName",
-	    name : "Project Name",
+	    name : "Project Name" ,
 	    field : "projectName",
 	    tag : "projectName",
 	    minWidth : 180

@@ -27,7 +27,18 @@ $(document).ready( function() {
 				var cashflowList ="<ul>";
 				var exportList ="<ul>";
 				
+				var portfolioIndex = 0;
+				var savedPortfolioIndex = $.cookie('saved_index_pf');
+				if (savedPortfolioIndex) {
+					try {
+						portfolioIndex = parseInt(savedPortfolioIndex);
+					} catch (e) {
+					}
+				}
 				for (var i = 0; i< data.list.length; i++) {
+					if (i != portfolioIndex) {
+						continue;
+					}
 					financingList += liFirstRow + "<a href=\"finDataNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					schedulingList += liFirstRow + "<a href=\"scheduleNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					cashflowList += liFirstRow + "<a href=\"cashFlowNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
@@ -39,15 +50,14 @@ $(document).ready( function() {
 						 var projects = result2.data;
 						 if (projects != null && projects.list.length != 0 ) {
 							for (var j = 0; j < projects.list.length; j++) {
-								projectsList += liFirstRowProjects + "<a href=\"projectDetailsNew.jsp?projectId=" +  projects.list[j].projectId + "\">" + data.list[i].portfolioName + " - " +projects.list[j].projectName + "</a></li>";
-								exportList += liFirstRowProjects + "<a href=\"projectDetailsNew.jsp?projectId=" +  projects.list[j].projectId + "\">" + data.list[i].portfolioName + " - " +projects.list[j].projectName + "</a></li>";
+								projectsList += liFirstRowProjects + "<a href=\"projectDetailsNew.jsp?projectId=" +  projects.list[j].projectId + "\">" + projects.list[j].projectCode + "</a></li>";
+								exportList += liFirstRowProjects + "<a href=\"projectDetailsNew.jsp?projectId=" + projects.list[j].projectId + "\">" + projects.list[j].projectCode + "</a></li>";
 								liFirstRowProjects = "<li>";
 							} 	
 						}	
 					} 
 
 					liFirstRow = "<li>";
-					
 				}
 				financingList += "</ul>";
 				$("#financingNavBar").append(financingList);
