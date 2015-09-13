@@ -297,12 +297,14 @@ width:100%;
 
 .fn-gantt .navigate {
 border-top:1px solid #DDD;
-padding:10px 0 10px 225px;
+padding:10px 20px 10px 225px;
 }
 
 .fn-gantt .navigate .nav-slider {
 height:20px;
 display:inline-block;
+position:relative;
+width:100%;
 }
 
 .fn-gantt .navigate .nav-slider-left,.fn-gantt .navigate .nav-slider-right {
@@ -313,15 +315,17 @@ display:inline-block;
 
 .fn-gantt .navigate .nav-slider-left {
 float:left;
+display:none;
 }
 
 .fn-gantt .navigate .nav-slider-right {
 float:right;
+display:none;
 }
 
 .fn-gantt .navigate .nav-slider-content {
 text-align:left;
-width:160px;
+width:100%;
 height:20px;
 display:inline-block;
 margin:0 10px;
@@ -333,7 +337,7 @@ display:block;
 }
 
 .fn-gantt .navigate .nav-slider-bar {
-width:155px;
+width:100%;
 height:6px;
 background-color:#838688;
 -webkit-box-shadow:0 1px 3px rgba(0,0,0,0.6) inset;
