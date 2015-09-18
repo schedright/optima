@@ -18,7 +18,7 @@ use optima;
 
 --
 -- Table structure for table `client`
---
+-- 
 
 DROP TABLE IF EXISTS `client`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
