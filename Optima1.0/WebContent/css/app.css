@@ -1080,4 +1080,24 @@ h2 {
     margin-left : -110px;
     margin-top : -200px;
 }
+.errorIcon {
+	background: url(../images/error.png) no-repeat;
+	width:64px;
+	height:64px;
+}
+.infoIcon {
+	background: url(../images/info.png) no-repeat;
+	width:64px;
+	height:64px;
+}
+.warningIcon {
+	background: url(../images/warning.png) no-repeat;
+	width:64px;
+	height:64px;
+}
+.successIcon {
+	background: url(../images/success.png) no-repeat;
+	width:64px;
+	height:64px;
+}
 

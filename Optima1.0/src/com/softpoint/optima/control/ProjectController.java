@@ -1117,16 +1117,14 @@ public class ProjectController {
 	private void writeTrialToCSVFile(Logger csvLogger, int iteration, double cashAvailable,
 			List<ProjectTask> currentEligibleSet, int projectLength, double totalCostCurrent, double d, String string,
 			double e) {
-		if (true) {
-			return;
-		}
+		try {
 		csvLogger.info("Iteration " + iteration);
 		
 		Date start = null;
 		Date end = null;
 		for (ProjectTask task : currentEligibleSet) {
 			Date taskStart = task.getCalendarStartDate();
-			Date taskEnd = addDays(task.getCalendarStartDate(),task.getCalenderDuration());
+			Date taskEnd = addDays(task.getCalendarStartDate(),task.getCalenderDuration()-1);
 			if (start==null) {
 				start = taskStart;
 			}
@@ -1141,6 +1139,9 @@ public class ProjectController {
 				end = taskEnd;
 			}
 		}
+		if (start==null || end==null) {
+			return;
+		}
 		long daysCount = differenceInDays(start, end) + 1;
 		
 		//write header
@@ -1152,7 +1153,31 @@ public class ProjectController {
 		}
 		
 		csvLogger.info(header);
-		
+
+		for (ProjectTask task : currentEligibleSet) {
+			Date taskStart = task.getCalendarStartDate();
+			Date taskEnd = addDays(task.getCalendarStartDate(),task.getCalenderDuration()-1);
+			
+			String line = task.getTaskDescription() + ",";
+			if (taskStart!=null && taskEnd!=null) {
+				Date index2 = start;
+				while (differenceInDays(index2, end)>0) {
+					if ( index2.before(taskStart) || index2.after(taskEnd) ) {
+						line +=",";
+					} else {
+						line += "X,";
+					}
+					index2 = addDays(index2, 1);
+				}
+				
+			}
+			csvLogger.info(line);
+		}
+		csvLogger.info(",");
+		} catch (Exception ex) {
+			csvLogger.error("error in reporting iteration");
+		}
+
 	}
 
 

@@ -73,7 +73,7 @@ $(function() {
  					} 
  				
  				} else {
- 					alert("Error" + result.message);
+ 					showMessage("Find project",'Error:' + result.message,'error');
  				}
  				} , portfolioId, $(this).data("toDate") );
  		},

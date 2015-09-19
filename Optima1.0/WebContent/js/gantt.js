@@ -7,8 +7,8 @@ function getGanttSource() {
 		}
 	}
 	tasksSource = [];
-	if (projectId == null) {
-		alert("Error on page - a project ID must be provided!!");
+	if (!projectId) {
+		showMessage("Update Project","No valid project id","Error on page - a project ID must be provided!!",'error');
 	} else {
 		var result = rpcClient.taskService.findAllByProject(projectId);
 		if (result.result == 0) {
@@ -96,7 +96,7 @@ function getGanttSource() {
 
 			}
 		} else {
-			alert("Unable to load project: " + result.message);
+			Message("Cannot load project","Unable to load project: " + result.message,'error');
 		}
 	}
 

@@ -74,10 +74,10 @@ $(function() {
 		    if (createTaskResult.result == 0) {
 			location.reload(true);
 		    } else {
-			alert("Error creating payment: " + createTaskResult.message);
+		    	showMessage("Create Payment",'Error:' + createTaskResult.message,'error');
 		    }
 		} else {
-		    alert("Error: Please check your input");
+	    	showMessage("Create Payment","Error: Please check your input",'error');
 		}
 	    });
 
@@ -110,7 +110,7 @@ $(function() {
 	    bValid = false;
 	}
 	if (dateExists) {
-	    alert("The entered date exists already in the finaces grid");
+    	showMessage("Add Finance","The entered date exists already in the finaces grid",'error');
 	    return;
 	}
 
@@ -120,10 +120,10 @@ $(function() {
 	    if (createFinanceResult.result == 0) {
 		location.reload(true);
 	    } else {
-		alert("Error creating payment: " + createTaskResult.message);
+	    	showMessage("Create Payment",'Error:' + createTaskResult.message,'error');
 	    }
 	} else {
-	    alert("Error: Please check your input");
+    	showMessage("Create Payment","Error: Please check your input",'error');
 	}
     });
     
@@ -156,7 +156,7 @@ $(function() {
     	    bValid = false;
     	}
     	if (dateExists) {
-    	    alert("The entered date exists already in the Extra Payment grid");
+	    	showMessage("Add Payment","The entered date exists already in the Extra Payment grid",'error');
     	    return;
     	}
 
@@ -165,10 +165,10 @@ $(function() {
     	    if (createExtraPaymentResult.result == 0) {
     		location.reload(true);
     	    } else {
-    		alert("Error creating extra payment: " + createExtraPaymentResult.message);
+		    	showMessage("Create Payment",'Error:' + createExtraPaymentResult.message,'error');
     	    }
     	} else {
-    	    alert("Error: Please check your input");
+	    	showMessage("Create Payment","Error: Please check your input",'error');
     	}
         });
     
@@ -291,7 +291,7 @@ $(function() {
 		pGrid.updateRow(cell.row);
 		location.reload(true);
 	    } else {
-		alert("Error: ", deletePaymentsResult.message);
+	    	showMessage("Create Payment",'Error:' + deletePaymentsResult.message,'error');
 	    }
 	});
 
@@ -356,7 +356,7 @@ $(function() {
 		fGrid.render();
 		location.reload(true);
 	    } else {
-		alert("Error: " + deleteFinanceResult.message);
+	    	showMessage("Delete Finance Result",'Error:' + deleteFinanceResult.message,'error');
 	    }
 	});
 
@@ -428,7 +428,7 @@ $(function() {
 		eGrid.render();
 		location.reload(true);
 	    } else {
-		alert("Error: " + deleteExtraPaymentResult.message);
+	    	showMessage("Delete Payment",'Error:' + deleteExtraPaymentResult.message,'error');
 	    }
 	});
 
@@ -454,7 +454,7 @@ $(function() {
     			}
    
     		} else {
-    			alert("Error:" + result.message);
+		    	showMessage("Get Payment",'Error:' + result.message,'error');
     		}
     	} , $("#collectionProject option:selected").val());
 		 	
@@ -475,7 +475,7 @@ $(function() {
 			}
 
 		} else {
-			alert("Error:" + result.message);
+	    	showMessage("Get Payment",'Error:' + result.message,'error');
 		}
 	} , $("#collectionProject option:selected").val());
     
@@ -493,7 +493,7 @@ $(function() {
     	if (paymentId == "undefined" || paymentId == null) {
     		$("#paymentToCollect").addClass("ui-state-error");
     	    bValid = false;
-    		alert("No payment selected");
+	    	showMessage("Collect Payment","No payment selected",'error');
     	}
     	if (amount == null || amount.length == 0 || !/^-?\d*\.?\d*$/.test(amount)) {
     	    $("#amountToCollect").addClass("ui-state-error");
@@ -504,10 +504,12 @@ $(function() {
     		
 	    	rpcClient.paymentService.submitAnInterimPayment(function(result, exception) {
 	    		if (result.result) {
-	    			alert("Payment submitted successfully");
-	    			location.reload(true);
+			    	showMessage("Submit Payment","Payment submitted successfully",'error',{Close:function(){
+						$(this).dialog("close");
+						location.reload(true);
+					}});
 	    		} else {
-	    			alert("Error:" + result.message);
+			    	showMessage("Submit Payment",'Error:' + result.message,'error');
 	    		}
 	    	} , paymentId , amount);
     	}

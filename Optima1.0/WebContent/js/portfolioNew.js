@@ -108,7 +108,7 @@ $(document).ready( function() {
 		        			 $("#projectCountry option[value=" + data.country.locationId + "]").attr('selected', 'selected');
 		        			 $("#projectPostalCode").val(data.projectAddressPostalCode);
 		        		 } else {
-		        			 alert("Error: " + call.message);
+		        			 showMessage("Find project",'Error:' + call.message,'error');
 		        		 }
 	        		 } , projectId);
 	        		
@@ -170,7 +170,7 @@ $(document).ready( function() {
 	        			 $( this ).dialog( "close" );
 	        			 location.reload();
 	        		 } else {
-	        			 alert(call.result + ":" + call.message);
+	        			 showMessage(projectId==null?"Create project":"Update project",'Error:' + call.message,'error');
 	        		 }
      			 } 
 	    	  },

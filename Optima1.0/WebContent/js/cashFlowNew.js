@@ -164,10 +164,6 @@ $(function() {
 					if (totalBalance[formattedDate1] == null) totalBalance[formattedDate1] = 0;
 					if (totalPayments[formattedDate1] == null) totalPayments[formattedDate1] = 0;
 					if (totalNetBalance[formattedDate1] == null) totalNetBalance[formattedDate1] = 0;
-					// alert(formattedDate2 + "," + projects[i].projectId);
-					// alert(data.map[formattedDate2 + "," +
-					// projects[i].projectId]);
-					// alert(currentCashOutRow);
 					pData[currentCashOutRow][formattedDate1] = data.map[formattedDate2 + ","
 						+ projects[i].projectId].cashout;
 					totalCashout[formattedDate1] += data.map[formattedDate2 + "," + projects[i].projectId].cashout;
