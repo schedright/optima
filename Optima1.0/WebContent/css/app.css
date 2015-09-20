@@ -1101,3 +1101,9 @@ h2 {
 	height:64px;
 }
 
+.solutionTable {
+	border: 1px solid #CCCCCC;
+}
+.solutionTable td {
+	border: 1px solid #CCCCCC;
+}

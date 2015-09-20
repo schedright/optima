@@ -33,7 +33,15 @@ $(function() {
 		
 		    fillProjectList(projectsData);
 		}
-	    
+		var solutionResponse = rpcClient.portfolioService.getSolution(portfolioId);
+		if (solutionResponse.result==0 && solutionResponse.data) {
+			$("#currentSolution").css('display','');
+			$("#schedResults").html('');
+			$("#schedResults").append(solutionResponse.data); 
+			
+		} else {
+			$("#currentSolution").css('display','none');
+		}
 
 	
     $("#mainAllProjects").droppable(
@@ -76,6 +84,7 @@ $(function() {
       		
   			 rpcClient.projectService.getSolution( function(result , exception) {
   			if (result.result == 0) {
+  				$("#currentSolution").css('display','');
   				var data = result.data;
   				$("#schedResults").html('');
   				$("#schedResults").append(data); 

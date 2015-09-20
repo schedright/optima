@@ -419,6 +419,7 @@ public class TaskController {
 				cal.add(Calendar.DATE, task.getCalenderDuration());
 				if (nextTaskStartDate == null || nextTaskStartDate.before(cal.getTime())) {
 					nextTask.setCalendarStartDate(cal.getTime());
+					nextTask.setTentativeStartDate(cal.getTime());
 					controller.merge(nextTask);
 				}
 				processTask(dependency.getDependent(), project, controller);

@@ -17,11 +17,12 @@
 				</div>
 			</div>
 
-		<div class="form-section">
+		<div id="currentSolution" class="form-section" style="display:none">
+			<H2 style="color:green">Solution</H2>
 			<div id="schedResults" class="div-Table">
 			</div>
 		
-	</div>
+		</div>
 	
 	<!-- 
 		<div id="loading-indicator" style="display:none" ><div id="loading-indicator-image"><img src="images/Sched-loaderLogo-Grey.png"/><img src="images/Sched-loader.gif"/></div></div>
