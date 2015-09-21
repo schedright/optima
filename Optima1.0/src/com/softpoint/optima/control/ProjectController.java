@@ -360,6 +360,7 @@ public class ProjectController {
 	}
 	
 	private ReentrantLock solutionLock = new ReentrantLock();
+	private static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM, yyyy");
 	
 	public ServerResponse getSolution(HttpSession session , int projectId, String outputFormat, String projectsPriority) {
 
@@ -368,7 +369,6 @@ public class ProjectController {
 			Project project = projectController.find(Project.class, projectId);
 			int portfolioId = project.getPortfolio().getPortfolioId();
 			
-			SimpleDateFormat format = new SimpleDateFormat("dd MMM, yyyy");
 			
 			TaskController taskController = new TaskController();
 			
@@ -413,8 +413,8 @@ public class ProjectController {
 				String separator = "";
 				SchedulePeriod currentPeriod = getCurrentPeriodBoundriesNew(session, currentDate, project.getPortfolio().getPortfolioId());
 				
-				String fromString = format.format(currentPeriod.getCurrent().getDateFrom());
-				String toString = format.format(currentPeriod.getCurrent().getDateTo());
+				String fromString = DATE_FORMATTER.format(currentPeriod.getCurrent().getDateFrom());
+				String toString = DATE_FORMATTER.format(currentPeriod.getCurrent().getDateTo());
 				
 				finalSolution = finalSolution +  "<div class='div-row-red'>From: " + fromString + " - To: " + toString +"</div>";
 				if (projectsPriority != null && projectsPriority.length() > 0) 
@@ -476,8 +476,8 @@ public class ProjectController {
 													solutionSummary = solutionSummary + "<div class='shiftedTaskOutLogo'>";
 											}
 											
-											String taskInitialString = format.format(task.getCalendarStartDate());
-											String taskSchedualeString = format.format(solvedTask.getScheduledStartDate());
+											String taskInitialString = DATE_FORMATTER.format(task.getCalendarStartDate());
+											String taskSchedualeString = DATE_FORMATTER.format(solvedTask.getScheduledStartDate());
 											
 											solutionSummary = solutionSummary + "<div>" + solvedTask.getTaskName() + " (" + taskInitialString + " - " + taskSchedualeString + ")" +"</div></div></div>" ;
 										}
@@ -531,7 +531,7 @@ public class ProjectController {
 										calendar.setTime(completetedTask.getScheduledStartDate());
 									else{
 										calendar.setTime(completetedTask.getCalendarStartDate());
-										System.out.println(completetedTask.getTaskName());
+										//System.out.println(completetedTask.getTaskName());
 									}
 									calendar.add(Calendar.DATE, completetedTask.getDuration());
 									Date completedTaskEndDate = calendar.getTime();
@@ -566,15 +566,15 @@ public class ProjectController {
 								
 								lastPaymentValue = lastPaymentValue + delayPenalty;
 								
-								String lastPaymentDateString = format.format(lastPaymentDate);
-								String lastPaymentStartString = format.format( currentPeriod.getCurrent().getDateFrom());
-								String lastPaymentToString = format.format(currentPeriod.getCurrent().getDateTo());
+								String lastPaymentDateString = DATE_FORMATTER.format(lastPaymentDate);
+								String lastPaymentStartString = DATE_FORMATTER.format( currentPeriod.getCurrent().getDateFrom());
+								String lastPaymentToString = DATE_FORMATTER.format(currentPeriod.getCurrent().getDateTo());
 								
 								solutionSummary = solutionSummary + "<div class='div-row-orange'>" +  "Last Payment:" + lastPaymentValue + " At: " + lastPaymentDateString +"</div>" ;
 								solutionSummary = solutionSummary + "<div class='div-row-orange'>" +  "Last Payment = Payment (" + lastPaymentStartString + " - " + lastPaymentToString + ") " + (lastPaymentValue + delayPenalty - totalRetainedAmount.get(currentProjectID).doubleValue()) + " + Retained amount: " + totalRetainedAmount.get(currentProjectID).floatValue() + " + Delay Penalty: " + delayPenalty +"</div>" ;
 								
 								double balance = PaymentUtil.getPortfolioOpenBalanceNew(session, project.getPortfolio() , lastPaymentDate); //balance that is accumulated from the previous period
- 								System.out.println(balance);
+ 								//System.out.println(balance);
 								
 								solutionSummary = solutionSummary + "<div class='div-row-orange'>" +  "Profit:" + (lastPaymentValue + balance) +"</div>" ;
 								
@@ -605,12 +605,12 @@ public class ProjectController {
 				currentDate = currentPeriod.getNext().getDateFrom();
 			}
 			
-			System.out.println(finalSolution);
-			System.out.println("totalRetainedAmount \n _______________________________________________________________\n");
-			System.out.println(totalRetainedAmount);
+			//System.out.println(finalSolution);
+			//System.out.println("totalRetainedAmount \n _______________________________________________________________\n");
+			//System.out.println(totalRetainedAmount);
 			
-			System.out.println("totalAdvancedPaymentAmount \n _______________________________________________________________\n");
-			System.out.println(totalAdvancedPaymentAmount);
+			//System.out.println("totalAdvancedPaymentAmount \n _______________________________________________________________\n");
+			//System.out.println(totalAdvancedPaymentAmount);
 			
 			return new ServerResponse("0" , "Success" , finalSolution);
 			
@@ -1456,7 +1456,7 @@ public class ProjectController {
 	
 	
 	public ServerResponse  getProjectCost( HttpSession session , int portfolioId , Date fromDate, Date toDate , int projectId ) {
-		System.out.println("Inside getProjectCost()");
+		//System.out.println("Inside getProjectCost()");
 		return new ServerResponse("0" , "Success" , 10.0);
 	}
 } 

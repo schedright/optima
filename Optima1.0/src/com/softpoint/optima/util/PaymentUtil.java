@@ -165,7 +165,7 @@ public class PaymentUtil {
 		}
 			
 		double overhead =  project.getOverheadPerDay().doubleValue() * numberOfDays;
-		System.out.println(project.getProjectId() + "-" + numberOfDays);
+		//System.out.println(project.getProjectId() + "-" + numberOfDays);
 		double cashout = taskCostCounter +  overhead;
 		return cashout;
 		

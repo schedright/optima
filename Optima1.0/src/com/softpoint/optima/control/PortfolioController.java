@@ -29,7 +29,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.eclipse.persistence.internal.sessions.DirectCollectionChangeRecord.NULL;
 
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
@@ -192,22 +191,70 @@ public class PortfolioController {
 			//if all tasks have scheduled start date it means that it is already been solved before
 			SimpleDateFormat format = new SimpleDateFormat("dd MMM, yyyy");
 
-			Date[] portofolioDateRanges;
-			portofolioDateRanges = PaymentUtil.getPortofolioDateRangesNew(controller, portfolioId);
-			Date startDate = portofolioDateRanges[0];
+			Date[] projectBoundaries = PaymentUtil.getPortofolioDateRangesNew(controller, portfolioId);
+			List<SchedulePeriod> periods = new ArrayList<SchedulePeriod>();
+			Date currentIndex = projectBoundaries[0];
 			ProjectController projectController = new ProjectController();
-			SchedulePeriod currentPeriod = projectController.getCurrentPeriodBoundriesNew(session, startDate, portfolioId);
-			
+			while(true) {
+				SchedulePeriod period = projectController.getCurrentPeriodBoundriesNew(session, currentIndex, portfolioId);
+				if (period!=null && period.getCurrent()!=null) {
+					periods.add(period);
+					currentIndex = period.getCurrent().getDateTo();
+				} 
+				if(projectBoundaries[1].getTime() <= period.getCurrent().getDateFrom().getTime()) {
+					break;
+				}
+			}
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append("<table class=\"solutionTable\">");
-			int periodIndex = 0;
-			int totalTasks = 0;
-			int reportedTasks = 0;
-			for(Project project : projects) {
-				totalTasks += project.getProjectTasks().size();
+
+			for (SchedulePeriod period:periods) {
+				Date startDate = period.getCurrent().getDateFrom();
+				Date endDate = period.getCurrent().getDateTo();
+				Boolean periodHeaderAdded = false;
+
+				for (Project project : projects) {
+					Boolean projectHeaderAdded = false;
+
+					List<ProjectTask> tasks = project.getProjectTasks();
+					for (ProjectTask task : tasks) {
+						Boolean startedIn = inBetweenDates(task.getScheduledStartDate(), startDate, endDate);
+						Boolean shouldPrint = startedIn
+								|| inBetweenDates(task.getTentativeStartDate(), startDate, endDate);
+
+						// only on tasks that will start in current period or
+						// that initially should have started this period
+						if (shouldPrint) {
+							if (!periodHeaderAdded) {
+								sb.append("<tr><td  colspan=\"6\"><h3>From: ").append(format.format(startDate))
+										.append(" TO: ").append(format.format(endDate)).append("</h3></td></tr>");
+								periodHeaderAdded = true;
+							}
+							if (!projectHeaderAdded) {
+								sb.append("<tr><td  width=\"30px\"></td><td  colspan=\"5\"><b>")
+										.append(project.getProjectCode()).append("</b></td></tr>");
+								projectHeaderAdded = true;
+							}
+							sb.append("<tr><td  width=\"30px\"></td><td  width=\"30px\"></td><td  width=\"10px\">");
+							if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
+								sb.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
+							} else if (!startedIn) {
+								sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskOutLogo\"></div>");
+							} else {
+								sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
+							}
+							sb.append("</td><td>").append(task.getTaskDescription()).append("</td><td>")
+									.append(format.format(task.getTentativeStartDate())).append("</td><td>")
+									.append(format.format(task.getScheduledStartDate())).append("</td></tr>\r");
+						}
+
+					}
+				}
+
 			}
-			while (reportedTasks<totalTasks) {
+				
+		/*	while (reportedTasks<totalTasks) {
 				Boolean periodHeaderAdded = false;
 				for(Project project : projects)
 				{
@@ -252,7 +299,7 @@ public class PortfolioController {
 				}		
 				periodIndex ++;
 				
-			} 
+			} */
 			sb.append("</table>");
 /*			
 			for(Project project : projects)

@@ -127,7 +127,7 @@ public class TaskController {
 		ProjectTask projectTask = null;
 		try {
 			
-			System.out.println("Resetting");
+			//System.out.println("Resetting");
 			projectTask = controller.find(ProjectTask.class, taskId);
 			projectTask.setScheduledStartDate(null);
 			projectTask.setCalendarStartDate(null);
@@ -407,7 +407,7 @@ public class TaskController {
 
 	protected void processTask(ProjectTask task, Project project, EntityController<ProjectTask> controller) throws EntityControllerException {
 		// Bug#1 Shifting is not working correctly when changing weekends! -- BassemVic
-		System.out.println(task.getTaskId());
+		//System.out.println(task.getTaskId());
 		task = controller.find(ProjectTask.class, task.getTaskId());
 		calculateCalederDuration(project, task);
 		for (TaskDependency dependency : task.getAsDependency()) {
@@ -418,8 +418,9 @@ public class TaskController {
 				cal.setTime(task.getCalendarStartDate());
 				cal.add(Calendar.DATE, task.getCalenderDuration());
 				if (nextTaskStartDate == null || nextTaskStartDate.before(cal.getTime())) {
-					nextTask.setCalendarStartDate(cal.getTime());
-					nextTask.setTentativeStartDate(cal.getTime());
+					Date newDate = adjustStart(project, cal.getTime());
+					nextTask.setCalendarStartDate(newDate);
+					nextTask.setTentativeStartDate(newDate);
 					controller.merge(nextTask);
 				}
 				processTask(dependency.getDependent(), project, controller);
@@ -428,6 +429,11 @@ public class TaskController {
 		controller.merge(task);
 	}
 
+	private static Date skipOffDays() {
+		
+		return null;
+	}
+	
 	/**
 	 * @param project
 	 * @param task
@@ -466,13 +472,30 @@ public class TaskController {
 		for (ProjectTask task : project.getProjectTasks()) {
 			if (task.getAsDependent() == null || task.getAsDependent().isEmpty()) {
 				rootTasks.add(task);
-				task.setCalendarStartDate(task.getTentativeStartDate());
+				task.setCalendarStartDate(adjustStart(project,task.getTentativeStartDate()));
 				controller.merge(task);
 			}
 		}
 		return rootTasks;
 	}
 	
+	/**
+	 * adjust the calendar start to
+	 * @return
+	 */
+	private static Date adjustStart(Project project, Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		while (true) {
+			if ( !PaymentUtil.isDayOff(date, project.getDaysOffs())
+					&&   !PaymentUtil.isWeekendDay(date, project.getWeekendDays())) {
+				return date;
+			} 
+
+			calendar.add(Calendar.DATE, 1);
+			date = calendar.getTime();
+		}
+	}
 	
 	public ServerResponse resetScheduling(HttpSession session , int projectId) {
 			adjustStartDateBasedOnTaskDependency(session, projectId, true);

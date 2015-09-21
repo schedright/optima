@@ -46,11 +46,11 @@ public class JsonRpcInitializer implements ServletContextListener {
 		event.getServletContext().setAttribute(__ENTITY_FACTORY, factory);
 		EntityManager manager = factory.createEntityManager();
 		manager.close();
-		System.out.println("Creating Optima LogFactory");
+		//System.out.println("Creating Optima LogFactory");
 		OptimaLogFactory logFactory = new OptimaLogFactory(event.getServletContext());
 
 		event.getServletContext().setAttribute(__LOG__FACTORY , logFactory);
-		System.out.println("Optima LogFactory created successfully...");
+		//System.out.println("Optima LogFactory created successfully...");
 		
 	}
 
