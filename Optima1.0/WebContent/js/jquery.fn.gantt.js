@@ -744,11 +744,13 @@
 
 
                         // Append panel elements
+                        var dateHeader = $('<div class="dateHeader"/>');
+                        dataPanel.append(dateHeader);
 
-                        dataPanel.append(yearArr.join(""));
-                        dataPanel.append(monthArr.join(""));
-                        dataPanel.append($('<div class="row" style="margin-left: 0;" />').html(dayArr.join("")));
-                        dataPanel.append($('<div class="row" style="margin-left: 0;" />').html(dowArr.join("")));
+                        dateHeader.append(yearArr.join(""));
+                        dateHeader.append(monthArr.join(""));
+                        dateHeader.append($('<div class="row" style="margin-left: 0;" />').html(dayArr.join("")));
+                        dateHeader.append($('<div class="row" style="margin-left: 0;" />').html(dowArr.join("")));
 
                         break;
                 }

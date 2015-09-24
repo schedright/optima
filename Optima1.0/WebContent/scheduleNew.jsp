@@ -19,9 +19,11 @@
 
 		<div id="currentSolution" class="form-section" style="display:none">
 			<H2 style="color:green">Solution</H2>
+			<button id="exportSolutionToCSV" class="btnRight">Export to CSV</button>
+			<div class="solutionContainer">
 			<div id="schedResults" class="div-Table">
 			</div>
-		
+			</div>
 		</div>
 	
 	<!-- 

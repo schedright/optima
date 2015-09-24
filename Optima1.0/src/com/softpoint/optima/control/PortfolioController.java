@@ -253,70 +253,7 @@ public class PortfolioController {
 				}
 
 			}
-				
-		/*	while (reportedTasks<totalTasks) {
-				Boolean periodHeaderAdded = false;
-				for(Project project : projects)
-				{
-					Boolean projectHeaderAdded = false;
-					List<ProjectPayment> payments = project.getProjectPayments();
-					if (periodIndex<payments.size()-1) {
-						ProjectPayment currentPayment = payments.get(periodIndex);
-						ProjectPayment nextPayment = payments.get(periodIndex+1);
-						
-						List<ProjectTask> tasks = project.getProjectTasks();
-						for (ProjectTask task : tasks) {
-							Boolean shouldIncrement = inBetweenDates(task.getScheduledStartDate(),currentPayment.getPaymentDate(),nextPayment.getPaymentDate());
-							Boolean shouldPrint = shouldIncrement || inBetweenDates(task.getTentativeStartDate(),currentPayment.getPaymentDate(),nextPayment.getPaymentDate());
-							
-							//only on tasks that will start in current period or that initially should have started this period
-							if (shouldPrint) {
-									if (!periodHeaderAdded) {
-										sb.append("<tr><td  colspan=\"6\"><h3>From: ").append(format.format(currentPayment.getPaymentDate())).append(" TO: ").append(format.format(nextPayment.getPaymentDate())).append("</h3></td></tr>");
-										periodHeaderAdded = true;
-									}
-									if (!projectHeaderAdded) {
-										sb.append("<tr><td  width=\"30px\"></td><td  colspan=\"5\"><b>").append(project.getProjectCode()).append("</b></td></tr>"); 
-										projectHeaderAdded = true;
-									}
-									sb.append("<tr><td  width=\"30px\"></td><td  width=\"30px\"></td><td  width=\"10px\">");
-									if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate())==0) {
-										sb.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
-									} else if (!shouldIncrement) {
-										sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskOutLogo\"></div>");
-									} else {
-										sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
-									}
-									sb.append("</td><td>").append(task.getTaskDescription()).append("</td><td>").append(format.format(task.getTentativeStartDate())).append("</td><td>").append(format.format(task.getScheduledStartDate())).append("</td></tr>\r");
-									if (shouldIncrement) {
-										reportedTasks++;
-									}
-							}
-						}
-						projectHeaderAdded = false;
-						
-					}
-				}		
-				periodIndex ++;
-				
-			} */
 			sb.append("</table>");
-/*			
-			for(Project project : projects)
-			{
-				List<ProjectPayment> payments = project.getProjectPayments();
-				List<PeriodCashout> periodCashouts = new ArrayList<PeriodCashout>();
-
-				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
-				if(projectDates[1].getTime() > currentPeriod.getCurrent().getDateFrom().getTime())
-				{
-					Calendar end = Calendar.getInstance();
-					end.setTime(portofolioDateRanges[1]);
-					end.add(Calendar.DATE, project.getPaymentRequestPeriod());
-					portofolioDateRanges[1] = end.getTime();
-				}
-			}
-*/			
 			return new ServerResponse("0", "Success", sb.toString());
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -324,6 +261,92 @@ public class PortfolioController {
 		}
 	}
 	
+	public ServerResponse getSolutionAsCSV(HttpSession session , int portfolioId) throws OptimaException {
+		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+		Portfolio portfolio = null;
+		try {
+			portfolio = controller.find(Portfolio.class, portfolioId);
+			//verify it is already solved
+			List<Project> projects = portfolio.getProjects();
+			for (Project project : projects) {
+				List<ProjectTask> tasks = project.getProjectTasks();
+				for (ProjectTask task:tasks) {
+					if (task.getScheduledStartDate()==null) {
+						//if at least one task doesn't have scheduled start date then it is not really solved yet
+						return new ServerResponse("0", "Success", "");
+					}
+				}
+			}
+			//if all tasks have scheduled start date it means that it is already been solved before
+			SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
+
+			Date[] projectBoundaries = PaymentUtil.getPortofolioDateRangesNew(controller, portfolioId);
+			List<SchedulePeriod> periods = new ArrayList<SchedulePeriod>();
+			Date currentIndex = projectBoundaries[0];
+			ProjectController projectController = new ProjectController();
+			while(true) {
+				SchedulePeriod period = projectController.getCurrentPeriodBoundriesNew(session, currentIndex, portfolioId);
+				if (period!=null && period.getCurrent()!=null) {
+					periods.add(period);
+					currentIndex = period.getCurrent().getDateTo();
+				} 
+				if(projectBoundaries[1].getTime() <= period.getCurrent().getDateFrom().getTime()) {
+					break;
+				}
+			}
+			
+			StringBuilder sb = new StringBuilder();
+
+			for (SchedulePeriod period:periods) {
+				Date startDate = period.getCurrent().getDateFrom();
+				Date endDate = period.getCurrent().getDateTo();
+				Boolean periodHeaderAdded = false;
+
+				for (Project project : projects) {
+					Boolean projectHeaderAdded = false;
+
+					List<ProjectTask> tasks = project.getProjectTasks();
+					for (ProjectTask task : tasks) {
+						Boolean startedIn = inBetweenDates(task.getScheduledStartDate(), startDate, endDate);
+						Boolean shouldPrint = startedIn
+								|| inBetweenDates(task.getTentativeStartDate(), startDate, endDate);
+
+						// only on tasks that will start in current period or
+						// that initially should have started this period
+						if (shouldPrint) {
+							if (!periodHeaderAdded) {
+								sb.append(format.format(startDate))
+										.append(" TO: ").append(format.format(endDate)).append("\r");
+								periodHeaderAdded = true;
+							}
+							if (!projectHeaderAdded) {
+								sb.append(",")
+										.append(project.getProjectCode()).append("\r");
+								projectHeaderAdded = true;
+							}
+							sb.append(",,");
+							if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
+								sb.append("✔,");
+							} else if (!startedIn) {
+								sb.append(">>,");
+							} else {
+								sb.append(">,");
+							}
+							sb.append(task.getTaskDescription()).append(",")
+									.append(format.format(task.getTentativeStartDate())).append(",")
+									.append(format.format(task.getScheduledStartDate())).append("\r");
+						}
+
+					}
+				}
+
+			}
+			return new ServerResponse("0", "Success", sb.toString());
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PORT0002" , String.format("Error updating Portfolio %s: %s" , portfolio!=null?portfolio.getPortfolioName():"", e.getMessage() ), e);
+		}
+	}
 	private static Boolean inBetweenDates(Date d,Date start, Date end) {
 		return !d.before(start) && d.before(end);
 	}

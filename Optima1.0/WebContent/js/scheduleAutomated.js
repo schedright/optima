@@ -84,18 +84,47 @@ $(function() {
       		
   			 rpcClient.projectService.getSolution( function(result , exception) {
   			if (result.result == 0) {
-  				$("#currentSolution").css('display','');
-  				var data = result.data;
-  				$("#schedResults").html('');
-  				$("#schedResults").append(data); 
+  				var solutionResponse = rpcClient.portfolioService.getSolution(portfolioId);
+  				if (solutionResponse.result==0 && solutionResponse.data) {
+  					$("#currentSolution").css('display','');
+  					$("#schedResults").html('');
+  					$("#schedResults").append(solutionResponse.data); 
+  					
+  				} else {
+  					$("#currentSolution").css('display','none');
+  				}
+//  				$("#currentSolution").css('display','');
+//  				var data = result.data;
+//  				$("#schedResults").html('');
+//  				$("#schedResults").append(data); 
   				$('#loading-indicator').hide();
   			 } else {
-  				 alert("Error generating solution: " + result.message);
+  				showMessage("Solve",'Error:' + result.message,'error');
   			 }
   		 }, projectID, "", priorityOrder); 
   			 
   	 });
 
+    $("#exportSolutionToCSV").button(
+     		 {
+     			icons : {
+     			    primary : "ui-icon-calculator"
+     			},
+     				text : true
+     		 }
+     	 ).click(function(){
+     		var solutionResponse = rpcClient.portfolioService.getSolutionAsCSV(portfolioId);
+    		if (solutionResponse.result==0 && solutionResponse.data) {
+		        var blob = new Blob([solutionResponse.data], {type: "text/plain;charset=utf-8"});
+		        var date = new Date();
+		        saveAs(blob, "Solution" + date + ".csv");
+    		} else {
+    			showMessage("Export to CSV",'Error: Cannot find a valid solution.','error');    			
+    		}
+     		 
+ 			 
+ 	 });
+    
 });
 
 function getURLVariables() {

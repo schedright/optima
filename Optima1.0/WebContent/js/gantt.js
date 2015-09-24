@@ -13,36 +13,7 @@ function getGanttSource() {
 		var result = rpcClient.taskService.findAllByProject(projectId);
 		if (result.result == 0) {
 			var taskData = result.data;
-			var weekEnds = {};
 			var fmt = new DateFmt("%d-%m-%y");
-			var daysOff = {};
-			if (taskData.list.length>0) {
-				var projCall = rpcClient.projectService.find(projectId);
-
-				if (projCall.result == 0) {
-					var pData = projCall.data;
-					if (pData && pData.weekendDays) {
-						if (pData.weekendDays.weekendDays.toLowerCase() == "sat-sun") {
-							weekEnds[6] = true;
-							weekEnds[0] = true;
-						} else if (pData.weekendDays.weekendDays.toLowerCase() == "fri-sat") {
-							weekEnds[5] = true;
-							weekEnds[6] = true;
-						} else if (pData.weekendDays.weekendDays.toLowerCase() == "thu-fri") {
-							weekEnds[4] = true;
-							weekEnds[5] = true;
-						}
-					}
-					if (pData && pData.daysOffs && pData.daysOffs.list && pData.daysOffs.list.length>0) {
-						for (var i=0;i<pData.daysOffs.list.length;i++) {
-							var d = pData.daysOffs.list[i];
-							var date = new Date(d.dayOff.time);
-							var key = fmt.format(date);
-							daysOff[key] = true;
-						}
-					}
-				}	
-			}
 			for (var i = 0; i < taskData.list.length; i++) {
 				
 				var startDate = taskData.list[i].calendarStartDate;
@@ -67,13 +38,6 @@ function getGanttSource() {
 				var endDate = startDate.time + (duration - 1) * 86400000;
 
 				var actualStartDate = new Date(startDate.time);
-				while (true) {
-					if (weekEnds[actualStartDate.getDay()] || daysOff[fmt.format(actualStartDate)]) {
-						actualStartDate = new Date(actualStartDate.getTime() + (1000 * 60 * 60 * 24));
-					} else {
-						break;
-					}
-				}
 				tasksSource.push({
 					name : taskData.list[i].taskName,
 
