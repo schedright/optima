@@ -11,7 +11,7 @@ File: Navigation CSS
 #topbar ul{display:block; float:left; font-size:12px; font-family:Georgia, "Times New Roman", Times, serif; font-weight: bold;}
 #topbar ul, #topbar ul li{margin:0; padding:0; list-style:none;}
 #topbar ul#topnav{margin:0px 0 0 15px;}
-#topbar ul li{float:left; padding-right:30px; padding-left:10px;}
+#topbar ul li{float:left; padding-right:25px; padding-left:6px;}
 #topbar ul li {height:40px; background:url('images/breadcrumb_divider_New.png') center right no-repeat;}
 #topbar ul li li{margin-left:-33px; margin-top:-12px;}
 #topbar ul li li{background-image:none; }

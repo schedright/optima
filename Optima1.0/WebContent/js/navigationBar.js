@@ -8,6 +8,7 @@ $(document).ready( function() {
 			$("#projectsNavBar").append("<a href=\"#\"><img src=\"css/header/images/project.png\" />Projects</a>");
 			$("#scheduleNavBar").append("<a href=\"#\"><img src=\"css/header/images/schedule.png\" />Scheduling</a>");
 			$("#cashflowNavBar").append("<a href=\"#\"><img src=\"css/header/images/cashflow.png\" />Cashflow</a>");
+			$("#financialNavBar").append("<a href=\"#\"><img src=\"css/header/images/financing.png\" />Financial</a>");
 			$("#exportNavBar").append("<a href=\"#\"><img src=\"css/header/images/export.png\" />Export Results</a>");
 			
 			
@@ -16,8 +17,9 @@ $(document).ready( function() {
 				$("#projectsNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Projects defined.</a></li></ul>");
 				$("#scheduleNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Portfolios defined.</a></li></ul>");
 				$("#cashflowNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Portfolios defined.</a></li></ul>");
+				$("#financialNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Projects defined.</a></li></ul>");
 				$("#exportNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Projects defined.</a></li></ul>");
-				
+			
 			} else {
 				var liFirstRow = "<li class=\"firstRowMenu\">";
 				var liFirstRowProjects = "<li class=\"firstRowMenu\">";
@@ -26,6 +28,7 @@ $(document).ready( function() {
 				var projectsList ="<ul>";
 				var cashflowList ="<ul>";
 				var exportList ="<ul>";
+				var financialList ="<ul>";
 				
 				var portfolioIndex = 0;
 				var savedPortfolioIndex = $.cookie('saved_index_pf');
@@ -42,6 +45,7 @@ $(document).ready( function() {
 					financingList += liFirstRow + "<a href=\"finDataNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					schedulingList += liFirstRow + "<a href=\"scheduleNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					cashflowList += liFirstRow + "<a href=\"cashFlowNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
+					financialList += liFirstRow + "<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					
 					
 					
@@ -71,8 +75,12 @@ $(document).ready( function() {
 				cashflowList += "</ul>";
 				$("#cashflowNavBar").append(cashflowList);
 				
+				financialList += "</ul>";
+				$("#financialNavBar").append(financialList);
+
 				exportList += "</ul>";
 				$("#exportNavBar").append(exportList);
+				
 			}
 		}
 	});
@@ -88,6 +96,8 @@ $(document).ready( function() {
 	else if(currentPage == 5)
 		$("#cashflowNavBar").addClass("active");
 	else if(currentPage == 6)
+		$("#financialNavBar").addClass("active");	
+	else if(currentPage == 7)
 		$("#exportNavBar").addClass("active");	
 	
 	
