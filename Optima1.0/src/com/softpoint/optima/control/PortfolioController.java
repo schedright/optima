@@ -42,6 +42,7 @@ import com.softpoint.optima.struct.PeriodCashout;
 import com.softpoint.optima.struct.ProjectPaymentDetail;
 import com.softpoint.optima.struct.SchedulePeriod;
 import com.softpoint.optima.util.PaymentUtil;
+import com.softpoint.optima.util.PaymentUtilBeforeSolving;
 
 /**
  * @author WDARWISH
@@ -171,8 +172,8 @@ public class PortfolioController {
 			return new ServerResponse("PORT0002" , String.format("Error updating Portfolio %s: %s" , portfolio!=null?portfolio.getPortfolioName():"", e.getMessage() ), e);
 		}
 	}
-	
-	public ServerResponse getSolution(HttpSession session , int portfolioId) throws OptimaException {
+
+	private boolean isSolved(HttpSession session , int portfolioId) throws OptimaException {
 		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
 		Portfolio portfolio = null;
 		try {
@@ -184,76 +185,236 @@ public class PortfolioController {
 				for (ProjectTask task:tasks) {
 					if (task.getScheduledStartDate()==null) {
 						//if at least one task doesn't have scheduled start date then it is not really solved yet
-						return new ServerResponse("0", "Success", "");
+						return false;
 					}
 				}
 			}
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+		
+	}
+	public ServerResponse hasSolution(HttpSession session , int portfolioId) throws OptimaException {
+		return new ServerResponse("0", "Success", isSolved(session, portfolioId)?"TRUE":"FALSE");
+	}
+	
+	public ServerResponse getSolution(HttpSession session , int portfolioId) throws OptimaException {
+		if (!isSolved(session, portfolioId)) {
+			return new ServerResponse("0", "Success", "");
+		}
+		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+		Portfolio portfolio = null;
+		try {
+			portfolio = controller.find(Portfolio.class, portfolioId);
+			
 			//if all tasks have scheduled start date it means that it is already been solved before
 			SimpleDateFormat format = new SimpleDateFormat("dd MMM, yyyy");
 
-			Date[] projectBoundaries = PaymentUtil.getPortofolioDateRangesNew(controller, portfolioId);
-			List<SchedulePeriod> periods = new ArrayList<SchedulePeriod>();
-			Date currentIndex = projectBoundaries[0];
-			ProjectController projectController = new ProjectController();
-			while(true) {
-				SchedulePeriod period = projectController.getCurrentPeriodBoundriesNew(session, currentIndex, portfolioId);
-				if (period!=null && period.getCurrent()!=null) {
-					periods.add(period);
-					currentIndex = period.getCurrent().getDateTo();
-				} 
-				if(projectBoundaries[1].getTime() <= period.getCurrent().getDateFrom().getTime()) {
-					break;
-				}
-			}
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append("<table class=\"solutionTable\">");
+			StringBuilder projSB = new StringBuilder();
+			projSB.append("<table class=\"solutionTable\">\r").append("<tr><td>Project Name</td><td>change</td><td>Profit before</td><td>Profit After</td></tr>");
+			
+			List<Project> projects = portfolio.getProjects();
+			for (Project project : projects) {
+				double totalCost = 0;
+				double totalIncome = 0;
+				
+				double overHeadBefore = 0;
+				double overHeadAfter = 0;
+				
+				double penaltiesBefore = 0;
+				double penaltiesAfter = 0;
+				Date lastDate = null;
 
-			for (SchedulePeriod period:periods) {
-				Date startDate = period.getCurrent().getDateFrom();
-				Date endDate = period.getCurrent().getDateTo();
-				Boolean periodHeaderAdded = false;
-
-				for (Project project : projects) {
-					Boolean projectHeaderAdded = false;
-
-					List<ProjectTask> tasks = project.getProjectTasks();
-					for (ProjectTask task : tasks) {
-						Boolean startedIn = inBetweenDates(task.getScheduledStartDate(), startDate, endDate);
-						Boolean shouldPrint = startedIn
-								|| inBetweenDates(task.getTentativeStartDate(), startDate, endDate);
-
-						// only on tasks that will start in current period or
-						// that initially should have started this period
-						if (shouldPrint) {
-							if (!periodHeaderAdded) {
-								sb.append("<tr><td  colspan=\"6\"><h3>From: ").append(format.format(startDate))
-										.append(" TO: ").append(format.format(endDate)).append("</h3></td></tr>");
-								periodHeaderAdded = true;
-							}
-							if (!projectHeaderAdded) {
-								sb.append("<tr><td  width=\"30px\"></td><td  colspan=\"5\"><b>")
-										.append(project.getProjectCode()).append("</b></td></tr>");
-								projectHeaderAdded = true;
-							}
-							sb.append("<tr><td  width=\"30px\"></td><td  width=\"30px\"></td><td  width=\"10px\">");
-							if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
-								sb.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
-							} else if (!startedIn) {
-								sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskOutLogo\"></div>");
-							} else {
-								sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
-							}
-							sb.append("</td><td>").append(task.getTaskDescription()).append("</td><td>")
-									.append(format.format(task.getTentativeStartDate())).append("</td><td>")
-									.append(format.format(task.getScheduledStartDate())).append("</td></tr>\r");
+				sb.append("<tr><td  colspan=\"5\"><b>")
+				.append(project.getProjectCode()).append("</b></td></tr>");
+				List<ProjectTask> tasks = project.getProjectTasks();
+				for (ProjectTask task : tasks) {
+					
+					totalCost += task.getUniformDailyCost().doubleValue() * task.getDuration();
+					totalIncome += task.getUniformDailyIncome().doubleValue() * task.getDuration();
+					
+					sb.append("<tr><td  width=\"30px\"></td><td  width=\"10px\">");
+					if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
+						sb.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
+					} else {
+						sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
+					}
+					sb.append("</td><td>").append(task.getTaskDescription()).append("</td><td>")
+							.append(format.format(task.getTentativeStartDate())).append("</td><td>")
+							.append(format.format(task.getScheduledStartDate())).append("</td></tr>\r");
+					
+					if (lastDate==null) {
+						int duration = TaskController.getDuration(project, task.getTentativeStartDate(), task.getDuration());
+						lastDate = addDayes(task.getTentativeStartDate(),duration); 
+					} else {
+						int duration = TaskController.getDuration(project, task.getTentativeStartDate(), task.getDuration());
+						Date newDate = addDayes(task.getTentativeStartDate(),duration);
+						if (lastDate.before(newDate)) {
+							lastDate = newDate;
 						}
+					}
 
+				}
+				
+				//overhead
+				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
+				Date scheduledStart = projectDates[0];
+				Date scheduledEnd   = projectDates[1];
+				overHeadAfter += daysBetween(scheduledStart, scheduledEnd)*project.getOverheadPerDay().doubleValue();
+				
+				Date d1 = project.getPropusedStartDate();
+				Date d2 = lastDate; 
+				overHeadBefore += daysBetween(d1, d2)*project.getOverheadPerDay().doubleValue();
+				
+				
+				//calculate penalties
+				Date finishDate = project.getProposedFinishDate();
+				if (finishDate!=null ) {
+					if (finishDate.after(scheduledEnd)) {
+						int extraDayes = daysBetween(finishDate, scheduledEnd);
+						penaltiesAfter += extraDayes*project.getDelayPenaltyAmount().doubleValue();
+					}
+					if (finishDate.after(lastDate)) {
+						int extraDayes = daysBetween(finishDate, lastDate);
+						penaltiesBefore+= extraDayes*project.getDelayPenaltyAmount().doubleValue();
 					}
 				}
-
+				double profitBefore = totalIncome-totalCost-penaltiesBefore-overHeadBefore;
+				double profitAfter = totalIncome-totalCost-penaltiesAfter-overHeadAfter;
+				
+				projSB.append("<tr><td>").append(project.getProjectCode());
+				
+				
+				
+				projSB.append("</td><td>");
+				
+				if (profitBefore>profitAfter) {
+					projSB.append("<div style=\"width:16px;height:16px\" class=\"decreasetProjectProfitLogo\"></div>");
+				} else {
+					projSB.append("<div style=\"width:16px;height:16px\" class=\"sameProjectProfitLogo\"></div>");
+				}
+				projSB.append("</td><td>").append(profitBefore).append("</td><td>").append(profitAfter).append("</td></tr>");
 			}
-			sb.append("</table>");
+			projSB.append("</table>");
+			
+			sb.append("</table>\r").append(projSB.toString());
+			return new ServerResponse("0", "Success", sb.toString());
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PORT0002" , String.format("Error updating Portfolio %s: %s" , portfolio!=null?portfolio.getPortfolioName():"", e.getMessage() ), e);
+		}
+	}
+
+	public static Date addDayes(Date date,int numOfDays) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.DATE, numOfDays);
+		return calendar.getTime();
+	}
+	private static int daysBetween(Date d1, Date d2){
+        return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
+	}	
+
+	public ServerResponse getSolutionAsCSV(HttpSession session , int portfolioId) throws OptimaException {
+		if (!isSolved(session, portfolioId)) {
+			return new ServerResponse("0", "Success", "");
+		}
+		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+		Portfolio portfolio = null;
+		try {
+			portfolio = controller.find(Portfolio.class, portfolioId);
+			
+			//if all tasks have scheduled start date it means that it is already been solved before
+			SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
+
+			StringBuilder sb = new StringBuilder();
+			StringBuilder projSB = new StringBuilder();
+			projSB.append("\rProject Name,change,Profit before,Profit After\r");
+			
+			List<Project> projects = portfolio.getProjects();
+			for (Project project : projects) {
+				double totalCost = 0;
+				double totalIncome = 0;
+				
+				double overHeadBefore = 0;
+				double overHeadAfter = 0;
+				
+				double penaltiesBefore = 0;
+				double penaltiesAfter = 0;
+				Date lastDate = null;
+				
+				sb.append(project.getProjectCode()).append("\r");
+				List<ProjectTask> tasks = project.getProjectTasks();
+				for (ProjectTask task : tasks) {
+					totalCost += task.getUniformDailyCost().doubleValue() * task.getDuration();
+					totalIncome += task.getUniformDailyIncome().doubleValue() * task.getDuration();
+
+					sb.append(",");
+					if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
+						sb.append("✔,");
+					} else {
+						sb.append(">,");
+					}
+					sb.append(task.getTaskDescription()).append(",")
+							.append(format.format(task.getTentativeStartDate())).append(",")
+							.append(format.format(task.getScheduledStartDate())).append("\r");
+					
+					if (lastDate==null) {
+						int duration = TaskController.getDuration(project, task.getTentativeStartDate(), task.getDuration());
+						lastDate = addDayes(task.getTentativeStartDate(),duration); 
+					} else {
+						int duration = TaskController.getDuration(project, task.getTentativeStartDate(), task.getDuration());
+						Date newDate = addDayes(task.getTentativeStartDate(),duration);
+						if (lastDate.before(newDate)) {
+							lastDate = newDate;
+						}
+					}
+					
+				}		
+				
+				//overhead
+				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
+				Date scheduledStart = projectDates[0];
+				Date scheduledEnd   = projectDates[1];
+				overHeadAfter += daysBetween(scheduledStart, scheduledEnd)*project.getOverheadPerDay().doubleValue();
+				
+				Date d1 = project.getPropusedStartDate();
+				Date d2 = lastDate; 
+				overHeadBefore += daysBetween(d1, d2)*project.getOverheadPerDay().doubleValue();
+				
+				
+				//calculate penalties
+				Date finishDate = project.getProposedFinishDate();
+				if (finishDate!=null ) {
+					if (finishDate.after(scheduledEnd)) {
+						int extraDayes = daysBetween(finishDate, scheduledEnd);
+						penaltiesAfter += extraDayes*project.getDelayPenaltyAmount().doubleValue();
+					}
+					if (finishDate.after(lastDate)) {
+						int extraDayes = daysBetween(finishDate, lastDate);
+						penaltiesBefore+= extraDayes*project.getDelayPenaltyAmount().doubleValue();
+					}
+				}
+				double profitBefore = totalIncome-totalCost-penaltiesBefore-overHeadBefore;
+				double profitAfter = totalIncome-totalCost-penaltiesAfter-overHeadAfter;
+				
+				projSB.append(project.getProjectCode());
+				projSB.append(",");
+				
+				if (profitBefore>profitAfter) {
+					projSB.append("▽");
+				} else {
+					projSB.append("✔");
+				}
+				projSB.append(",").append(profitBefore).append(",").append(profitAfter).append("\r");
+				
+			}
+			
+			sb.append("\r").append(projSB.toString());
 			return new ServerResponse("0", "Success", sb.toString());
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -261,95 +422,6 @@ public class PortfolioController {
 		}
 	}
 	
-	public ServerResponse getSolutionAsCSV(HttpSession session , int portfolioId) throws OptimaException {
-		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
-		Portfolio portfolio = null;
-		try {
-			portfolio = controller.find(Portfolio.class, portfolioId);
-			//verify it is already solved
-			List<Project> projects = portfolio.getProjects();
-			for (Project project : projects) {
-				List<ProjectTask> tasks = project.getProjectTasks();
-				for (ProjectTask task:tasks) {
-					if (task.getScheduledStartDate()==null) {
-						//if at least one task doesn't have scheduled start date then it is not really solved yet
-						return new ServerResponse("0", "Success", "");
-					}
-				}
-			}
-			//if all tasks have scheduled start date it means that it is already been solved before
-			SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
-
-			Date[] projectBoundaries = PaymentUtil.getPortofolioDateRangesNew(controller, portfolioId);
-			List<SchedulePeriod> periods = new ArrayList<SchedulePeriod>();
-			Date currentIndex = projectBoundaries[0];
-			ProjectController projectController = new ProjectController();
-			while(true) {
-				SchedulePeriod period = projectController.getCurrentPeriodBoundriesNew(session, currentIndex, portfolioId);
-				if (period!=null && period.getCurrent()!=null) {
-					periods.add(period);
-					currentIndex = period.getCurrent().getDateTo();
-				} 
-				if(projectBoundaries[1].getTime() <= period.getCurrent().getDateFrom().getTime()) {
-					break;
-				}
-			}
-			
-			StringBuilder sb = new StringBuilder();
-
-			for (SchedulePeriod period:periods) {
-				Date startDate = period.getCurrent().getDateFrom();
-				Date endDate = period.getCurrent().getDateTo();
-				Boolean periodHeaderAdded = false;
-
-				for (Project project : projects) {
-					Boolean projectHeaderAdded = false;
-
-					List<ProjectTask> tasks = project.getProjectTasks();
-					for (ProjectTask task : tasks) {
-						Boolean startedIn = inBetweenDates(task.getScheduledStartDate(), startDate, endDate);
-						Boolean shouldPrint = startedIn
-								|| inBetweenDates(task.getTentativeStartDate(), startDate, endDate);
-
-						// only on tasks that will start in current period or
-						// that initially should have started this period
-						if (shouldPrint) {
-							if (!periodHeaderAdded) {
-								sb.append(format.format(startDate))
-										.append(" TO: ").append(format.format(endDate)).append("\r");
-								periodHeaderAdded = true;
-							}
-							if (!projectHeaderAdded) {
-								sb.append(",")
-										.append(project.getProjectCode()).append("\r");
-								projectHeaderAdded = true;
-							}
-							sb.append(",,");
-							if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
-								sb.append("✔,");
-							} else if (!startedIn) {
-								sb.append(">>,");
-							} else {
-								sb.append(">,");
-							}
-							sb.append(task.getTaskDescription()).append(",")
-									.append(format.format(task.getTentativeStartDate())).append(",")
-									.append(format.format(task.getScheduledStartDate())).append("\r");
-						}
-
-					}
-				}
-
-			}
-			return new ServerResponse("0", "Success", sb.toString());
-		} catch (EntityControllerException e) {
-			e.printStackTrace();
-			return new ServerResponse("PORT0002" , String.format("Error updating Portfolio %s: %s" , portfolio!=null?portfolio.getPortfolioName():"", e.getMessage() ), e);
-		}
-	}
-	private static Boolean inBetweenDates(Date d,Date start, Date end) {
-		return !d.before(start) && d.before(end);
-	}
 	/**
 	 * @param session
 	 * @param key
@@ -636,6 +708,72 @@ public class PortfolioController {
 		
 	}
 	
+	public ServerResponse	getProjectCashFlowChart(HttpSession session, int projectId) throws OptimaException {
+		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		try {
+			
+			Map<String, DailyCashFlowMapEntity> results = new HashMap<String, DailyCashFlowMapEntity>();
+			
+			Project project = controller.find(Project.class , projectId);
+			
+			int portfolioId = project.getPortfolio().getPortfolioId();
+			Date[] portoflioDateRange = getPortfolioDateRangeWithLastPayment(session, portfolioId);
+			
+			Calendar start = Calendar.getInstance();
+			start.setTime(portoflioDateRange[0]);
+			Calendar end = Calendar.getInstance();
+			end.setTime(portoflioDateRange[1]);
+
+			Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller, project.getProjectId());
+			Date projectStartDate = projectDates[0];
+		
+			
+			Date[] tasksSpan = PaymentUtil.getProjectDateRanges(controller, projectId);
+		
+			Date lastTaskEndDate = tasksSpan[1];
+			double totalRetained = 0.0;
+			for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
+				DailyCashFlowMapEntity entity = new DailyCashFlowMapEntity();
+				entity.setPortfolioId(project.getPortfolio().getPortfolioId());
+				entity.setProjectId(project.getProjectId());
+				entity.setDay(date);
+				boolean includeOverhead = false;
+				if (   (date.equals(projectStartDate) || date.after(projectStartDate)) 
+					&& (date.before(lastTaskEndDate) || date.equals(lastTaskEndDate))) {
+					includeOverhead = true;
+				}
+				entity.setCashout(PaymentUtil.getDateTasksCashout(project, date , includeOverhead  ));
+				entity.setFinanceCost(PaymentUtil.getDateFinanceCost(project, date, results));
+				double payment = PaymentUtil.getProjectPaymentstNew(session, project, date);
+				double originalPayment = payment / (1.0-project.getRetainedPercentage().doubleValue()-project.getAdvancedPaymentPercentage().doubleValue());
+
+				
+				if(!start.equals(end))
+				{
+					double retainedAmount = originalPayment * project.getRetainedPercentage().doubleValue();
+					double advancedAmount = originalPayment * project.getAdvancedPaymentPercentage().doubleValue();
+					totalRetained = totalRetained + retainedAmount;
+					entity.setPayments(payment);
+				}else
+					entity.setPayments(payment + totalRetained);
+								
+				entity.setBalance(PaymentUtil.getBalance(date, entity, results));
+				entity.setNetBalance(entity.getBalance() + entity.getFinanceCost());
+				
+				results.put( PaymentUtil.dateOnlyFormat.format(date) + "," + project.getProjectId(), entity);
+			}
+
+			
+			
+			return new ServerResponse("0", "Success", results);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PORT0008" , String.format("Error loading portfolios : %s" , e.getMessage() ), e);
+		}
+		
+	}
+	
+	
 	public ServerResponse	getProjectCashFlowData(HttpSession session, int projectId) throws OptimaException {
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 		try {
@@ -915,10 +1053,11 @@ public class PortfolioController {
 	}
 	public ServerResponse downloadCashflowGraph (HttpSession session, int portfolioId) {
 			EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+			Workbook workbook = null;
 			try {
 				
 				//Load graph template 
-				Workbook workbook = new XSSFWorkbook(OPCPackage.open(new FileInputStream(session.getServletContext().getRealPath( "/WEB-INF" + File.separator + "/files" + File.separator + "template.xlsx"))));
+				workbook = new XSSFWorkbook(OPCPackage.open(new FileInputStream(session.getServletContext().getRealPath( "/WEB-INF" + File.separator + "/files" + File.separator + "template.xlsx"))));
 				CreationHelper createHelper = workbook.getCreationHelper();
 				
 				
@@ -932,12 +1071,12 @@ public class PortfolioController {
 				Cell portfolioNameCell = portfolioNameRow.getCell(4);
 				portfolioNameCell.setCellValue(portfolio.getPortfolioName());
 				
-				Map<Date, Double> totalCashOut = new HashMap();
-				Map<Date, Double> totalFinanceCost = new HashMap();
-				Map<Date, Double> totalBalanceSolution = new HashMap();
-				Map<Date, Double> totalPayments = new HashMap();
-				Map<Date, Double> totalBalanceInitial = new HashMap();
-				Map<Date, Double> totalFinance = new HashMap();
+				Map<Date, Double> totalCashOut = new HashMap<Date, Double>();
+				Map<Date, Double> totalFinanceCost = new HashMap<Date, Double>();
+				Map<Date, Double> totalBalanceSolution = new HashMap<Date, Double>();
+				Map<Date, Double> totalPayments = new HashMap<Date, Double>();
+				Map<Date, Double> totalBalanceInitial = new HashMap<Date, Double>();
+				Map<Date, Double> totalFinance = new HashMap<Date, Double>();
 				
 				int proj = 1;
 				for (Project currentProject : projects) {
@@ -1227,15 +1366,23 @@ public class PortfolioController {
 			} catch (Exception e) {
 				e.printStackTrace();
 				return new ServerResponse("PROJ0003" , String.format("Error looking up portfolio %d: %s" , portfolioId , e.getMessage() ), e);
+			} finally {
+				if (workbook!=null) {
+					try {
+						workbook.close();
+					} catch (IOException e) {
+					}
+				}
 			}
 		}
 	
 	public ServerResponse downloadCashflowGraphNew (HttpSession session, int portfolioId) {
 		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+		Workbook workbook = null;
 		try {
 			
 			//Load graph template 
-			Workbook workbook = new XSSFWorkbook(OPCPackage.open(new FileInputStream(session.getServletContext().getRealPath( "/WEB-INF" + File.separator + "/files" + File.separator + "template.xlsx"))));
+			workbook = new XSSFWorkbook(OPCPackage.open(new FileInputStream(session.getServletContext().getRealPath( "/WEB-INF" + File.separator + "/files" + File.separator + "template.xlsx"))));
 			CreationHelper createHelper = workbook.getCreationHelper();
 			
 			
@@ -1249,12 +1396,12 @@ public class PortfolioController {
 			Cell portfolioNameCell = portfolioNameRow.getCell(4);
 			portfolioNameCell.setCellValue(portfolio.getPortfolioName());
 			
-			Map<Date, Double> totalCashOut = new HashMap();
-			Map<Date, Double> totalFinanceCost = new HashMap();
-			Map<Date, Double> totalBalanceSolution = new HashMap();
-			Map<Date, Double> totalPayments = new HashMap();
-			Map<Date, Double> totalBalanceInitial = new HashMap();
-			Map<Date, Double> totalFinance = new HashMap();
+			Map<Date, Double> totalCashOut = new HashMap<Date, Double>();
+			Map<Date, Double> totalFinanceCost = new HashMap<Date, Double>();
+			Map<Date, Double> totalBalanceSolution = new HashMap<Date, Double>();
+			Map<Date, Double> totalPayments = new HashMap<Date, Double>();
+			Map<Date, Double> totalBalanceInitial = new HashMap<Date, Double>();
+			Map<Date, Double> totalFinance = new HashMap<Date, Double>();
 			
 			int proj = 1;
 			for (Project currentProject : projects) {
@@ -1544,9 +1691,267 @@ public class PortfolioController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ServerResponse("PROJ0003" , String.format("Error looking up portfolio %d: %s" , portfolioId , e.getMessage() ), e);
+		} finally {
+			if (workbook!=null) {
+				try {
+					workbook.close();
+				} catch (IOException e) {
+				}
+			}
 		}
 	}
 	
+	private static final int SVG_HEIGHT = 300;
+	private static final int SVG_PADDING = 30;
+	private static final int DAY_WIDTH = 20;
+	private static final int FIRST_DAY = 120;
+	
+	
+	/*
+	 * returns SVG for the flow chart
+	 */
+	public ServerResponse getCashFlowSVGGraph(HttpSession session, int portfolioId) {
+		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+		try {
+
+			Map<String, DailyCashFlowMapEntity> results = new HashMap<String, DailyCashFlowMapEntity>();
+			Portfolio portfolio = controller.find(Portfolio.class, portfolioId);
+			Date[] portoflioDateRange = getPortfolioDateRangeWithLastPayment(session, portfolioId);
+			List<Project> projects = portfolio.getProjects();
+
+			Map<Date, Double> totalCashOut = new HashMap<Date, Double>();
+			Map<Date, Double> totalFinanceCost = new HashMap<Date, Double>();
+			Map<Date, Double> totalBalanceSolution = new HashMap<Date, Double>();
+			Map<Date, Double> totalPayments = new HashMap<Date, Double>();
+			Map<Date, Double> totalBalanceInitial = new HashMap<Date, Double>();
+			Map<Date, Double> totalFinance = new HashMap<Date, Double>();
+
+			Map<Date, Double> totalOriginalCashOut = new HashMap<Date, Double>();
+			Map<Date, Double> totalOriginalFinance = new HashMap<Date, Double>();
+			Map<Date, Double> totalOriginalBalanceSolution = new HashMap<Date, Double>();
+			Map<Date, Double> totalOriginalPayments = new HashMap<Date, Double>();
+			
+			for (Project currentProject : projects) {
+
+				Calendar start = Calendar.getInstance();
+				start.setTime(portoflioDateRange[0]);
+				Calendar end = Calendar.getInstance();
+				end.setTime(portoflioDateRange[1]);
+
+				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, currentProject.getProjectId());
+				Date projectStartDate = projectDates[0];
+				Date projectEndDate = projectDates[1];
+
+				for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE,
+						1), date = start.getTime()) {
+					DailyCashFlowMapEntity entity = new DailyCashFlowMapEntity();
+					entity.setPortfolioId(portfolioId);
+					entity.setProjectId(currentProject.getProjectId());
+					entity.setDay(date);
+					boolean includeOverhead = false;
+					if ((date.equals(projectStartDate) || date.after(projectStartDate))
+							&& (date.before(projectEndDate) || date.equals(projectEndDate))) {
+						includeOverhead = true;
+					}
+
+
+					double cashOutValue = PaymentUtil.getDateTasksCashout(currentProject, date, includeOverhead);
+					entity.setCashout(cashOutValue);
+					if (totalCashOut.get(date) == null)
+						totalCashOut.put(date, cashOutValue);
+					else
+						totalCashOut.put(date, totalCashOut.get(date) + cashOutValue);
+
+					double cashOutValue2 = PaymentUtilBeforeSolving.getDateTasksCashout(currentProject, date, includeOverhead);
+					if (totalOriginalCashOut.get(date) == null)
+						totalOriginalCashOut.put(date, cashOutValue2);
+					else
+						totalOriginalCashOut.put(date, totalOriginalCashOut.get(date) + cashOutValue2);
+
+					double financeCostValue = PaymentUtil.getDateFinanceCost(currentProject, date, results);
+					entity.setFinanceCost(financeCostValue);
+					if (totalFinanceCost.get(date) == null)
+						totalFinanceCost.put(date, financeCostValue);
+					else
+						totalFinanceCost.put(date, totalFinanceCost.get(date) + financeCostValue);
+
+					double paymentsValue = PaymentUtil.getProjectPaymentstNew(session, currentProject, date);
+					entity.setPayments(paymentsValue);
+					if (totalPayments.get(date) == null)
+						totalPayments.put(date, paymentsValue);
+					else
+						totalPayments.put(date, totalPayments.get(date) + paymentsValue);
+
+					double paymentsValue2 = PaymentUtilBeforeSolving.getProjectPaymentstNew(session, currentProject, date);
+					if (totalOriginalPayments.get(date) == null)
+						totalOriginalPayments.put(date, paymentsValue2);
+					else
+						totalOriginalPayments.put(date, totalOriginalPayments.get(date) + paymentsValue2);
+
+					double balanceSolutionValue = PaymentUtil.getBalance(date, entity, results);
+					entity.setBalance(balanceSolutionValue);
+					if (totalBalanceSolution.get(date) == null)
+						totalBalanceSolution.put(date, balanceSolutionValue);
+					else
+						totalBalanceSolution.put(date, totalBalanceSolution.get(date) + balanceSolutionValue);
+
+					double balanceSolutionValue2 = PaymentUtilBeforeSolving.getBalance(date, entity, results);
+					if (totalOriginalBalanceSolution.get(date) == null)
+						totalOriginalBalanceSolution.put(date, balanceSolutionValue2);
+					else
+						totalOriginalBalanceSolution.put(date, totalOriginalBalanceSolution.get(date) + balanceSolutionValue2);
+					
+					double finance = PaymentUtil.getFinanceLimit(session, portfolioId, date);
+					totalFinance.put(date, -1 * finance);
+
+					double finance2 = PaymentUtilBeforeSolving.getFinanceLimit(session, portfolioId, date);
+					totalOriginalFinance.put(date, -1 * finance2);
+					
+					if (totalBalanceInitial.get(date) == null)
+						totalBalanceInitial.put(date, entity.getBalance() + entity.getFinanceCost());
+					else
+						totalBalanceInitial.put(date,
+								totalBalanceInitial.get(date) + entity.getBalance() + entity.getFinanceCost());
+
+					results.put(PaymentUtil.dateOnlyFormat.format(date) + "," + currentProject.getProjectId(), entity);
+				}
+
+			}
+			
+			//get the ranges of the finance
+			Double cashTop = null;
+			Double cashBottom = null;
+			
+			for (Double val : totalBalanceSolution.values()) {
+				if (cashTop==null) {
+					cashTop = val;
+				} else if (cashTop<val){
+					cashTop = val;
+				}
+				if (cashBottom==null) {
+					cashBottom = val;
+				} else if (cashBottom>val) {
+					cashBottom = val;
+				}
+			}
+			for (Double val : totalFinance.values()) {
+				if (cashTop==null) {
+					cashTop = val;
+				} else if (cashTop<val){
+					cashTop = val;
+				}
+				if (cashBottom==null) {
+					cashBottom = val;
+				} else if (cashBottom>val) {
+					cashBottom = val;
+				}
+			}
+			
+			long numOfDayes = ProjectController.differenceInDays(portoflioDateRange[0], portoflioDateRange[1]);
+			long width = (numOfDayes+2) * DAY_WIDTH + 3*SVG_PADDING ; // 
+			
+			
+			//need to display a bit more in the top and bottom
+			double range = Math.abs(cashTop  - cashBottom);
+			int numOfDijits = (int)Math.floor(Math.log10(range * 1.2));
+			double cashStep = Math.pow(10, numOfDijits); 
+			int startCash = (int) ((int)Math.floor(cashBottom/cashStep) * cashStep);
+			int numberOfCashes = (int) (Math.floor(Math.abs(cashTop  - startCash)/cashStep) + 2); //number of horizontal lines we will draw
+			int cashHeight = (SVG_HEIGHT - 2*SVG_PADDING) /numberOfCashes;
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("<svg height='").append(SVG_HEIGHT).append("' width='").append(width).append("'>\r");
+			//draw the horizontal lines
+			for (int i=0;i<numberOfCashes;i++) {
+				int x = 3*SVG_PADDING;
+				int y = SVG_HEIGHT-SVG_PADDING-i*cashHeight;
+				//<path id="lineAB" d="M 100 350 l 150 -300 l 150 300" stroke="red"
+				sb.append("<path d=\"M ").append(x).append(" ").append(y).append(" l ").append(width-SVG_PADDING-x).append(" 0\" stroke='lightgrey' stroke-width='1' fill='none'></path>\r");
+				sb.append("<text x=\"10\" y=\"").append(y).append("\" font-size=\"12\" stroke=\"black\">").append(startCash + cashStep*i).append("</text>\r");
+			}
+			
+			SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
+			
+			Calendar start = Calendar.getInstance();
+			start.setTime(portoflioDateRange[0]);
+			Calendar end = Calendar.getInstance();
+			end.setTime(portoflioDateRange[1]);
+			
+			int index = 0;
+			int financeY = 0;
+			int currentY = 0;
+			int currentY2 = 0;
+			StringBuilder financeSB = new StringBuilder();
+			StringBuilder currentSB = new StringBuilder();
+			StringBuilder originalSB = new StringBuilder();
+			
+			double prevBalance = 0;
+			double prevBalance2 = 0;
+			double ratio = cashHeight / cashStep;
+			for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
+				int x = FIRST_DAY + index * DAY_WIDTH;
+				//<text font-size="12" fill="lightgrey" transform="translate(100 350) rotate(-90)" >I love SVG</text>
+				if((index%2)==0) {
+				sb.append("<text transform=\"translate(").append(x).append(" ").append(SVG_HEIGHT-2*SVG_PADDING).append(") rotate(-90)\" font-size=\"12\" fill=\"gray\" fill-opacity=\"0.7\">").append(format.format(date)).append("</text>\r");
+				}
+				Double cF = totalFinance.get(date);
+				
+				int yf = (int) (SVG_HEIGHT - (cF-startCash)*ratio-SVG_PADDING);
+				int ys = (int) (SVG_HEIGHT - (prevBalance+totalPayments.get(date)-startCash)*ratio-SVG_PADDING); 
+				int yE = (int) (SVG_HEIGHT - (prevBalance+totalPayments.get(date) - totalCashOut.get(date)-startCash)*ratio-SVG_PADDING); 
+				int ysO = (int) (SVG_HEIGHT - (prevBalance2+totalOriginalPayments.get(date)-startCash)*ratio-SVG_PADDING); 
+				int yEO = (int) (SVG_HEIGHT - (prevBalance2+totalOriginalPayments.get(date) - totalOriginalCashOut.get(date)-startCash)*ratio-SVG_PADDING); 
+				if (index==0) {
+					financeSB.append("<path d=\"M ").append(FIRST_DAY).append(" ").append(yf);
+					financeY = yf;
+					
+					currentSB.append("<path d=\"M ").append(FIRST_DAY).append(" ").append(ys);
+					currentSB.append(" l 0 ").append(yE-ys);
+					currentY = yE;
+					
+					originalSB.append("<path d=\"M ").append(FIRST_DAY).append(" ").append(ys);
+					originalSB.append(" l 0 ").append(yEO-ysO);
+					currentY2 = yEO;
+				} else {
+					if (financeY==yf) {
+						financeSB.append(" l ").append(DAY_WIDTH).append(" 0");
+					} else {
+						financeSB.append(" l ").append(DAY_WIDTH).append(" 0 l 0 ").append(yf-financeY);
+						financeY = yf;
+					}
+					
+					currentSB.append(" l ").append(DAY_WIDTH).append(" 0");
+					currentSB.append(" l 0 ").append(yE-currentY);
+					currentY = yE;
+
+					originalSB.append(" l ").append(DAY_WIDTH).append(" 0");
+					originalSB.append(" l 0 ").append(yEO-currentY2);
+					currentY2 = yEO;
+					
+				}
+				prevBalance = totalBalanceSolution.get(date);
+				prevBalance2 = totalOriginalBalanceSolution.get(date);
+				index++;
+			}
+			financeSB.append("\" stroke=\"orange\" stroke-width=\"2\" fill=\"none\" />\r");
+			sb.append(financeSB.toString());
+
+			currentSB.append("\" stroke=\"green\" stroke-width=\"2\" fill=\"none\" />\r");
+			sb.append(currentSB.toString());
+
+//			originalSB.append("\" stroke=\"blue\" stroke-width=\"2\" fill=\"none\" />\r");
+//			sb.append(originalSB.toString());
+
+			sb.append("</svg>");
+			return new ServerResponse("0", "Success",sb.toString());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ServerResponse("PROJ0003",
+					String.format("Error looking up portfolio %d: %s", portfolioId, e.getMessage()), e);
+		}
+	}	
+
 	private static byte[] loadFile(File file) throws IOException {
 	    InputStream is = new FileInputStream(file);
  
@@ -1564,6 +1969,10 @@ public class PortfolioController {
 	    }
  
 	    if (offset < bytes.length) {
+	    	try {
+	    		is.close();
+	    	} catch (Exception e) {
+	    	}
 	        throw new IOException("Could not completely read file "+file.getName());
 	    }
  

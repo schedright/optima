@@ -1113,3 +1113,12 @@ h2 {
 	height:350px;
 	overflow:auto;
 }
+
+.decreasetProjectProfitLogo{
+	background: url(../images/decreasedProfitLogo.png) no-repeat;
+	padding-left:25px;
+}
+.sameProjectProfitLogo{
+	background: url(../images/sameProfileLogo.png) no-repeat;
+	padding-left:25px;
+}

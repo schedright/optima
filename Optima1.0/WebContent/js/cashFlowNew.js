@@ -1,6 +1,7 @@
 $(function() {
 	document.title = 'Cash Flow';
     var portfolioId = null;
+    $( "#accordion" ).accordion();
 
     for ( var i in getURLVariables()) {
 	if (i == "portfolioId") {
@@ -191,6 +192,11 @@ $(function() {
 	
 			}
 
+			var svgGraphCall = rpcClient.portfolioService.getCashFlowSVGGraph(portfolioId)
+			if (svgGraphCall.result && svgGraphCall.data) {
+				$("#cashflowChartDiv").html('');
+				$("#cashflowChartDiv").append(svgGraphCall.data); 
+			}
 	    }
 	    
 		pData[rowCount] = {};

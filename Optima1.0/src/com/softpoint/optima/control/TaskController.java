@@ -439,10 +439,14 @@ public class TaskController {
 	 * @param task
 	 */
 	protected void calculateCalederDuration(Project project, ProjectTask task) {
-		Date startDate = task.getCalendarStartDate();
+		task.setCalenderDuration(getDuration(project,task.getCalendarStartDate(),task.getDuration()));
+
+	}
+
+	public static int getDuration(Project project, Date startDate, int originalDuration) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(startDate);
-		int duration = task.getDuration();
+		int duration = originalDuration;
 		int calendarDuration = 0;
 		while (duration > 0) {
 			if ( PaymentUtil.isDayOff(startDate, project.getDaysOffs())
@@ -457,10 +461,8 @@ public class TaskController {
 			
 
 		}
-		task.setCalenderDuration(calendarDuration);
-
+		return calendarDuration;
 	}
-
 	
 
 	/**

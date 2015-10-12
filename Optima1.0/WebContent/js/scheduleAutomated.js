@@ -33,11 +33,11 @@ $(function() {
 		
 		    fillProjectList(projectsData);
 		}
-		var solutionResponse = rpcClient.portfolioService.getSolution(portfolioId);
-		if (solutionResponse.result==0 && solutionResponse.data) {
+		var solutionResponse = rpcClient.portfolioService.hasSolution(portfolioId);
+		if (solutionResponse.result==0 && solutionResponse.data && solutionResponse.data=='TRUE') {
 			$("#currentSolution").css('display','');
 			$("#schedResults").html('');
-			$("#schedResults").append(solutionResponse.data); 
+			$("#schedResults").append("<p style='margin-left:65px'><a href='financials.jsp?portfolioId=" + portfolioId +"'>Go to the current solution.</a></p>"); 
 			
 		} else {
 			$("#currentSolution").css('display','none');
@@ -72,37 +72,27 @@ $(function() {
       			 
       		 }
       	 ).click(function(){
-      		$('#loading-indicator').show();
-      		var projectsAccordingToPriority = $("#mainAllProjects").find('li');
-      		var projectID = projectsAccordingToPriority[0].id;
-      		var priorityOrder = "";
-      		var separator = "";
-      		for (var i = 0; i < projectsAccordingToPriority.length; i++) {
-      			priorityOrder = priorityOrder + separator + projectsAccordingToPriority[i].id;
-      			separator = ",";
-      		}
-      		
-  			 rpcClient.projectService.getSolution( function(result , exception) {
-  			if (result.result == 0) {
-  				var solutionResponse = rpcClient.portfolioService.getSolution(portfolioId);
-  				if (solutionResponse.result==0 && solutionResponse.data) {
-  					$("#currentSolution").css('display','');
-  					$("#schedResults").html('');
-  					$("#schedResults").append(solutionResponse.data); 
-  					
-  				} else {
-  					$("#currentSolution").css('display','none');
-  				}
-//  				$("#currentSolution").css('display','');
-//  				var data = result.data;
-//  				$("#schedResults").html('');
-//  				$("#schedResults").append(data); 
-  				$('#loading-indicator').hide();
-  			 } else {
-  				showMessage("Solve",'Error:' + result.message,'error');
-  			 }
-  		 }, projectID, "", priorityOrder); 
-  			 
+				var displayed = $("#currentSolution").css('display');
+				if (displayed == 'none') {
+					solveIt(portfolioId);
+				} else {
+	
+					var buttons = {
+						Yes : function() {
+							$(this).dialog("close");
+							solveIt(portfolioId);
+							return;
+						},
+						No : function() {
+							$(this).dialog("close");
+							return;
+						}
+					}
+					showMessage(
+							'Solve',
+							'The portfolio was already solved before. Do you want to solve it agin?',
+							'info', buttons);
+				}
   	 });
 
     $("#exportSolutionToCSV").button(
@@ -126,6 +116,30 @@ $(function() {
  	 });
     
 });
+
+function solveIt(portfolioId) {
+	$('#loading-indicator').show();
+	var projectsAccordingToPriority = $("#mainAllProjects").find('li');
+	var projectID = projectsAccordingToPriority[0].id;
+	var priorityOrder = "";
+	var separator = "";
+	for (var i = 0; i < projectsAccordingToPriority.length; i++) {
+		priorityOrder = priorityOrder + separator + projectsAccordingToPriority[i].id;
+		separator = ",";
+	}
+	rpcClient.projectService.getSolution( function(result , exception) {
+			if (result.result == 0 && result.data) {
+				$("#currentSolution").css('display','');
+				$("#schedResults").html('');
+				$("#schedResults").append("<p style='margin-left:65px'><a href='financials.jsp?portfolioId=" + portfolioId +"'>Go to the current solution.</a></p>"); 
+				showMessage("Solve Portfolio",'Portfolio solved successfully.','success');
+			} else {
+				showMessage("Solve Portfolio",'Error:' + result.message,'error');
+				$("#currentSolution").css('display','none');
+			}
+			$('#loading-indicator').hide();
+	}, projectID, "", priorityOrder); 
+};
 
 function getURLVariables() {
 	var getVars = [];
