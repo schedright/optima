@@ -314,13 +314,19 @@
                 $dataPanel.css({ height: $leftPanel.height() });
                 core.waitToggle(element, false);
                 settings.onRender();
+                
+                $rightPanel.parent().scroll(function(e) {
+                    var newScroll = $rightPanel.parent().scrollTop();
+                    $("#dateHeader").css('top',newScroll);
+                    $("#leftTopSpacer").css('top',newScroll);
+                   });
             },
 
             // Create and return the left panel with labels
             leftPanel: function (element) {
                 /* Left panel */
                 var ganttLeftPanel = $('<div class="leftPanel"/>')
-                    .append($('<div class="row spacer"/>')
+                    .append($('<div id="leftTopSpacer" class="row spacer"/>')
                     .css("height", tools.getCellSize() * element.headerRows + "px")
                     .css("width", "100%"));
 
@@ -744,7 +750,7 @@
 
 
                         // Append panel elements
-                        var dateHeader = $('<div class="dateHeader"/>');
+                        var dateHeader = $('<div id="dateHeader" class="dateHeader"/>');
                         dataPanel.append(dateHeader);
 
                         dateHeader.append(yearArr.join(""));

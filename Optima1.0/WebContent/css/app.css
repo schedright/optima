@@ -145,6 +145,8 @@ width:225px;
 border-bottom:none;
 background-color:#FFF0D3;
 margin:-2px 0 1px;
+position:absolute;
+border-bottom:1px solid #DDD;
 }
 
 .fn-gantt .rightPanel {
@@ -1121,4 +1123,8 @@ h2 {
 .sameProjectProfitLogo{
 	background: url(../images/sameProfileLogo.png) no-repeat;
 	padding-left:25px;
+}
+.dateHeader {
+	position:absolute;
+	z-index:1000;
 }
