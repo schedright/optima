@@ -25,7 +25,6 @@ import org.json.JSONObject;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
-import com.softpoint.optima.control.PaymentController;
 import com.softpoint.optima.db.DaysOff;
 import com.softpoint.optima.db.PaymentType;
 import com.softpoint.optima.db.Portfolio;
@@ -41,7 +40,7 @@ import com.softpoint.optima.struct.Period;
 import com.softpoint.optima.struct.ProjectPaymentDetail;
 import com.softpoint.optima.struct.TaskSolution;
 
-public class PaymentUtilBeforeSolving {
+public class PaymentUtilBeforeSolving extends PaymentUtil {
 	public static SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("dd/MM/yyyy");
 	
 	public synchronized static String getDatesOnly(Date date){
@@ -371,11 +370,7 @@ public class PaymentUtilBeforeSolving {
 		Date taskDate = null;
 		while (iter.hasNext()) {
 			currentTask = iter.next();
-			if(currentTask.getActualStartDate() != null){
-				taskDate = currentTask.getActualStartDate();
-			} else if (currentTask.getScheduledStartDate() != null) {
-				taskDate = currentTask.getScheduledStartDate();
-			} else if (currentTask.getTentativeStartDate() != null) {
+			if (currentTask.getTentativeStartDate() != null) {
 				taskDate = currentTask.getTentativeStartDate();
 			}
 			
@@ -541,14 +536,7 @@ public class PaymentUtilBeforeSolving {
 
 
 	public static Date getTaskDate(ProjectTask task) {
-		if (task.getActualStartDate() != null) {
-			return task.getActualStartDate();
-		} else if (task.getScheduledStartDate() != null) {
-			return task.getScheduledStartDate();
-		} else if (task.getTentativeStartDate() != null) {
-			return task.getTentativeStartDate();
-		} else return task.getTentativeStartDate();
-		
+		return task.getTentativeStartDate();
 	}
 
 
@@ -2270,8 +2258,8 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		start.setTime(task.getTentativeStartDate());
 		while (countDown>0) {
 			Date date = start.getTime() ;
-			if ( isDayOff(date, task.getProject().getDaysOffs())) {
-				start.add(Calendar.DATE, 1);
+			start.add(Calendar.DATE, 1);
+			if ( isDayOff(date, task.getProject().getDaysOffs()) || isWeekendDay(date, task.getProject().getWeekendDays())) {
 				totalDays ++;
 				continue;
 			} else {
