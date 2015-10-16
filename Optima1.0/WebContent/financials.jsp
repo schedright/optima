@@ -1,7 +1,7 @@
 <script>var currentPage=6;</script>
 <%@ include file="headerNew.html"%>
 
-<div style="width: 960px; margin-left: auto; margin-right: auto;">
+<div style="margin:20px 20px 20px 20px;">
 
 	<div class="form-section" id="financialDetails">
 		<div id="currentSolution" class="form-section">

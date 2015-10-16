@@ -41,7 +41,7 @@ div.wrapper h1, div.wrapper h2, div.wrapper h3, div.wrapper h4, div.wrapper h5, 
 
 /* ----------------------------------------------Generalise------------------------------------- */
 
-#header, #topbar, #container, #footer, #copyright{display:block; position:relative; width:960px; margin:0 auto;}
+#header, #topbar, #container, #footer, #copyright{display:block; position:relative; /* width:960px; margin:0 auto; */}
 
 /* ----------------------------------------------Header------------------------------------- */
  
@@ -82,7 +82,10 @@ div.wrapper h1, div.wrapper h2, div.wrapper h3, div.wrapper h4, div.wrapper h5, 
 
 /* jQuery Tabs Specific - Only modify if you know what you are doing */
 
-.ui-tabs{}
+.ui-tabs{
+	border:0px;
+	padding:0px;
+}
 .ui-tabs .ui-tabs-nav{}
 .ui-tabs .ui-tabs-nav li{}
 #container .ui-tabs .ui-tabs-nav li a{color:#FFFFFF; background-color:transparent;}
@@ -196,13 +199,14 @@ div.wrapper h1, div.wrapper h2, div.wrapper h3, div.wrapper h4, div.wrapper h5, 
 }
 /*****************************************************************/
 .mainContainer{
-	width: 960px;
+	/* width: 960px;
 	margin-left: auto;
-	margin-right: auto;
+	margin-right: auto; */
 }
 
 .btnRight{
 	float: right;
+	margin:10px 10px 10px 10px;
 }
 
 .accordionAfterBtn{

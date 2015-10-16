@@ -59,7 +59,7 @@ select option{
 /* CSSTidy 1.2: Sun Sep 29 01:28:31 2013 */
 .gantt,.gantt2 {
 width:100%;
-max-width: 1050px;
+/* max-width: 1050px; */
 border:14px solid #ddd;
 position:relative;
 -webkit-border-radius:6px;
@@ -68,7 +68,7 @@ border-radius:6px;
 -webkit-box-sizing:border-box;
 -moz-box-sizing:border-box;
 box-sizing:border-box;
-margin:20px auto;
+/* margin:20px auto; */
 }
 
 .gantt:after {
@@ -516,6 +516,7 @@ margin-top:2px;
 .one-column {
 	float: left;
 	width:90%;
+	margin:20px 20px 20px 20px;
 }
 
 .two-columns.right{
@@ -601,10 +602,11 @@ margin: 5px 0;
 .draggable li, #allTasks li, #dependencies li { margin: 0 5px 5px 5px; padding: 2px; font-size: 1em; width: 95%; cursor: move;}
 
 #projectButtons{
-	float:right
+	float:right;
+	margin:20px 100px;
 }
 #projectTabs{
-	width: 960px;
+	/* width: 960px; */
 }
 
 #projectTabsNew{
@@ -687,7 +689,7 @@ width: 310px !important;
   }
   
   .ui-tabs{
-  	float:left;
+  	/* float:left; */
   	margin: 0 0 20px 0;
   }
   
@@ -1126,5 +1128,5 @@ h2 {
 }
 .dateHeader {
 	position:absolute;
-	z-index:1000;
+	z-index:100;
 }
