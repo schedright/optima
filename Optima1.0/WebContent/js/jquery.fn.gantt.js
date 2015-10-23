@@ -329,6 +329,10 @@
                     .append($('<div id="leftTopSpacer" class="row spacer"/>')
                     .css("height", tools.getCellSize() * element.headerRows + "px")
                     .css("width", "100%"));
+                
+                ganttLeftPanel.append($('<div class="row leftTopMargin"/>')
+                .css("height", tools.getCellSize() * element.headerRows + "px")
+                .css("width", "100%"));
 
                 var entries = [];
                 $.each(element.data, function (i, entry) {
