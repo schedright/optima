@@ -207,13 +207,14 @@ public class PortfolioController {
 			SimpleDateFormat format = new SimpleDateFormat("dd MMM, yyyy");
 
 			StringBuilder sb = new StringBuilder();
-			sb.append("<table class=\"solutionTable\">");
-			StringBuilder projSB = new StringBuilder();
-			projSB.append("<table class=\"solutionTable\">\r")
-					.append("<tr><td>Project Name</td><td>change</td><td>Profit before</td><td>Profit After</td></tr>");
 
 			List<Project> projects = portfolio.getProjects();
 			for (Project project : projects) {
+				sb.append("<table class=\"solutionTable\">");
+				StringBuilder projSB = new StringBuilder();
+				projSB.append("<table class=\"solutionTable\">\r")
+						.append("<tr><td>").append(project.getProjectCode()).append("</td><td>change</td><td>Original</td><td>Final</td></tr>");
+
 				double totalCost = 0;
 				double totalIncome = 0;
 
@@ -242,13 +243,11 @@ public class PortfolioController {
 							.append(format.format(task.getScheduledStartDate())).append("</td></tr>\r");
 
 					if (lastDate == null) {
-						int duration = TaskController.getDuration(project, task.getTentativeStartDate(),
-								task.getDuration());
-						lastDate = addDayes(task.getTentativeStartDate(), duration);
+						int duration = task.getDuration();
+						lastDate = addDayes(task.getTentativeStartDate(), duration-1);
 					} else {
-						int duration = TaskController.getDuration(project, task.getTentativeStartDate(),
-								task.getDuration());
-						Date newDate = addDayes(task.getTentativeStartDate(), duration);
+						int duration = task.getDuration();
+						Date newDate = addDayes(task.getTentativeStartDate(), duration-1);
 						if (lastDate.before(newDate)) {
 							lastDate = newDate;
 						}
@@ -281,9 +280,7 @@ public class PortfolioController {
 				double profitBefore = totalIncome - totalCost - penaltiesBefore - overHeadBefore;
 				double profitAfter = totalIncome - totalCost - penaltiesAfter - overHeadAfter;
 
-				projSB.append("<tr><td>").append(project.getProjectCode());
-
-				projSB.append("</td><td>");
+				projSB.append("<tr><td>Profit</td><td>");
 
 				if (profitBefore > profitAfter) {
 					projSB.append("<div style=\"width:16px;height:16px\" class=\"decreasetProjectProfitLogo\"></div>");
@@ -292,10 +289,16 @@ public class PortfolioController {
 				}
 				projSB.append("</td><td>").append(profitBefore).append("</td><td>").append(profitAfter)
 						.append("</td></tr>");
-			}
-			projSB.append("</table>");
 
-			sb.append("</table>\r").append(projSB.toString());
+				projSB.append("<tr><td>Finish Date</td><td></td><td>").append(format.format(lastDate));
+				projSB.append("</td><td>").append(format.format(scheduledEnd));
+				projSB.append("</td></tr>");
+				
+				projSB.append("</table>");
+
+				sb.append("</table>\r").append(projSB.toString());
+				
+			}
 			return new ServerResponse("0", "Success", sb.toString());
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -362,11 +365,11 @@ public class PortfolioController {
 					if (lastDate == null) {
 						int duration = TaskController.getDuration(project, task.getTentativeStartDate(),
 								task.getDuration());
-						lastDate = addDayes(task.getTentativeStartDate(), duration);
+						lastDate = addDayes(task.getTentativeStartDate(), duration-1);
 					} else {
 						int duration = TaskController.getDuration(project, task.getTentativeStartDate(),
 								task.getDuration());
-						Date newDate = addDayes(task.getTentativeStartDate(), duration);
+						Date newDate = addDayes(task.getTentativeStartDate(), duration-1);
 						if (lastDate.before(newDate)) {
 							lastDate = newDate;
 						}
