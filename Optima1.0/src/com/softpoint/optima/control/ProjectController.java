@@ -1296,6 +1296,11 @@ public class ProjectController {
 
 	private static boolean SHOW_COMING_TASKS = true;
 
+	private boolean isIffDay(Project project,Date date) {
+		return PaymentUtil.isDayOff(date, project.getDaysOffs())
+		|| PaymentUtil.isWeekendDay(date, project.getWeekendDays());
+	}
+	
 	private void writeTrialToHTMLLogFile(PeriodLogGenerator report, int iteration, String shortVersion, Date from,
 			Date to, Project project, Date projectEnd, double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost,double openBalance) {
 		try {
@@ -1321,12 +1326,13 @@ public class ProjectController {
 			String header = "<td></td>";
 			Date index = start;
 			while (differenceInDays(index, end) > 0) {
+				boolean offDay = isIffDay(project, index);
 				if (!index.before(to)) {
 					// future
-					header = header + "<td bgcolor=\"CC9900\">" + new SimpleDateFormat("dd/MM").format(index) + "</td>";
+					header = header + "<td bgcolor=\"CC9900\">" + (offDay?"<div class=\"stripedDiv\"></div>":"") + new SimpleDateFormat("dd/MM").format(index) +  "</td>";
 				} else {
 					// current
-					header = header + "<td bgcolor=\"lightgreen\">" + new SimpleDateFormat("dd/MM").format(index)
+					header = header + "<td bgcolor=\"lightgreen\">"  + (offDay?"<div class=\"stripedDiv\"></div>":"") + new SimpleDateFormat("dd/MM").format(index) 
 							+ "</td>";
 				}
 				index = addDays(index, 1);
@@ -1343,6 +1349,7 @@ public class ProjectController {
 						String line = "<tr><td>" + task.getTaskDescription() + "</td>";
 						Date index2 = start;
 						while (differenceInDays(index2, end) > 0) {
+							boolean offDay = isIffDay(project, index2);
 							String color = "gray";
 							if (taskStart.before(start)) {
 								color = "lightgreen";
@@ -1354,9 +1361,9 @@ public class ProjectController {
 								}
 							}
 							if (index2.before(taskStart) || index2.after(taskEnd)) {
-								line += "<td></td>";
+								line += "<td>"  + (offDay?"<div class=\"stripedDiv\"></div>":"") +"</td>";
 							} else {
-								line += "<td bgcolor=\"" + color + "\"></td>";
+								line += "<td bgcolor=\"" + color + "\">"  + (offDay?"<div class=\"stripedDiv\"></div>":"") + "</td>";
 							}
 							index2 = addDays(index2, 1);
 						}
