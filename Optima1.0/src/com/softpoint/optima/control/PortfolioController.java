@@ -242,12 +242,13 @@ public class PortfolioController {
 							.append(format.format(task.getTentativeStartDate())).append("</td><td>")
 							.append(format.format(task.getScheduledStartDate())).append("</td></tr>\r");
 
+					int oldDuration = PaymentUtilBeforeSolving.calculateTaskDuration(task);
 					if (lastDate == null) {
 						int duration = task.getDuration();
-						lastDate = addDayes(task.getTentativeStartDate(), duration-1);
+						lastDate = addDayes(task.getTentativeStartDate(), oldDuration-1);
 					} else {
 						int duration = task.getDuration();
-						Date newDate = addDayes(task.getTentativeStartDate(), duration-1);
+						Date newDate = addDayes(task.getTentativeStartDate(), oldDuration-1);
 						if (lastDate.before(newDate)) {
 							lastDate = newDate;
 						}
@@ -268,12 +269,12 @@ public class PortfolioController {
 				// calculate penalties
 				Date finishDate = project.getProposedFinishDate();
 				if (finishDate != null) {
-					if (finishDate.after(scheduledEnd)) {
-						int extraDayes = daysBetween(finishDate, scheduledEnd);
+					if (scheduledEnd.after(finishDate)) {
+						int extraDayes = daysBetween(finishDate, scheduledEnd)-1;
 						penaltiesAfter += extraDayes * project.getDelayPenaltyAmount().doubleValue();
 					}
-					if (finishDate.after(lastDate)) {
-						int extraDayes = daysBetween(finishDate, lastDate);
+					if (lastDate.after(finishDate)) {
+						int extraDayes = daysBetween(finishDate, lastDate)-1;
 						penaltiesBefore += extraDayes * project.getDelayPenaltyAmount().doubleValue();
 					}
 				}
@@ -290,7 +291,13 @@ public class PortfolioController {
 				projSB.append("</td><td>").append(profitBefore).append("</td><td>").append(profitAfter)
 						.append("</td></tr>");
 
-				projSB.append("<tr><td>Finish Date</td><td></td><td>").append(format.format(lastDate));
+				projSB.append("<tr><td>Finish Date</td><td>");
+				if (scheduledEnd.after(lastDate)) {
+					projSB.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
+				} else {
+					projSB.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
+				}
+				projSB.append("</td><td>").append(format.format(lastDate));
 				projSB.append("</td><td>").append(format.format(scheduledEnd));
 				projSB.append("</td></tr>");
 				
@@ -315,7 +322,7 @@ public class PortfolioController {
 	}
 
 	private static int daysBetween(Date d1, Date d2) {
-		return (int) ((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
+		return (int) ((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 	}
 
 	public ServerResponse getSolutionAsCSV(HttpSession session, int portfolioId) throws OptimaException {
@@ -332,11 +339,12 @@ public class PortfolioController {
 			SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
 
 			StringBuilder sb = new StringBuilder();
-			StringBuilder projSB = new StringBuilder();
-			projSB.append("\rProject Name,change,Profit before,Profit After\r");
 
 			List<Project> projects = portfolio.getProjects();
 			for (Project project : projects) {
+				StringBuilder projSB = new StringBuilder();
+				projSB.append("\r").append(project.getProjectCode()).append(",change,Original,Final\r");
+
 				double totalCost = 0;
 				double totalIncome = 0;
 
@@ -390,20 +398,19 @@ public class PortfolioController {
 				// calculate penalties
 				Date finishDate = project.getProposedFinishDate();
 				if (finishDate != null) {
-					if (finishDate.after(scheduledEnd)) {
-						int extraDayes = daysBetween(finishDate, scheduledEnd);
+					if (scheduledEnd.after(finishDate)) {
+						int extraDayes = daysBetween(finishDate, scheduledEnd)-1;
 						penaltiesAfter += extraDayes * project.getDelayPenaltyAmount().doubleValue();
 					}
-					if (finishDate.after(lastDate)) {
-						int extraDayes = daysBetween(finishDate, lastDate);
+					if (lastDate.after(finishDate)) {
+						int extraDayes = daysBetween(finishDate, lastDate)-1;
 						penaltiesBefore += extraDayes * project.getDelayPenaltyAmount().doubleValue();
 					}
 				}
 				double profitBefore = totalIncome - totalCost - penaltiesBefore - overHeadBefore;
 				double profitAfter = totalIncome - totalCost - penaltiesAfter - overHeadAfter;
 
-				projSB.append(project.getProjectCode());
-				projSB.append(",");
+				projSB.append("Profit,");
 
 				if (profitBefore > profitAfter) {
 					projSB.append("▽");
@@ -411,10 +418,20 @@ public class PortfolioController {
 					projSB.append("✔");
 				}
 				projSB.append(",").append(profitBefore).append(",").append(profitAfter).append("\r");
+				projSB.append("Finish Date,");
+				if (scheduledEnd.after(lastDate)) {
+					projSB.append(">>,");
+				} else {
+					projSB.append("✔,");
+				}
+				projSB.append(format.format(lastDate));
+				projSB.append(",").append(format.format(scheduledEnd));
+				projSB.append("\r");
+
+				sb.append(projSB.toString());
 
 			}
 
-			sb.append("\r").append(projSB.toString());
 			return new ServerResponse("0", "Success", sb.toString());
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -1670,7 +1687,7 @@ public class PortfolioController {
 	private static final String DATE_VERTICAL = "<text transform=\"translate(%d %d) rotate(-90)\" font-size=\"12\" fill=\"gray\" fill-opacity=\"0.7\">%s</text>\r";
 	
 	private static final String FINANCE_PATH = "<path d=\"%s\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><path d=\"M 250 498 l 75 0\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><text x=\"250\" y=\"492\" font-size=\"18\" stroke=\"orange\">Finance</text>";
-	private static final String ORIGINAL_PATH = "<path d=\"%s\" stroke=\"lightblue\" stroke-width=\"4\" stroke-dasharray=\"5,5\" stroke-opacity=\"0.8\" fill=\"none\"></path><path d=\"M 400 498 l 75 0\" stroke=\"lightblue\" stroke-width=\"4\" stroke-dasharray=\"5,5\" stroke-opacity=\"0.6\" fill=\"none\"></path><text x=\"400\" y=\"492\" font-size=\"18\" stroke=\"lightblue\">Original</text>";
+	private static final String ORIGINAL_PATH = "<path d=\"%s\" stroke=\"red\" stroke-width=\"2\"  stroke-opacity=\"0.7\" fill=\"none\"></path><path d=\"M 400 498 l 75 0\" stroke=\"red\" stroke-width=\"2\" stroke-opacity=\"0.6\" fill=\"none\"></path><text x=\"400\" y=\"492\" font-size=\"18\" stroke=\"red\">Original</text>";
 	private static final String CURRENT_PATH = "<path d=\"%s\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><path d=\"M 550 498 l 75 0\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><text x=\"550\" y=\"492\" font-size=\"18\" stroke=\"green\">Final</text>";
 	
 	/*

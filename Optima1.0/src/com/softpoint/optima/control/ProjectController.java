@@ -1019,7 +1019,7 @@ public class ProjectController {
 				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
 				Date projectEndDate = projectDates[1];
 
-				writeTrialToHTMLLogFile(solutionReport, iteration, shortVersion, from, to, project, projectDates[1], totalCostCurrent,payment,extraPaymentNextPeriod, financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance);
+				writeTrialToHTMLLogFile(solutionReport, iteration, shortVersion, from, to, project, projectDates[1], totalCostCurrent,payment,paymentCurrent, financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance);
 
 				if (initial) {
 					initialInfo = cashAvailable + "," + totalCostCurrent + ","
@@ -1124,7 +1124,7 @@ public class ProjectController {
 						solutionOutput.info(shortVerion);
 
 						writeTrialToHTMLLogFile(solutionReport, iteration, shortVerion, from, to, project,
-								projectDates[1], totalCostCurrent,payment,extraPaymentNextPeriod ,financeLimit,financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance);
+								projectDates[1], totalCostCurrent,payment,paymentCurrent ,financeLimit,financeLimitNextPeriod,leftOverCost,solutionEligibleTasksLeftOverCost,openBalance);
 
 						solutions.add(solution);
 						logger.info(String.format(
@@ -1354,7 +1354,7 @@ public class ProjectController {
 							if (taskStart.before(start)) {
 								color = "lightgreen";
 							} else if (!index2.before(to)) {
-								if (taskStart.after(to)) {
+								if (!taskStart.before(to)) {
 									color = "orange";
 								} else {
 									color = "yellow";
