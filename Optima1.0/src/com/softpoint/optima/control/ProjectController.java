@@ -449,7 +449,7 @@ public class ProjectController {
 
 							cashAvailableNext = new Double(currentSolInfoArray[6]);
 
-							if ((payment > 0 || !flagToStop.get(currentProjectID)) && cashAvailableNext > 0) {
+							if ((payment + cashAvailableNext) > 0) {
 								// solvedTasks!=null && solvedTasks.size()!=0 &&
 								// atLeastOneTaskAtCurrentPeriod(solvedTasks,currentPeriod.getCurrent().getDateTo())){
 
