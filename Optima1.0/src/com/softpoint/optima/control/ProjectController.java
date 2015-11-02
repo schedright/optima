@@ -1325,7 +1325,7 @@ public class ProjectController {
 			// write header
 			String header = "<td></td>";
 			Date index = start;
-			while (differenceInDays(index, end) > 0) {
+			while (differenceInDays(index, end) > -1) {
 				boolean offDay = isIffDay(project, index);
 				if (!index.before(to)) {
 					// future
@@ -1348,7 +1348,7 @@ public class ProjectController {
 					if (SHOW_COMING_TASKS || !taskStart.after(to)) {
 						String line = "<tr><td>" + task.getTaskDescription() + "</td>";
 						Date index2 = start;
-						while (differenceInDays(index2, end) > 0) {
+						while (differenceInDays(index2, end) > -1) {
 							boolean offDay = isIffDay(project, index2);
 							String color = "gray";
 							if (taskStart.before(start)) {

@@ -1954,7 +1954,8 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		while(!reachProjectEnd){
 			Calendar cal = Calendar.getInstance();
 	        cal.setTime(projectStartDate);
-	        cal.add(Calendar.DATE, i*collectionPeriod); // play here
+	        int l = paymentRequestPeriod + ((i-1)*collectionPeriod);
+	        cal.add(Calendar.DATE, l); // play here
 	        Date paymentDate = cal.getTime();
 	        projectPayment = new ProjectPayment();
 	        

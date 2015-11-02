@@ -1933,6 +1933,17 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	}
 	
 	public static List<ProjectPayment> getProjectPayments(HttpSession session, Project project, Date projectExpectedEndDate) throws EntityControllerException {
+
+		//if multiple projects, the aligned period will be shorted that each project expected period, which might cause problems,
+		if (project.getPortfolio().getProjects().size()>1)
+		{
+			Calendar cal = Calendar.getInstance();
+			cal = Calendar.getInstance();
+	        cal.setTime(projectExpectedEndDate);
+	        cal.add(Calendar.DATE, project.getPaymentRequestPeriod());
+	        projectExpectedEndDate = cal.getTime();
+		}
+		
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 		List<ProjectPayment> projectPayments = new ArrayList<ProjectPayment>();
 		Date projectStartDate = project.getPropusedStartDate(); 
@@ -1966,7 +1977,8 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		while(!reachProjectEnd){
 			Calendar cal = Calendar.getInstance();
 	        cal.setTime(projectStartDate);
-	        cal.add(Calendar.DATE, i*collectionPeriod); // play here
+	        int l = paymentRequestPeriod + ((i-1)*collectionPeriod);
+	        cal.add(Calendar.DATE, l); // play here
 	        Date paymentDate = cal.getTime();
 	        projectPayment = new ProjectPayment();
 	        
