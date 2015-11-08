@@ -523,19 +523,23 @@ public class PortfolioController {
 			List<Project> projects = portfolio.getProjects();
 			for (Project project : projects) {
 				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
-				if (projectDates[1].getTime() > currentPeriod.getCurrent().getDateFrom().getTime()) {
-					//for multiple project, the alligned date might not be the date for request, so we need to check it here
-					if (projects.size()>1) {
-						int daysCount = PaymentUtil.daysBetween(projectDates[0], portofolioDateRanges[1]); 
-						int remainder = daysCount % project.getPaymentRequestPeriod();
-						if (remainder!=0) {
-							Calendar end = Calendar.getInstance();
-							end.setTime(portofolioDateRanges[1]);
-							end.add(Calendar.DATE, project.getPaymentRequestPeriod() - remainder);
-							portofolioDateRanges[1] = end.getTime();
+				//for multiple project, the alligned date might not be the date for request, so we need to check it here
+				if (projects.size()>1) {
+					int daysCount = PaymentUtil.daysBetween(projectDates[0], portofolioDateRanges[1]); 
+					int remainder = daysCount % project.getPaymentRequestPeriod();
+					if (remainder!=0) {
+						int diff = PaymentUtil.daysBetween(currentPeriod.getCurrent().getDateFrom(), projectDates[1]);
+						if (diff+project.getPaymentRequestPeriod() - remainder>0) {
+						Calendar end = Calendar.getInstance();
+						end.setTime(portofolioDateRanges[1]);
+						end.add(Calendar.DATE, project.getPaymentRequestPeriod() - remainder);
+						portofolioDateRanges[1] = end.getTime();
 						}
 					}
+				}
 
+				
+				if (projectDates[1].getTime() > currentPeriod.getCurrent().getDateFrom().getTime()) {
 					
 					Calendar end = Calendar.getInstance();
 					end.setTime(portofolioDateRanges[1]);
