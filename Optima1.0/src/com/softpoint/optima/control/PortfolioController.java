@@ -43,6 +43,7 @@ import com.softpoint.optima.struct.ProjectPaymentDetail;
 import com.softpoint.optima.struct.SchedulePeriod;
 import com.softpoint.optima.util.PaymentUtil;
 import com.softpoint.optima.util.PaymentUtilBeforeSolving;
+import com.softpoint.optima.util.ProjectSolutionDetails;
 
 /**
  * @author WDARWISH
@@ -321,7 +322,7 @@ public class PortfolioController {
 		return calendar.getTime();
 	}
 
-	private static int daysBetween(Date d1, Date d2) {
+	public static int daysBetween(Date d1, Date d2) {
 		return (int) ((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 	}
 
@@ -628,7 +629,7 @@ public class PortfolioController {
 			start.setTime(portoflioDateRange[0]);
 			Calendar end = Calendar.getInstance();
 			end.setTime(portoflioDateRange[1]);
-
+			
 			List<Project> projects = portfolio.getProjects();
 			for (Project currentProject : projects) {
 				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, currentProject.getProjectId());
@@ -664,6 +665,57 @@ public class PortfolioController {
 
 	}
 
+	public static class PortfolioCashFlow {
+		PortfolioCashFlow () {
+//			portfolioCashFlow = new HashMap<String, DailyCashFlowMapEntity>();
+			projectsCashFlow = new HashMap<Integer, Map<String, DailyCashFlowMapEntity>>();
+			portfolioStart = null;
+			portfolioEnd = null;
+		}
+//		Map<String, DailyCashFlowMapEntity> portfolioCashFlow;
+		Map<Integer, Map<String, DailyCashFlowMapEntity>> projectsCashFlow;
+		Date portfolioStart;
+		Date portfolioEnd;
+	}
+	
+	/**
+	 * get the complete solution for portfolio and all projects. 
+	 * @param session
+	 * @param portfolioId
+	 * @return
+	 * @throws OptimaException
+	 */
+	public ServerResponse getPortfolioCashFlowDataNew2(HttpSession session, int portfolioId) throws OptimaException {
+		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
+//		PortfolioCashFlow cashFlow = new PortfolioCashFlow();
+		try {
+			Portfolio portfolio = controller.find(Portfolio.class, portfolioId);
+			HashMap<String,Object> projectsCashFlow = new HashMap<String, Object>();
+			List<Project> projects = portfolio.getProjects();
+			projectsCashFlow.put("projects", projects);
+			Date start = null;
+			Date end = null;
+			for (Project project: projects) {
+				ProjectSolutionDetails details = new ProjectSolutionDetails(false, project);
+				projectsCashFlow.put(String.valueOf(project.getProjectId()), details.getResults());
+				
+				if (start==null || start.after(details.getPortfolioStart())) {
+					start = details.getPortfolioStart();
+				}
+				if (end==null || end.before(details.getPortfolioEnd())) {
+					end = details.getPortfolioEnd();
+				}
+			}
+			projectsCashFlow.put("start", start);
+			projectsCashFlow.put("end", end);
+			
+			return new ServerResponse("0", "Success", projectsCashFlow);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PORT0008", String.format("Error loading portfolios : %s", e.getMessage()), e);
+		}
+	}
+	
 	public ServerResponse getProjectCashFlowDataNew(HttpSession session, int projectId) throws OptimaException {
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 		try {
@@ -671,8 +723,10 @@ public class PortfolioController {
 			Map<String, DailyCashFlowMapEntity> results = new HashMap<String, DailyCashFlowMapEntity>();
 
 			Project project = controller.find(Project.class, projectId);
-
+/*
 			int portfolioId = project.getPortfolio().getPortfolioId();
+			
+			long startTime = System.nanoTime();
 			Date[] portoflioDateRange = getPortfolioDateRangeWithLastPayment(session, portfolioId);
 
 			Calendar start = Calendar.getInstance();
@@ -716,8 +770,19 @@ public class PortfolioController {
 
 				results.put(PaymentUtil.dateOnlyFormat.format(date) + "," + project.getProjectId(), entity);
 			}
+			long endTime = System.nanoTime();
 
-			return new ServerResponse("0", "Success", results);
+			ProjectSolutionDetails details = new ProjectSolutionDetails(false, project);
+			long endTime2 = System.nanoTime();
+			
+			long duration1 = (endTime - startTime); 
+			long duration2 = (endTime2 - endTime);
+
+/*/			
+			ProjectSolutionDetails details = new ProjectSolutionDetails(false, project);
+//*/
+			
+			return new ServerResponse("0", "Success", details.getResults());
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
 			return new ServerResponse("PORT0008", String.format("Error loading portfolios : %s", e.getMessage()), e);
@@ -725,6 +790,7 @@ public class PortfolioController {
 
 	}
 
+	
 	public ServerResponse getProjectCashFlowChart(HttpSession session, int projectId) throws OptimaException {
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 		try {

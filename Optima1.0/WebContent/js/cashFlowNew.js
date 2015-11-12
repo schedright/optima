@@ -9,11 +9,10 @@ $(function() {
 	}
     }
    
-    var dateRangeCall = rpcClient.portfolioService.getPortfolioDateRangeNew(portfolioId);
-
+    var allResults = rpcClient.portfolioService.getPortfolioCashFlowDataNew2(portfolioId);
     var dataView = new Slick.Data.DataView();
 
-    if (dateRangeCall.result == 0) {
+    if (allResults.result == 0) {
 	var fmt = new DateFmt("%w %d-%n-%y");
 	var fmt2 = new DateFmt("%d/%m/%y");
 
@@ -25,8 +24,8 @@ $(function() {
 	} ];
 	var pData = [];
 	var rowCount = 0;
-	var startDate = new Date(dateRangeCall.data[0].time);
-	var endDate = new Date(dateRangeCall.data[1].time);
+	var startDate = new Date(allResults.data.map.start.time);
+	var endDate = new Date(allResults.data.map.end.time);
 	var runningDate = new Date(startDate);
 	while (runningDate <= endDate) {
 
@@ -107,9 +106,9 @@ $(function() {
 		     
 		});
 	
-	var portfolioCall = rpcClient.portfolioService.find(portfolioId);
-	if (portfolioCall.result == 0) {
-	    var projects = portfolioCall.data.projects.list;
+//	var portfolioCall = rpcClient.portfolioService.find(portfolioId);
+	if (allResults.result == 0) {
+	    var projects = allResults.data.map.projects.list;
 	    var totalCashout = [];
 	    var totalFinanceCost = [];
 	    var totalBalance = [];
@@ -119,10 +118,10 @@ $(function() {
 			pData[rowCount] = {};
 			pData[rowCount]["day"] = "Project " + projects[i].projectCode + ":";
 			rowCount++;
-			var projectCashFlowData = rpcClient.portfolioService.getProjectCashFlowDataNew(projects[i].projectId);
+			var projectCashFlowData = allResults.data.map[projects[i].projectId];
 	
-			if (projectCashFlowData.result == 0) {
-			    var data = projectCashFlowData.data;
+			if (projectCashFlowData && projectCashFlowData.map) {
+			    var data = projectCashFlowData;
 	
 			    var currentCashOutRow = rowCount;
 			    pData[rowCount] = {};

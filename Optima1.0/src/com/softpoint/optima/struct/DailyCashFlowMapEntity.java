@@ -60,4 +60,11 @@ public class DailyCashFlowMapEntity {
 	public void setNetBalance(double netBalance) {
 		this.netBalance = netBalance;
 	}
+	
+	@Override
+	public String toString() {
+		return "DailyCashFlowMapEntity [portfolioId=" + portfolioId + ", projectId=" + projectId + ", day=" + day
+				+ ", cashout=" + cashout + ", financeCost=" + financeCost + ", balance=" + balance + ", payments="
+				+ payments + ", netBalance=" + netBalance + "]";
+	}
 }
