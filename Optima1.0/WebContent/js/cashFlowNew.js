@@ -1,5 +1,5 @@
 $(function() {
-	document.title = 'Cash Flow';
+	document.title = 'SchedRight - Cash Flow';
     var portfolioId = null;
     $( "#accordion" ).accordion();
 

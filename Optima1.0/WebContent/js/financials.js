@@ -1,5 +1,5 @@
 $(function() {
-	document.title = 'Financial Details';
+	document.title = 'SchedRight - Financial Details';
 	var grid;
 
 	

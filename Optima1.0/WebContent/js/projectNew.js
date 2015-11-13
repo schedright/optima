@@ -687,7 +687,7 @@ $(function() {
 	    $("#portfolioId").val(pData.portfolio.portfolioId);
 	    $("#projnameTxt").val(pData.projectName);
 	    $("#projCodeTxt").val(pData.projectCode);
-	    document.title = pData.projectCode;
+	    document.title = "SchedRight - " + pData.projectCode;
 	    $("#projectDescTxt").val(pData.projectDescription);
 
 	    $("#projStreet").val(pData.projectAddressStreet);

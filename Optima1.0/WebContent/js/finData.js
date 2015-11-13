@@ -1,6 +1,6 @@
 
 $(function() {
-	document.title = 'Financial Periods';
+	document.title = 'SchedRight - Financial Periods';
     $("#paymentTypeRadio").buttonset();
 
     $('#paymentDate').datepicker({

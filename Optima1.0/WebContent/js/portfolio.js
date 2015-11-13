@@ -1,7 +1,7 @@
 
 
 $(document).ready( function() {
-	document.title = 'Portfolios';
+	document.title = 'SchedRight - Portfolios';
 	$("#portfoliosNavBar").addClass("active");
 	
 	$('#main').tabs({ 

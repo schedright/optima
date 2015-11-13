@@ -1,7 +1,7 @@
 
 
 $(document).ready( function() {
-	document.title = 'Portfolios';
+	document.title = 'SchedRight - Portfolios';
 	$('#main').tabs({ 
 	    activate: function (e, ui) { 
 	        $.cookie('pf-selected-tab', ui.newTab.index(), { path: '/' }); 

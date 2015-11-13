@@ -88,8 +88,7 @@ public class ProjectSolutionDetails {
 				double tasksIncome = 0d;
 				if (!(PaymentUtil.isDayOff(date, daysOff) || PaymentUtil.isWeekendDay(date, weekEnds))) {
 					for (ProjectTask currentTask : projectTasks) {
-						Date taskStart = (originalOrFinal || currentTask.getScheduledStartDate() == null)
-								? currentTask.getCalendarStartDate() : currentTask.getScheduledStartDate();
+						Date taskStart = getTaskStart(currentTask,originalOrFinal);
 						if (!date.before(taskStart) && !date.after(tasksEnd.get(currentTask))) {
 							tasksCost = tasksCost + currentTask.getUniformDailyCost().doubleValue();
 							tasksIncome = tasksIncome + currentTask.getUniformDailyIncome().doubleValue();
@@ -141,6 +140,18 @@ public class ProjectSolutionDetails {
 		}
 	}
 
+	private Date getTaskStart(ProjectTask currentTask, boolean originalOrFinal2) {
+		if (!originalOrFinal2) {
+			if (currentTask.getScheduledStartDate()==null) {
+				return currentTask.getCalendarStartDate();
+			} else {
+				return currentTask.getScheduledStartDate();
+			}
+		} else {
+			return currentTask.getTentativeStartDate();
+		}
+	}
+
 	private void calculateDates(Project currentProject) {
 
 		portfolioStart = currentProject.getPropusedStartDate();
@@ -153,29 +164,29 @@ public class ProjectSolutionDetails {
 
 			Date s = project.getPropusedStartDate();
 			Date lte = project.getPropusedStartDate();
-
-			for (ProjectTask task : tasks) {
-				Date taskStart = (originalOrFinal || task.getScheduledStartDate() == null)
-						? task.getCalendarStartDate() : task.getScheduledStartDate();
-				if (taskStart.before(s)) {
-					s = taskStart;
-				}
-				Date taskEnd = getTaskEnd(project, task);
-				tasksEnd.put(task, taskEnd);
-
-				if (taskEnd.after(lte)) {
-					lte = taskEnd;
-				}
-
-				if (project == currentProject) {
-					projectTasks.add(task);
+			if (s!=null && lte!=null) {
+				for (ProjectTask task : tasks) {
+					Date taskStart = getTaskStart(task, originalOrFinal);
+					if (taskStart.before(s)) {
+						s = taskStart;
+					}
+					Date taskEnd = getTaskEnd(project, task);
+					tasksEnd.put(task, taskEnd);
+	
+					if (taskEnd.after(lte)) {
+						lte = taskEnd;
+					}
+	
+					if (project == currentProject) {
+						projectTasks.add(task);
+					}
 				}
 			}
 
 			// the actual end date should actually include the remaining days in
 			// the period plus waiting until it is payed out.
 
-			int diffInDays = PortfolioController.daysBetween(project.getPropusedStartDate(), lte);
+			int diffInDays = (project.getPropusedStartDate()!=null && lte!=null)? PortfolioController.daysBetween(project.getPropusedStartDate(), lte):0;
 			int daysInLastPeriod = diffInDays % requestPeriod;
 			int daysRemainingInThePeriod = daysInLastPeriod == 0 ? 0 : requestPeriod - daysInLastPeriod;
 			int shift = daysRemainingInThePeriod + paymentPeriod + 1;
@@ -225,11 +236,11 @@ public class ProjectSolutionDetails {
 	 * we just add it.
 	 */
 	private Date getTaskEnd(Project project, ProjectTask task) {
-		if (!originalOrFinal && task.getScheduledStartDate() != null) {
-			return PortfolioController.addDayes(task.getScheduledStartDate(), task.getCalenderDuration() - 1);
+		if (!originalOrFinal) {
+			return PortfolioController.addDayes( task.getScheduledStartDate() != null?task.getScheduledStartDate():task.getCalendarStartDate(), task.getCalenderDuration() - 1);
 		} else {
 			Calendar cal = Calendar.getInstance();
-			cal.setTime(task.getCalendarStartDate());
+			cal.setTime(task.getTentativeStartDate());
 			List<DaysOff> daysOff = project.getDaysOffs();
 			WeekendDay weekEnds = project.getWeekendDays();
 			int duration = task.getDuration();

@@ -1,5 +1,5 @@
 $(function() {
-	document.title = 'Scheduling';
+	document.title = 'SchedRight - Scheduling';
 
 	var portfolioId = null;
 	for ( var i in getURLVariables()) {
