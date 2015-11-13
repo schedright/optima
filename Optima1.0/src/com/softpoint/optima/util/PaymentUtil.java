@@ -1558,7 +1558,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		task.setCalenderDuration(calendarDuration);
 	}
 
-	public static int getProjectLength(Project project , String outputType , Logger logger) {
+	public static int getProjectLength(Project project) {
 		List<ProjectTask> tasks = project.getProjectTasks();
 		if (tasks == null || tasks.size() <= 0)
 			return 0;
@@ -1582,15 +1582,8 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 			if (taskEndDate.after(maxEndDate)) {
 				maxEndDate = taskEndDate;
 			}
-			if (outputType.equals("detailedOutput")) {
-				logger.info(String.format("Task: %s , start: %s , end:%s" ,currentTask.getTaskName() , taskStartDate.toString() , taskEndDate.toString() ));
-			}
 		}
 		int numberOfDays = PaymentUtil.daysBetween(minStartDate, maxEndDate);
-		if (outputType.equals("detailedOutput")) {
-			logger.info(String.format("Project start :%s , project end: %s , projectLength: %d", minStartDate.toString() , maxEndDate.toString() , numberOfDays));
-		}
-		
 		return numberOfDays;
 	}
 

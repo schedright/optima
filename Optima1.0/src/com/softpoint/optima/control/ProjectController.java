@@ -17,11 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
-import com.softpoint.optima.JsonRpcInitializer;
 import com.softpoint.optima.OptimaException;
-import com.softpoint.optima.OptimaLogFactory;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Client;
 import com.softpoint.optima.db.LocationInfo;
@@ -885,24 +881,12 @@ public class ProjectController {
 			double retainedAmountDeduction = 0.0;
 			double advancedPaymentDeduction = 0.0;
 
-			OptimaLogFactory factory = (OptimaLogFactory) session.getServletContext()
-					.getAttribute(JsonRpcInitializer.__LOG__FACTORY);
-			Logger logger = factory.getProjectLogger(project.getProjectCode());
-			Logger solutionOutput = factory.getProjectOutput(project.getProjectCode());
-
 			PeriodLogGenerator solutionReport = new PeriodLogGenerator(session.getServletContext(),
 					project.getProjectCode() + "_" + timeStamp, DATE_FORMATTER.format(from), DATE_FORMATTER.format(to));
 
-			// Logger csvLogger =
-			// factory.getProjectCSVOutput(solutionOutput.getName());
 			solutionReport.setProject(project.getPortfolio().getPortfolioName(),
 					project.getProjectCode() + "-" + project.getProjectName());
-			// csvLogger.info("All Trials for project '" +
-			// project.getProjectCode() + " - " + project.getProjectName());
 
-			solutionOutput.info("Project Name:" + project.getProjectCode() + " - " + project.getProjectName());
-			logger.info("######################################################################################");
-			logger.info("Generating solution");
 			double leftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController, project.getPortfolio(), from, to,
 					completedProjects); // Overhead current + cost of any task
 										// starts before this period and still
@@ -939,13 +923,6 @@ public class ProjectController {
 																													// for
 																													// solved
 																													// projects
-			logger.info(String.format("Period: %s - %s", from.toString(), to.toString()));
-			logger.info("Startup Data");
-			logger.info(String.format("leftover Cost: %f", leftOverCost));
-			logger.info(String.format("openBalance: %f", openBalance));
-			logger.info(String.format("payment: %f", payment));
-			logger.info(String.format("financeLimit: %f", financeLimit));
-			logger.info(String.format("Cashout other projects (based on current schedule): %f", cashOutOthers));
 
 			List<ProjectTask> eligibleTasks = null;
 			boolean completed = false;
@@ -959,7 +936,7 @@ public class ProjectController {
 			double cashAvailableNextPeriod = financeLimitNextPeriod + openBalance + payment - leftOverCost
 					- cashOutOthers - retainedAmountDeduction - advancedPaymentDeduction;
 
-			Map<Integer, TaskState> taskStates = initTaskState(project, logger);
+			Map<Integer, TaskState> taskStates = initTaskState(project);
 			eligibleTasks = PaymentUtil.getEligibleTasks(project, from, to, true);
 			int iteration = 0;
 			boolean initial = true;
@@ -996,25 +973,15 @@ public class ProjectController {
 				double leftOverNextCost = eligibleTasksLeftOverCost + otherPojectsEligibleTasksLeftOverCost; // -
 																												// nextPeriodLeftoverFinanceCost;
 
-				logger.info(String.format("Current eligible tasks cost (current period): %f",
-						eligibleTasksCurrentPeroidCost));
-				logger.info(String.format("Current eligible tasks total cost: %f", totalCostCurrent));
-				logger.info(String.format("Expected Cash: %f", expectedCashIn));
-				logger.info(String.format("Current eligible tasks cost (leftover next period): %f",
-						eligibleTasksLeftOverCost));
-				logger.info(String.format("Current eligible tasks leftover total cost (leftover next period): %f",
-						leftOverNextCost));
-
 				String shortVersion = String
 						.format("Selected: Iteration [%d] R[Current]:[%.2f] Activities:[%s] Start [%s] Project Duration: [%d] C[Current]: [%f] R[Next]:[%f] Feasible: %s Raimining cash:[%f]%n",
 								iteration, cashAvailable, PaymentUtil.getEligibaleTaskNameList(currentEligibleSet),
 								PaymentUtil.getTaskListStart(currentEligibleSet),
-								PaymentUtil.getProjectLength(project, outputFormat, solutionOutput), totalCostCurrent,
+								PaymentUtil.getProjectLength(project), totalCostCurrent,
 								cashAvailableNextPeriod - totalCostCurrent + expectedCashIn - leftOverNextCost,
 								totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent
 										+ expectedCashIn >= leftOverNextCost ? "Yes" : "No",
 						cashAvailable - totalCostCurrent < 0 ? 0 : cashAvailable - totalCostCurrent);
-				solutionOutput.info(shortVersion);
 
 				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
 				Date projectEndDate = projectDates[1];
@@ -1036,22 +1003,8 @@ public class ProjectController {
 
 				if (totalCostCurrent <= cashAvailable
 						&& cashAvailableNextPeriod - totalCostCurrent + expectedCashIn >= leftOverNextCost) {
-					logger.info(
-							"######################################################################################");
-					logger.info(String.format(
-							"Solution Found: project tasks cost(elligibe) : %f  , cash before: %f , cash after: %f",
-							totalCostCurrent, cashAvailable, cashAvailable - totalCostCurrent));
-					for (ProjectTask task : eligibleTasks) {
-						// task.setScheduledStartDate(PaymentUtil.getTaskDate(task));
-						logger.info(String.format("Task: %s , StartDate: %s", task.getTaskName(),
-								task.getScheduledStartDate()));
-					}
-					logger.info(
-							"######################################################################################");
 					completed = true;
 				} else {
-					logger.info(
-							"--------------------------------------------------------------------------------------");
 
 					List<TaskSolution> solutions = new LinkedList<>();
 					boolean noChange = true;
@@ -1097,7 +1050,7 @@ public class ProjectController {
 								.getOtherProjectsLeftOverCostNew(session, project, from, to, projectBoundaries[1],
 										completedProjects);
 
-						int projectLength = PaymentUtil.getProjectLength(project, outputFormat, solutionOutput);
+						int projectLength = PaymentUtil.getProjectLength(project);
 						solution.setCurrentPeriodCost(solutionTotalCostCurrent);
 						solution.setLeftOversCost(
 								solutionEligibleTasksLeftOverCost + solutionOtherPojectsEligibleTasksLeftOverCost); // -
@@ -1121,16 +1074,11 @@ public class ProjectController {
 																: "No",
 										cashAvailable - solutionTotalCostCurrent < 0 ? 0
 												: cashAvailable - solutionTotalCostCurrent);
-						solutionOutput.info(shortVerion);
 
 						writeTrialToHTMLLogFile(solutionReport, iteration, shortVerion, from, to, project,
 								projectDates[1], totalCostCurrent,payment,paymentCurrent ,financeLimit,financeLimitNextPeriod,leftOverCost,solutionEligibleTasksLeftOverCost,openBalance);
 
 						solutions.add(solution);
-						logger.info(String.format(
-								"Shifting task: %s , Project Length after shift: %d , New task start date: %s , Current Period Cost after shift:%f, Leftovers Cost after shift:%f",
-								task.getTaskName(), solution.getProjectLength(), solution.getStartDate().toString(),
-								solution.getCurrentPeriodCost(), solution.getLeftOversCost()));
 						task.setCalendarStartDate(taskDate);
 						resetTaskState(project, taskStates);
 
@@ -1139,7 +1087,6 @@ public class ProjectController {
 					if (noChange) {
 						completed = true; // no tasks can be scheduled this
 											// period. Stop here
-						logger.info("All tasks are out of period - please solve for next period");
 					} else {
 
 						TaskSolution nextIteration = PaymentUtil.findSolutionIteration(solutions, cashAvailable,
@@ -1148,14 +1095,7 @@ public class ProjectController {
 							nextIteration.getTask().setCalendarStartDate(nextIteration.getStartDate());
 
 							PaymentUtil.adjustStartDateBasedOnTaskDependency(project);
-							taskStates = initTaskState(project, logger);
-
-							logger.info(String.format(
-									"Next Iteration: %s , Project Length after shift: %d , New task start date: %s , Current period cost after shift:%f, Leftover cost after shift:%f",
-									nextIteration.getTask().getTaskName(), nextIteration.getProjectLength(),
-									nextIteration.getStartDate().toString(), nextIteration.getCurrentPeriodCost(),
-									nextIteration.getLeftOversCost()));
-
+							taskStates = initTaskState(project);
 						} else {
 							return new ServerResponse("0", "Success", null);
 						}
@@ -1226,72 +1166,6 @@ public class ProjectController {
 		long diff = milliseconds2 - milliseconds1;
 		long diffDays = diff / (24 * 60 * 60 * 1000);
 		return diffDays;
-	}
-
-	private void writeTrialToCSVFile(Logger csvLogger, int iteration, double cashAvailable,
-			List<ProjectTask> currentEligibleSet, int projectLength, double totalCostCurrent, double d, String string,
-			double e) {
-		try {
-			csvLogger.info("Iteration " + iteration);
-
-			Date start = null;
-			Date end = null;
-			for (ProjectTask task : currentEligibleSet) {
-				Date taskStart = task.getCalendarStartDate();
-				Date taskEnd = addDays(task.getCalendarStartDate(), task.getCalenderDuration() - 1);
-				if (start == null) {
-					start = taskStart;
-				}
-				if (end == null) {
-					end = taskEnd;
-				}
-
-				if (taskStart.before(start)) {
-					start = taskStart;
-				}
-				if (taskEnd.after(end)) {
-					end = taskEnd;
-				}
-			}
-			if (start == null || end == null) {
-				return;
-			}
-			long daysCount = differenceInDays(start, end) + 1;
-
-			// write header
-			String header = ",";
-			Date index = start;
-			while (differenceInDays(index, end) > 0) {
-				header = header + new SimpleDateFormat("dd/MM").format(index) + ",";
-				index = addDays(index, 1);
-			}
-
-			csvLogger.info(header);
-
-			for (ProjectTask task : currentEligibleSet) {
-				Date taskStart = task.getCalendarStartDate();
-				Date taskEnd = addDays(task.getCalendarStartDate(), task.getCalenderDuration() - 1);
-
-				String line = task.getTaskDescription() + ",";
-				if (taskStart != null && taskEnd != null) {
-					Date index2 = start;
-					while (differenceInDays(index2, end) > 0) {
-						if (index2.before(taskStart) || index2.after(taskEnd)) {
-							line += ",";
-						} else {
-							line += "X,";
-						}
-						index2 = addDays(index2, 1);
-					}
-
-				}
-				csvLogger.info(line);
-			}
-			csvLogger.info(",");
-		} catch (Exception ex) {
-			csvLogger.error("error in reporting iteration");
-		}
-
 	}
 
 	private static boolean SHOW_COMING_TASKS = true;
@@ -1410,252 +1284,13 @@ public class ProjectController {
 		return false;
 	}
 
-	public ServerResponse getPeriodSolution(HttpSession session, int projectId, Date from, Date to, Date next,
-			String paymentDetailsJson, String solvedProjects, String outputFormat) {
-		Map<Integer, ProjectPaymentDetail> paymentDetails = PaymentUtil.getPaymentDetailsMap(paymentDetailsJson);
-		EntityController<Project> projectController = new EntityController<>(session.getServletContext());
-		EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
-		try {
-			solutionLock.lock();
-
-			Project project = projectController.find(Project.class, projectId);
-			OptimaLogFactory factory = (OptimaLogFactory) session.getServletContext()
-					.getAttribute(JsonRpcInitializer.__LOG__FACTORY);
-			Logger logger = factory.getProjectLogger(project.getProjectCode());
-			Logger solutionOutput = factory.getProjectOutput(project.getProjectCode());
-			solutionOutput.info("Project Name:" + project.getProjectCode() + " - " + project.getProjectName());
-			logger.info("######################################################################################");
-			logger.info("Generating solution");
-			double leftOverCost = PaymentUtil.getPortfolioLeftOverCost(portController, project.getPortfolio(), from, to,
-					null);
-			double openBalance = PaymentUtil.getPortfolioOpenBalance(session, project.getPortfolio(), from);
-			double payment = PaymentUtil.getPortfolioPayment(from, to, paymentDetails, project.getPortfolio(), true);
-
-			double financeLimit = PaymentUtil.getFinanceLimit(session, project.getPortfolio().getPortfolioId(), from);
-			double financeLimitNextPeriod = PaymentUtil.getFinanceLimit(session,
-					project.getPortfolio().getPortfolioId(), to);
-
-			double cashOutOthers = PaymentUtil.getCashOutOtherProjects(session, project, from, to, solvedProjects);
-			logger.info(String.format("Period: %s - %s", from.toString(), to.toString()));
-			logger.info("Startup Data");
-			logger.info(String.format("leftover Cost: %f", leftOverCost));
-			logger.info(String.format("openBalance: %f", openBalance));
-			logger.info(String.format("payment: %f", payment));
-			logger.info(String.format("financeLimit: %f", financeLimit));
-			logger.info(String.format("Cashout other projects (based on current schedule): %f", cashOutOthers));
-
-			List<ProjectTask> eligibleTasks = null;
-			boolean completed = false;
-			double cashAvailable = financeLimit + openBalance + payment - leftOverCost - cashOutOthers;
-			double cashAvailableNextPeriod = financeLimitNextPeriod + openBalance + payment - leftOverCost
-					- cashOutOthers;
-
-			Map<Integer, TaskState> taskStates = initTaskState(project, logger);
-			eligibleTasks = PaymentUtil.getEligibleTasks(project, from, to, true);
-			int iteration = 0;
-			while (!completed) {
-				List<ProjectTask> currentEligibleSet = PaymentUtil.getEligibleTasks(project, from, to, true);
-				double eligibleTasksCurrentPeroidCost = PaymentUtil
-						.getEligiableTaskCurrentPeriodCost(currentEligibleSet, from, to);
-
-				// Bug#4
-				double otherPojectsEligibleTasksCurrentPeroidCost = PaymentUtil
-						.getOtherProjectsCurrentPeriodCost(project, from, to);
-				double otherPojectsEligibleTasksLeftOverCost = PaymentUtil.getOtherProjectsLeftOverCost(project, from,
-						to);
-						// -------------
-
-				// TODO Input Parameter should consider all tasks going through
-				// the current period
-				List<ProjectTask> currentTaskSet = PaymentUtil.getCurrentTasks(project, from, to, true);
-
-				double eligibleTasksLeftOverCost = PaymentUtil.getEligiableTaskLeftOverCost(currentTaskSet, project,
-						from, to);
-				double expectedCashIn = PaymentUtil.getPortfolioPayment(to, next, paymentDetails,
-						project.getPortfolio(), false);
-
-				double totalCostCurrent = eligibleTasksCurrentPeroidCost; // -
-																			// eligiableTaskFinanceCost;
-				double leftOverNextCost = eligibleTasksLeftOverCost + otherPojectsEligibleTasksLeftOverCost; // -
-																												// nextPeriodLeftoverFinanceCost;
-
-				logger.info(String.format("Current eligible tasks cost (current period): %f",
-						eligibleTasksCurrentPeroidCost));
-				logger.info(String.format("Current eligible tasks total cost: %f", totalCostCurrent));
-				logger.info(String.format("Expected Cash: %f", expectedCashIn));
-				logger.info(String.format("Current eligible tasks cost (leftover next period): %f",
-						eligibleTasksLeftOverCost));
-				logger.info(String.format("Current eligible tasks leftover total cost (leftover next period): %f",
-						leftOverNextCost));
-
-				solutionOutput.info(String
-						.format("Selected: Iteration [%d] R[Current]:[%.2f] Activities:[%s] Start [%s] Project Duration: [%d] C[Current]: [%f] R[Next]:[%f] Feasible: %s Raimining cash:[%f]%n",
-								iteration, cashAvailable, PaymentUtil.getEligibaleTaskNameList(currentEligibleSet),
-								PaymentUtil.getTaskListStart(currentEligibleSet),
-								PaymentUtil.getProjectLength(project, outputFormat, solutionOutput), totalCostCurrent,
-								cashAvailableNextPeriod - totalCostCurrent + expectedCashIn - leftOverNextCost,
-								totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent
-										+ expectedCashIn >= leftOverNextCost ? "Yes" : "No",
-						cashAvailable - totalCostCurrent < 0 ? 0 : cashAvailable - totalCostCurrent));
-
-				if (totalCostCurrent <= cashAvailable
-						&& cashAvailableNextPeriod - totalCostCurrent + expectedCashIn >= leftOverNextCost) {
-					logger.info(
-							"######################################################################################");
-					logger.info(String.format(
-							"Solution Found: project tasks cost(elligibe) : %f  , cash before: %f , cash after: %f",
-							totalCostCurrent, cashAvailable, cashAvailable - totalCostCurrent));
-					for (ProjectTask task : eligibleTasks) {
-						// task.setScheduledStartDate(PaymentUtil.getTaskDate(task));
-						logger.info(String.format("Task: %s , StartDate: %s", task.getTaskName(),
-								task.getScheduledStartDate()));
-					}
-					logger.info(
-							"######################################################################################");
-					completed = true;
-				} else {
-					logger.info(
-							"--------------------------------------------------------------------------------------");
-
-					List<TaskSolution> solutions = new LinkedList<>();
-					boolean noChange = true;
-					for (ProjectTask task : currentEligibleSet) {
-						task.setScheduledStartDate(null);
-						Date taskDate = PaymentUtil.getTaskDate(task);
-						Calendar calendar = Calendar.getInstance();
-						calendar.setTime(taskDate);
-						do {
-							calendar.add(Calendar.DATE, 1);
-						} while (PaymentUtil.isDayOff(calendar.getTime(), project.getDaysOffs())
-								|| PaymentUtil.isWeekendDay(calendar.getTime(), project.getWeekendDays()));
-
-						// Bug#2 Not checking all the cases
-						// if (to.equals(calendar.getTime()) ||
-						// to.after(calendar.getTime())) {
-						noChange = false;
-						task.setCalendarStartDate(calendar.getTime());
-						PaymentUtil.adjustStartDateBasedOnTaskDependency(project);
-						updateScheduledState(project, taskStates);
-
-						TaskSolution solution = new TaskSolution(task);
-						List<ProjectTask> solutionCurrenteligibleTasks = PaymentUtil.getEligibleTasks(project, from, to,
-								true);
-
-						double solutionEligibleTasksCurrentPeroidCost = PaymentUtil
-								.getEligiableTaskCurrentPeriodCost(solutionCurrenteligibleTasks, from, to);
-
-						// TODO Input Parameter should consider all tasks going
-						// through the current period
-						List<ProjectTask> solutionCurrentTaskSet = PaymentUtil.getCurrentTasks(project, from, to, true);
-						double solutionEligibleTasksLeftOverCost = PaymentUtil
-								.getEligiableTaskLeftOverCost(solutionCurrentTaskSet, project, from, to);
-
-						double solutionExpectedCashIn = PaymentUtil.getPortfolioPayment(to, next, paymentDetails,
-								project.getPortfolio(), false);
-						double solutionTotalCostCurrent = solutionEligibleTasksCurrentPeroidCost;// -
-																									// solutionEligiableTaskFinanceCost;
-
-						double solutionOtherPojectsEligibleTasksLeftOverCost = PaymentUtil
-								.getOtherProjectsLeftOverCost(project, from, to);
-
-						int projectLength = PaymentUtil.getProjectLength(project, outputFormat, solutionOutput);
-						solution.setCurrentPeriodCost(solutionTotalCostCurrent);
-						solution.setLeftOversCost(
-								solutionEligibleTasksLeftOverCost + solutionOtherPojectsEligibleTasksLeftOverCost); // -
-																													// solutionNextPeriodLeftOverFinanceCost);
-
-						solution.setIncome(solutionExpectedCashIn);
-						solution.setProjectLength(projectLength);
-						solution.setStartDate(calendar.getTime());
-
-						solutionOutput.info(String
-								.format("Iteration [%d] R[Current]:[%.2f] Activities:[%s] Start [%s] Project Duration: [%d] C[Current]: [%f] R[Next]:[%f] Feasible: %s Raimining cash:[%f]%n",
-										iteration, cashAvailable,
-										PaymentUtil.getEligibaleTaskNameList(solutionCurrenteligibleTasks), PaymentUtil
-												.getTaskListStart(solutionCurrenteligibleTasks),
-										projectLength, solutionTotalCostCurrent,
-										cashAvailableNextPeriod - solutionTotalCostCurrent + solutionExpectedCashIn
-												- solution.getLeftOversCost(),
-										solutionTotalCostCurrent <= cashAvailable
-												&& cashAvailableNextPeriod - solutionTotalCostCurrent
-														+ solutionExpectedCashIn >= solution.getLeftOversCost() ? "Yes"
-																: "No",
-										cashAvailable - solutionTotalCostCurrent < 0 ? 0
-												: cashAvailable - solutionTotalCostCurrent));
-						solutions.add(solution);
-						logger.info(String.format(
-								"Shifting task: %s , Project Length after shift: %d , New task start date: %s , Current Period Cost after shift:%f, Leftovers Cost after shift:%f",
-								task.getTaskName(), solution.getProjectLength(), solution.getStartDate().toString(),
-								solution.getCurrentPeriodCost(), solution.getLeftOversCost()));
-						task.setCalendarStartDate(taskDate);
-						resetTaskState(project, taskStates);
-
-						// }
-					}
-					if (noChange) {
-						completed = true; // no tasks can be scheduled this
-											// period. Stop here
-						logger.info("All tasks are out of period - please solve for next period");
-					} else {
-
-						TaskSolution nextIteration = PaymentUtil.findSolutionIteration(solutions, cashAvailable,
-								cashAvailableNextPeriod);
-						if (nextIteration != null) {
-							nextIteration.getTask().setCalendarStartDate(nextIteration.getStartDate());
-
-							PaymentUtil.adjustStartDateBasedOnTaskDependency(project);
-							taskStates = initTaskState(project, logger);
-
-							logger.info(String.format(
-									"Next Iteration: %s , Project Length after shift: %d , New task start date: %s , Current period cost after shift:%f, Leftover cost after shift:%f",
-									nextIteration.getTask().getTaskName(), nextIteration.getProjectLength(),
-									nextIteration.getStartDate().toString(), nextIteration.getCurrentPeriodCost(),
-									nextIteration.getLeftOversCost()));
-
-						} else {
-							return new ServerResponse("0", "Success", null);
-						}
-					}
-
-				}
-				iteration++;
-			}
-			List<SolvedTask> solvedTasks = new ArrayList<>();
-			for (ProjectTask task : eligibleTasks) {
-				SolvedTask solvedTask = new SolvedTask();
-				solvedTask.setTaskId(task.getTaskId());
-				solvedTask.setTaskName(task.getTaskName());
-				solvedTask.setTaskDescription(task.getTaskDescription());
-				solvedTask.setScheduledStartDate(task.getCalendarStartDate());
-				solvedTask.setCalenderDuration(task.getCalenderDuration());
-				solvedTasks.add(solvedTask);
-			}
-
-			return new ServerResponse("0", "Success", solvedTasks);
-
-		} catch (EntityControllerException | OptimaException e) {
-			e.printStackTrace();
-			return new ServerResponse("PROJ0003",
-					String.format("Error solving period for project %d: %s", projectId, e.getMessage()), e);
-		} finally {
-			solutionLock.unlock();
-		}
-
-	}
-
 	/**
 	 * @param project
 	 * @return
 	 */
-	private Map<Integer, TaskState> initTaskState(Project project, Logger logger) {
+	private Map<Integer, TaskState> initTaskState(Project project) {
 		Map<Integer, TaskState> taskStates = new HashMap<Integer, TaskState>();
-		logger.info("Current state:");
-		logger.info(
-				"=====================================================================================================");
 		for (ProjectTask task : project.getProjectTasks()) {
-			logger.info(String.format("Task: %s , StartDate (Calendar) : %s, StartDate (Scheduled): %s, duration: %d",
-					task.getTaskName(), task.getCalendarStartDate(), task.getScheduledStartDate(),
-					task.getCalenderDuration()));
 			taskStates.put(task.getTaskId(),
 					new TaskState(task.getCalendarStartDate(), task.getCalendarStartDate(), task.getCalenderDuration(),
 							task.getCalenderDuration(), task.getScheduledStartDate(), task.getScheduledStartDate()));

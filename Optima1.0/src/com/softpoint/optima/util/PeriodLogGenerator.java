@@ -8,8 +8,6 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
-import org.omg.CORBA.Current;
-
 public class PeriodLogGenerator {
 
 	private static final String HTML_FILE = "<html><style>td{position:relative;} .stripedDiv{top:0;bottom:0;left:0;right:0;position:absolute;background-image: linear-gradient(to right top,transparent 33%,black 33%,black 66%,transparent 66%);background-size: 3px 3px;}</style><body><H1>Portfolio:%PORTFOLIO%</H1><H2>Project:%PROJECT%</H2><H2>%START% - %END%</H>2%ITERATIONS%</body></html>";
@@ -32,6 +30,11 @@ public class PeriodLogGenerator {
 	public PeriodLogGenerator(ServletContext context, String baseName, String startDate, String endDate) {
 		super();
 		int index = 1;
+		String logPath = context.getRealPath("/logs");
+		File folder = new File(logPath);
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
 		while (true) {
 			String fileName = "/logs/" + baseName + "_P" + index + ".html";
 			filePath = context.getRealPath(fileName);
