@@ -95,10 +95,12 @@ public class PaymentUtil {
 		double portfolioLeftOvers = 0;
 		for (Project project : projects) {
 			try {
-				Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller, project.getProjectId());
-				Date projectEndDate = projectDates[1];
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(PaymentUtil.getProjectExpectedEndDate(project));
+				cal.add(Calendar.DATE, 1);
+				Date projectEndDate = cal.getTime();
 				
-				projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
+				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
 				Date projectStartDate = projectDates[0];
 				
 				if (projectStartDate != null && projectStartDate.getTime() < to.getTime() && projectEndDate.getTime() >= from.getTime()) {
@@ -1201,7 +1203,16 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 				costAccumulator += effictiveNumberOfDays * task.getUniformDailyCost().doubleValue();
 			}
 		}
-		int overheadDays = PaymentUtil.daysBetween(end, nextEventDate);
+		int overheadDays = 0;
+		Date date = PaymentUtil.getProjectExpectedEndDate(project);
+		if (date.before(nextEventDate)) {
+			overheadDays = PaymentUtil.daysBetween(end, date); //end is included
+			if (!end.after(date)) {
+				overheadDays++;
+			}
+		} else {
+			overheadDays = PaymentUtil.daysBetween(end, nextEventDate);
+		}
 		costAccumulator += overheadDays * project.getOverheadPerDay().doubleValue();
 		return costAccumulator;
 	}

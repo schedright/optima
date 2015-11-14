@@ -1222,9 +1222,9 @@ public class ProjectController {
 						Date index2 = start;
 						while (differenceInDays(index2, end) > -1) {
 							boolean offDay = isIffDay(project, index2);
-							String color = "gray";
+							String color = "lightgreen";
 							if (taskStart.before(start)) {
-								color = "lightgreen";
+								color = "lightgrey";
 							} else if (!index2.before(to)) {
 								if (!taskStart.before(to)) {
 									color = "orange";
