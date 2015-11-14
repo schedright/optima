@@ -1587,6 +1587,34 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		return numberOfDays;
 	}
 
+	public static Date getProjectExpectedEndDate(Project project) {
+		List<ProjectTask> tasks = project.getProjectTasks();
+		if (tasks == null || tasks.size() <= 0)
+			return project.getPropusedStartDate();
+		
+		Date minStartDate = tasks.get(0).getCalendarStartDate(); // getTaskDate(tasks.get(0)); //
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(minStartDate);
+		calendar.add(Calendar.DATE, tasks.get(0).getCalenderDuration() );
+		Date maxEndDate = calendar.getTime();
+		
+		for (ProjectTask currentTask : tasks) {
+			
+			Date taskStartDate = currentTask.getCalendarStartDate();  // 	getTaskDate(currentTask);
+			if (taskStartDate.before(minStartDate)) {
+				minStartDate = taskStartDate;
+			}
+			
+			calendar.setTime(taskStartDate);
+			calendar.add(Calendar.DATE, currentTask.getCalenderDuration()-1 );
+			Date taskEndDate = calendar.getTime();
+			if (taskEndDate.after(maxEndDate)) {
+				maxEndDate = taskEndDate;
+			}
+		}
+		return maxEndDate;
+	}
+
 	/*
 	 * First select the solution with minimum project length If multiple, select
 	 * the feasible one If multiple select the maximum cost If none select the

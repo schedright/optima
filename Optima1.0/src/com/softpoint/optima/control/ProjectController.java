@@ -973,20 +973,18 @@ public class ProjectController {
 				double leftOverNextCost = eligibleTasksLeftOverCost + otherPojectsEligibleTasksLeftOverCost; // -
 																												// nextPeriodLeftoverFinanceCost;
 
+				int projLength = PaymentUtil.getProjectLength(project);
 				String shortVersion = String
 						.format("Selected: Iteration [%d] R[Current]:[%.2f] Activities:[%s] Start [%s] Project Duration: [%d] C[Current]: [%f] R[Next]:[%f] Feasible: %s Raimining cash:[%f]%n",
 								iteration, cashAvailable, PaymentUtil.getEligibaleTaskNameList(currentEligibleSet),
 								PaymentUtil.getTaskListStart(currentEligibleSet),
-								PaymentUtil.getProjectLength(project), totalCostCurrent,
+								projLength, totalCostCurrent,
 								cashAvailableNextPeriod - totalCostCurrent + expectedCashIn - leftOverNextCost,
 								totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent
 										+ expectedCashIn >= leftOverNextCost ? "Yes" : "No",
 						cashAvailable - totalCostCurrent < 0 ? 0 : cashAvailable - totalCostCurrent);
 
-				Date[] projectDates = PaymentUtil.getProjectDateRanges(controller, project.getProjectId());
-				Date projectEndDate = projectDates[1];
-
-				writeTrialToHTMLLogFile(solutionReport, iteration, shortVersion, from, to, project, projectDates[1], totalCostCurrent,payment,paymentCurrent, financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance);
+				writeTrialToHTMLLogFile(solutionReport, iteration, shortVersion, from, to, project, PaymentUtil.getProjectExpectedEndDate(project), totalCostCurrent,payment,paymentCurrent, financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance);
 
 				if (initial) {
 					initialInfo = cashAvailable + "," + totalCostCurrent + ","
@@ -1076,7 +1074,7 @@ public class ProjectController {
 												: cashAvailable - solutionTotalCostCurrent);
 
 						writeTrialToHTMLLogFile(solutionReport, iteration, shortVerion, from, to, project,
-								projectDates[1], totalCostCurrent,payment,paymentCurrent ,financeLimit,financeLimitNextPeriod,leftOverCost,solutionEligibleTasksLeftOverCost,openBalance);
+								PaymentUtil.getProjectExpectedEndDate(project), solutionEligibleTasksCurrentPeroidCost,payment,paymentCurrent ,financeLimit,financeLimitNextPeriod,leftOverCost,solutionEligibleTasksLeftOverCost,openBalance);
 
 						solutions.add(solution);
 						task.setCalendarStartDate(taskDate);
