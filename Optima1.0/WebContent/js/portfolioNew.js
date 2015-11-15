@@ -266,10 +266,15 @@ $(document).ready( function() {
 						"</div>" +
 					"</div>");
 			} else {
-				
+				var currentPortfolio = isNaN(parseInt($.cookie('saved_index_pf')))?0:parseInt($.cookie('saved_index_pf'));
 				for (var i = 0; i< data.list.length; i++) {
 				var projectsHtml = "<h3>" + data.list[i].portfolioName + "</h3><div id=\"portfolio" + data.list[i].portfolioId + "\">" 
 				+ data.list[i].portfolioDescreption + "<br><br><br>" ;
+				
+				if (currentPortfolio!=i) {
+					$("#accordion").append(projectsHtml + " Loading");
+					continue;
+				}
 				
 				var result2 = rpcClient.projectService.findAllByPortfolio(data.list[i].portfolioId);
 				
@@ -394,17 +399,13 @@ $(document).ready( function() {
 						    		          bValid = bValid && checkLength( portDescription, "ePortDescription", 1, 1024 );
 						    		       
 						    		          if ( bValid ) {
+						    		        	  var dlg = $(this);
 						    		        	  rpcClient.portfolioService.update(function(result , exception) {
 						    		            	if (result.result == 0) {
-							    		            	$( this ).dialog( "close" );
+						    		            		dlg.dialog( "close" );
 							    		            	location.reload();
 							    		            } else {
-							    		            	$( "#editPortfolioDialog" ).append("<div class=\"ui-widget\">" +
-							    						"<div class=\"ui-state-error ui-corner-all\" style=\"padding: 0 .7em;\">" +
-							    							"<p><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin-right: .3em;\"></span>" +
-							    							"<strong>Alert:</strong>Error: "  + result.message + "</p>" +
-							    						"</div>" +
-							    		            	"</div>");
+							    		            	showMessage("Update Portfolio",'Error:' + result.message,'error');
 							    		            }	
 						    		            } ,portfolio.portfolioId, portName.val() , portDescription.val()); 
 						    		            
@@ -422,7 +423,7 @@ $(document).ready( function() {
 					 });
 				
 					$("#portfolio" + data.list[i].portfolioId + "delete").data("portfolio" , data.list[i]).click(function () {
-						var portfolioId = $(this).data('portfolioId');
+						var portfolioId = $(this).data('portfolio').portfolioId;
 				    	 if ($("deletePortConfirmDialog").length == 0) {
 					    	$("body").append( "	<div id=\"deletePortConfirmDialog\" title=\"Delete portfolio?\"> " 
 					    			+ " <p><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin: 0 7px 20px 0;\"> "

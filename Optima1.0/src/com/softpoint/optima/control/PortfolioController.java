@@ -137,10 +137,10 @@ public class PortfolioController {
 		try {
 			controller.persist(portfolio);
 			return new ServerResponse("0", "Success", portfolio);
-		} catch (EntityControllerException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new ServerResponse("PORT0001",
-					String.format("Error creating Portfolio %s: %s", name, e.getMessage()), e);
+					String.format("Error creating Portfolio %s: %s", name, e.getMessage()), "");
 		}
 	}
 
@@ -159,10 +159,10 @@ public class PortfolioController {
 			portfolio.setPortfolioName(name);
 			controller.merge(portfolio);
 			return new ServerResponse("0", "Success", portfolio);
-		} catch (EntityControllerException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new ServerResponse("PORT0002", String.format("Error updating Portfolio %s: %s",
-					portfolio != null ? portfolio.getPortfolioName() : "", e.getMessage()), e);
+					portfolio != null ? portfolio.getPortfolioName() : "", e.getMessage()), "");
 		}
 	}
 
@@ -468,7 +468,7 @@ public class PortfolioController {
 		try {
 			controller.remove(Portfolio.class, key);
 			return new ServerResponse("0", "Success", null);
-		} catch (EntityControllerException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new ServerResponse("PORT0004", String.format("Error removing Portfolio %d: %s", key, e.getMessage()),
 					e);
