@@ -8,8 +8,8 @@
 		<class>com.softpoint.optima.db.LocationInfo</class> 
 		<class>com.softpoint.optima.db.PaymentType</class>
 		<class>com.softpoint.optima.db.Portfolio</class>
-		<class>com.softpoint.optima.db.PortfolioFinance</class>
 		<class>com.softpoint.optima.db.PortfolioExtrapayment</class>
+		<class>com.softpoint.optima.db.PortfolioFinance</class>
 		<class>com.softpoint.optima.db.Project</class>
 		<class>com.softpoint.optima.db.ProjectPayment</class>
 		<class>com.softpoint.optima.db.ProjectTask</class>
