@@ -149,6 +149,8 @@ CREATE TABLE `portfolio` (
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+ALTER TABLE portfolio
+ADD CONSTRAINT uc_portfolio_name UNIQUE (portfolio_name);
 --
 -- Dumping data for table `portfolio`
 --
@@ -336,7 +338,8 @@ CREATE TABLE `project_task` (
   CONSTRAINT `project_task_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=225 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
+ALTER TABLE project_task
+ADD CONSTRAINT uc_project_task_name UNIQUE (project_id, task_name);
 --
 -- Dumping data for table `project_task`
 --

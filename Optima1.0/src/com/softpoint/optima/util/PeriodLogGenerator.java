@@ -14,13 +14,14 @@ public class PeriodLogGenerator {
 	private static final String ITERATION = "<H1>Iteration # %ITERATION_NUMBER%</H1><p>%PREVIOUS%</p><Table border=\"1\"><tr>%TASKS_DATES%</tr>%TASKS%</Table><p>%DETAILS%</p>";
 	private static final String TRIAL = "<p>%PREVIOUS%</p><Table  border=\"1\"><tr>%TASKS_DATES%</tr>%TASKS%</Table><p>%DETAILS%</p>";
 	private static final String DETAILS = "<Table><tr><td>Balance:</td><td>%Balance%</td></tr>"
-			+ "<Table><tr><td>Finance I:</td><td>%Finance I%</td></tr>"
-			+ "<Table><tr><td>Payment I:</td><td>%Payment I%</td></tr>"
-			+ "<Table><tr><td>Cash-out current:</td><td>%Cash-out current%</td></tr>"
-			+ "<Table><tr><td>Cost current:</td><td>%Cost current%</td></tr>"
-			+ "<Table><tr><td>Finance II:</td><td>%Finance II%</td></tr>"
-			+ "<Table><tr><td>Payment II:</td><td>%Payment II%</td></tr>"
-			+ "<Table><tr><td>Cash-out next:</td><td>%Cash-out next%</td></tr></table>";
+			+ "<tr><td>Finance I:</td><td>%Finance I%</td></tr>"
+			+ "<tr><td>Payment I:</td><td>%Payment I%</td></tr>"
+			+ "<tr><td>Cash-out current:</td><td>%Cash-out current%</td></tr>"
+			+ "<tr><td>Cost current:</td><td>%Cost current%</td></tr>"
+			+ "<tr><td>Finance II:</td><td>%Finance II%</td></tr>"
+			+ "<tr><td>Payment II:</td><td>%Payment II%</td></tr>"
+			+ "<tr><td>Cash-out next:</td><td>%Cash-out next%</td></tr>"
+			+ "<tr><td>Cash-Out other:</td><td>%Cash-Out other%</td></tr></table>";
 
 	private String filePath;
 	String fileContent;
@@ -94,7 +95,7 @@ public class PeriodLogGenerator {
 		currentIteration = currentIteration.replace("%TASKS%", taskRow + "\r%TASKS%");
 	}
 
-	public void setDetails(double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost, double openBalance) {
+	public void setDetails(double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost, double openBalance, double cashOutOthers) {
 		String details = DETAILS;
 		details = details.replace("%Cost current%", Double.toString(totalCostCurrent));
 		details = details.replace("%Payment I%", Double.toString(payment));
@@ -104,6 +105,7 @@ public class PeriodLogGenerator {
 		details = details.replace("%Cash-out current%", Double.toString(leftOverCost));
 		details = details.replace("%Cash-out next%", Double.toString(leftOverNextCost));
 		details = details.replace("%Balance%", Double.toString(openBalance));
+		details = details.replace("%Cash-Out other%", Double.toString(cashOutOthers));
 		currentIteration = currentIteration.replace("%DETAILS%", details);
 	}
 	

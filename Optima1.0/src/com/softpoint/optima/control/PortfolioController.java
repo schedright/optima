@@ -1761,7 +1761,7 @@ public class PortfolioController {
 
 	private static final int SVG_HEIGHT = 500;
 	private static final int SVG_PADDING = 30;
-	private static final int DAY_WIDTH = 10;
+	private static final int DAY_WIDTH = 15;
 	private static final int FIRST_DAY = 120;
 
 	private static final String FINANCE_HORIZONTAL_LINE = "<path d=\"M %d %d l %d 0\" stroke=\"lightgrey\" stroke-width=\"1\" fill=\"none\"></path><text x=\"10\" y=\"%d\" font-size=\"12\" stroke=\"black\">%.2f</text>\r";
@@ -1931,6 +1931,11 @@ public class PortfolioController {
 			double range = Math.abs(cashTop - cashBottom);
 			int numOfDijits = (int) Math.floor(Math.log10(range * 1.2));
 			double cashStep = Math.pow(10, numOfDijits);
+			int roughCount = (int) ((range * 1.2)/cashStep);
+			
+			if (roughCount<5) {
+				cashStep /=4;
+			} 
 			int startCash = (int) ((int) Math.floor(cashBottom / cashStep) * cashStep);
 			// number of horizontal lines we will draw
 			int numberOfCashes = (int) (Math.floor(Math.abs(cashTop - startCash) / cashStep) + 2); 
@@ -1951,22 +1956,14 @@ public class PortfolioController {
 
 			{//add dates vertically, try not to show many
 				int daysCount = daysBetween(startDate, endDate);
-				int everyWhat = 1;
-				if (daysCount>10 && daysCount<50) {
-					everyWhat = 2;
-				} else if (daysCount>50 && daysCount<100) {
-					everyWhat = 5;
-				} if (daysCount>100) {
-					everyWhat = 10;
-				}
 				SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
 				Calendar start = Calendar.getInstance();
 				start.setTime(startDate);
 				int index = 0;
 				for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE,
 						1), date = start.getTime()) {
-					int x = FIRST_DAY + index * DAY_WIDTH + 4;
-					if ((index % everyWhat) == 0) {
+					if (date.equals(startDate) || (totalPayments.get(date)!=null && totalPayments.get(date)>0)) {
+						int x = FIRST_DAY + index * DAY_WIDTH + 4;
 						sb.append(String.format(DATE_VERTICAL,x,(SVG_HEIGHT - 2 * SVG_PADDING),format.format(date)));
 					}
 					index++;

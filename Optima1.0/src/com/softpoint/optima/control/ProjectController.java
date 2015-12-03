@@ -984,7 +984,7 @@ public class ProjectController {
 										+ expectedCashIn >= leftOverNextCost ? "Yes" : "No",
 						cashAvailable - totalCostCurrent < 0 ? 0 : cashAvailable - totalCostCurrent);
 
-				writeTrialToHTMLLogFile(solutionReport, iteration, shortVersion, from, to, project, PaymentUtil.getProjectExpectedEndDate(project), totalCostCurrent,payment,paymentCurrent, financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance);
+				writeTrialToHTMLLogFile(solutionReport, iteration, shortVersion, from, to, project, PaymentUtil.getProjectExpectedEndDate(project), totalCostCurrent,payment,paymentCurrent, financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance,cashOutOthers);
 
 				if (initial) {
 					initialInfo = cashAvailable + "," + totalCostCurrent + ","
@@ -1074,7 +1074,7 @@ public class ProjectController {
 												: cashAvailable - solutionTotalCostCurrent);
 
 						writeTrialToHTMLLogFile(solutionReport, iteration, shortVerion, from, to, project,
-								PaymentUtil.getProjectExpectedEndDate(project), solutionEligibleTasksCurrentPeroidCost,payment,paymentCurrent ,financeLimit,financeLimitNextPeriod,leftOverCost,solutionEligibleTasksLeftOverCost,openBalance);
+								PaymentUtil.getProjectExpectedEndDate(project), solutionEligibleTasksCurrentPeroidCost,payment,paymentCurrent ,financeLimit,financeLimitNextPeriod,leftOverCost,solutionEligibleTasksLeftOverCost+ solutionOtherPojectsEligibleTasksLeftOverCost,openBalance,cashOutOthers);
 
 						solutions.add(solution);
 						task.setCalendarStartDate(taskDate);
@@ -1174,7 +1174,7 @@ public class ProjectController {
 	}
 	
 	private void writeTrialToHTMLLogFile(PeriodLogGenerator report, int iteration, String shortVersion, Date from,
-			Date to, Project project, Date projectEnd, double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost,double openBalance) {
+			Date to, Project project, Date projectEnd, double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost,double openBalance, double cashOutOthers) {
 		try {
 			Date start = from;
 			Date end = to;
@@ -1243,7 +1243,7 @@ public class ProjectController {
 					}
 				}
 			}
-			report.setDetails(totalCostCurrent,payment, extraPaymentNextPeriod,financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance);
+			report.setDetails(totalCostCurrent,payment, extraPaymentNextPeriod,financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance,cashOutOthers);
 			/*
 			 * for (ProjectTask task : currentEligibleSet) { Date taskStart =
 			 * task.getCalendarStartDate(); Date taskEnd =
