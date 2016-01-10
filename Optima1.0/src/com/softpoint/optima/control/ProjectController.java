@@ -34,6 +34,7 @@ import com.softpoint.optima.struct.TaskSolution;
 import com.softpoint.optima.struct.TaskState;
 import com.softpoint.optima.util.PaymentUtil;
 import com.softpoint.optima.util.PeriodLogGenerator;
+import com.softpoint.optima.util.solution.PortfolioSolver;
 
 /**
  * @author WDARWISH
@@ -342,8 +343,13 @@ public class ProjectController {
 		EntityController<Project> projectController = new EntityController<>(session.getServletContext());
 		try {
 			Project project = projectController.find(Project.class, projectId);
-			int portfolioId = project.getPortfolio().getPortfolioId();
+			long millis1 = System.currentTimeMillis();
+/**/			
+			PortfolioSolver solver = new PortfolioSolver(project.getPortfolio(), projectsPriority);
+			String ret = solver.solveIt(session);
 
+/*/
+			int portfolioId = project.getPortfolio().getPortfolioId();
 			TaskController taskController = new TaskController();
 
 			HashMap<Integer, Boolean> flagToStop = new HashMap<Integer, Boolean>();
@@ -649,8 +655,11 @@ public class ProjectController {
 			// System.out.println("totalAdvancedPaymentAmount \n
 			// _______________________________________________________________\n");
 			// System.out.println(totalAdvancedPaymentAmount);
-
-			return new ServerResponse("0", "Success", finalSolution);
+			long millis3 = System.currentTimeMillis();
+//*/
+			long millis2 = System.currentTimeMillis();
+			System.out.println(millis2-millis1);
+			return new ServerResponse("0", "Success", "FIXED");
 
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -1175,6 +1184,9 @@ public class ProjectController {
 	
 	private void writeTrialToHTMLLogFile(PeriodLogGenerator report, int iteration, String shortVersion, Date from,
 			Date to, Project project, Date projectEnd, double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost,double openBalance, double cashOutOthers) {
+		if (true) {
+			return;
+		}
 		try {
 			Date start = from;
 			Date end = to;

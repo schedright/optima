@@ -42,8 +42,8 @@ import com.softpoint.optima.struct.PeriodCashout;
 import com.softpoint.optima.struct.ProjectPaymentDetail;
 import com.softpoint.optima.struct.SchedulePeriod;
 import com.softpoint.optima.util.PaymentUtil;
-import com.softpoint.optima.util.PaymentUtilBeforeSolving;
 import com.softpoint.optima.util.ProjectSolutionDetails;
+import com.softpoint.optima.util.TaskUtil;
 
 /**
  * @author WDARWISH
@@ -243,7 +243,7 @@ public class PortfolioController {
 							.append(format.format(task.getTentativeStartDate())).append("</td><td>")
 							.append(format.format(task.getScheduledStartDate())).append("</td></tr>\r");
 
-					int oldDuration = PaymentUtilBeforeSolving.calculateTaskDuration(task);
+					int oldDuration = TaskUtil.calculateTaskDuration(task);
 					if (lastDate == null) {
 						lastDate = addDayes(task.getTentativeStartDate(), oldDuration-1);
 					} else {
