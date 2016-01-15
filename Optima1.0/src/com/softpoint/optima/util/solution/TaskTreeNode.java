@@ -27,8 +27,9 @@ public class TaskTreeNode {
 
 	int completedDays;
 
+	Map<TaskTreeNode,Integer> undoList;
 	public TaskTreeNode() {
-		
+		undoList = new HashMap<TaskTreeNode,Integer>();
 	}
 	
 	public TaskTreeNode(ProjectTask task, ProjectWrapper projectW) {
@@ -41,6 +42,7 @@ public class TaskTreeNode {
 		calculatedTaskEnd = null;
 		calculatedTaskStart = null;
 		durationWithChildren = -1;
+		undoList = new HashMap<TaskTreeNode,Integer>();
 	}
 
 
@@ -51,6 +53,28 @@ public class TaskTreeNode {
 	 */
 	int shift(int days) {
 		daysShift += days;
+		if (days>0) {
+			//this will be needed if we have task A and task B that dependes on A
+			//if B is shifted first, it's days shift will be 1
+			//then if we shift A, we need to move back A, otherwise it will be shifted twice
+			//but in case moving A wasn't the best solution, we might need to undo, so we don't want to lose B status, 
+			//so I keep them in the undoList
+			undoList.clear();
+			for (TaskTreeNode child:getChildren()) {
+				if (child.daysShift>0) {
+					undoList.put(child, child.daysShift);
+					child.daysShift = 0;
+				}
+			}
+		} else if (days<0){
+			for (TaskTreeNode child:getChildren()) {
+				if (undoList.containsKey(child)) {
+					child.daysShift = undoList.get(child);
+				}
+			}
+			undoList.clear();
+		}
+		
 		clearStartAndEndDateRecursive(this);
 		if (days>0) {
 			Date startDate = getCalculatedTaskStart();

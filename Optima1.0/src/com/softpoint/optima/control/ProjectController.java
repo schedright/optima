@@ -344,7 +344,7 @@ public class ProjectController {
 		try {
 			Project project = projectController.find(Project.class, projectId);
 			long millis1 = System.currentTimeMillis();
-/**/			
+/**/		
 			PortfolioSolver solver = new PortfolioSolver(project.getPortfolio(), projectsPriority);
 			String ret = solver.solveIt(session);
 

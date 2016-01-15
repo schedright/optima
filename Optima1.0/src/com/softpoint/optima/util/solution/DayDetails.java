@@ -11,6 +11,7 @@ public class DayDetails {
 	Double retained;
 	Double penalty;
 	Double balance;
+	Double otherProjectsCashOut;
 
 	public DayDetails(Double finance, Double payments, Double periodCost, Double periodIncome, Double financeInterest, Double overhead,
 			Double leftOver, Double retained, Double penalty, Double balance) {
@@ -25,6 +26,7 @@ public class DayDetails {
 		this.penalty = penalty;
 		this.balance = balance;
 		this.periodIncome = periodIncome;
+		this.otherProjectsCashOut = (double) 0;
 	}
 
 	public DayDetails(DayDetails dayDetails) {
@@ -39,6 +41,7 @@ public class DayDetails {
 		this.penalty = dayDetails.penalty;
 		this.balance = dayDetails.balance;
 		this.periodIncome = dayDetails.periodIncome;
+		this.otherProjectsCashOut = dayDetails.otherProjectsCashOut;
 	}
 	
 	public DayDetails() {
@@ -52,6 +55,7 @@ public class DayDetails {
 		retained		= (double) 0 ;
 		penalty			= (double) 0 ;
 		balance			= (double) 0 ;
+		otherProjectsCashOut = (double) 0;
 	}
 
 	public Double getFinance() {
@@ -186,6 +190,14 @@ public class DayDetails {
 		penalty += dayDetails.penalty;
 		balance += dayDetails.balance;
 		periodIncome += dayDetails.periodIncome;
+	}
+
+	public Double getOtherProjectsCashOut() {
+		return otherProjectsCashOut==null?0:otherProjectsCashOut;
+	}
+
+	public void setOtherProjectsCashOut(Double otherProjectsCashOut) {
+		this.otherProjectsCashOut = otherProjectsCashOut;
 	}
 
 }

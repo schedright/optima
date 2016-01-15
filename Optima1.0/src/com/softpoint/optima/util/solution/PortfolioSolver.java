@@ -192,7 +192,11 @@ public class PortfolioSolver {
 			dayDetails.setPayments(payment);
 		}*/
 		dayDetails.setFinance(getFinanceAtDate(currentPeriodStart));
-
+		
+		Map<ProjectWrapper,Double> totalIncome = new HashMap<ProjectWrapper,Double>();
+		for (ProjectWrapper p:projects) {
+			totalIncome.put(p, Double.valueOf(0));
+		}
 		int temp = 0;
 		while (finishedProjects < projects.size()) {
 			temp++;
@@ -204,21 +208,32 @@ public class PortfolioSolver {
 //			DayDetails p2EndDefails = new DayDetails();
 			int twoPeriodDuration = TaskUtil.daysBetween(p1Start, p2End);
 
-			DayDetails tempDayDetails = new DayDetails(dayDetails);
-			// TODO Add left overs from existing tasks of all projects
-
 			for (int projectIndex = 0; projectIndex < projects.size(); projectIndex++) {
 				ProjectWrapper projectW = projects.get(projectIndex);
-				DayDetails currentProjectDayDetails = new DayDetails(tempDayDetails);
+				DayDetails currentProjectDayDetails = new DayDetails(dayDetails);
 				currentProjectDayDetails.setLeftOver((double) 0);
 
 				// Add overhead from all next project, we dont add current or
 				// previous cause they are already calculated
+				double totalCashoutOther = 0;
 				for (int i = projectIndex + 1; i < projects.size(); i++) {
 					ProjectWrapper next = projects.get(i);
-					currentProjectDayDetails.setOverhead(currentProjectDayDetails.getOverhead().doubleValue()
-							+ (twoPeriodDuration * next.getProject().getOverheadPerDay().doubleValue()));
+					
+					DayDetails tmp = new DayDetails();
+					Map<Date, Double> pamymentClone = cloneMap(payments);
+					//fake call just to find the cash out
+					List<TaskTreeNode> LO = projectLeftovers.get(next);
+					List<TaskTreeNode> tmpLO = new ArrayList<TaskTreeNode>();
+					if (LO!=null) {
+						tmpLO.addAll(LO);
+					}
+					Map<String, Object> tmpResult = isValidPeriod(next, tmpLO, tmpLO, tmp,p1Start,p1End,p2End,0);
+					payments = cloneMap(pamymentClone);
+					
+					tmp = (DayDetails) tmpResult.get(P1_END);
+					totalCashoutOther += tmp.getOverhead() + tmp.getLeftOver();
 				}
+				currentProjectDayDetails.setOtherProjectsCashOut(totalCashoutOther);
 
 				// list of left over tasks for this project
 				List<TaskTreeNode> leftOverTasks = projectLeftovers.get(projectW);
@@ -229,6 +244,7 @@ public class PortfolioSolver {
 				List<TaskTreeNode> eligibleTasks = new ArrayList<TaskTreeNode>();
 				getEligibleTasks(projectW, p1Start, p2End, eligibleTasks);
 
+				currentProjectDayDetails.setPeriodIncome(totalIncome.get(projectW));
 				Map<String, Object> details = getPeriodSolutionPerProject(projectW, eligibleTasks, leftOverTasks,
 						currentProjectDayDetails,p1Start,p1End,p2End);
 				if (details.get(FEASIBLE)==Boolean.FALSE) {
@@ -267,6 +283,8 @@ public class PortfolioSolver {
 					}
 				}
 				dayDetails = (DayDetails) details.get(P1_END);
+				totalIncome.put(projectW,dayDetails.getPeriodIncome());
+				
 				dayDetails.setOverhead((double)0);
 				dayDetails.setPeriodCost((double)0);
 				projectLeftovers.put(projectW,leftoverTasks);
@@ -330,7 +348,7 @@ public class PortfolioSolver {
 				TaskTreeNode shiftedTask = null;
 				for (TaskTreeNode task:eligibleTasks) {
 					//left overs doesn't move, and we dont need to push any task further than outside the period
-					if (leftOverTasks.contains(task) || task.getCalculatedTaskStart().after(p1End) || task.getCalculatedTaskStart().before(p1Start)) {
+					if (leftOverTasks.contains(task) || !task.getCalculatedTaskStart().before(p1End) || task.getCalculatedTaskStart().before(p1Start)) {
 						continue;
 					}
 					if (!task.getCalculatedTaskStart().before(p1End)) {
@@ -339,7 +357,6 @@ public class PortfolioSolver {
 					tempDayDetails = new DayDetails(currentProjectDayDetails);
 					shiftHappens = true;
 					int actualShift = task.shift(1);
-					Date dbg = task.getCalculatedTaskStart();
 					payments = cloneMap(pamymentClone);
 					result = isValidPeriod(projectW, eligibleTasks, leftOverTasks, tempDayDetails,p1Start,p1End,p2End,numberOfDaysSinceLastRequest.get(projectW));
 					boolean resultFeasible = result.get(FEASIBLE)==Boolean.TRUE;
@@ -403,6 +420,7 @@ public class PortfolioSolver {
 				}
 				shiftedTask.shift(1);
 				result = bestResult;
+				Date ccc = eligibleTasks.get(3).getCalculatedTaskStart();
 				numberOfDaysSinceLastRequest.put(projectW, (Integer) result.get(DAYSSINCELASTREQUEST2));
 				payments = cloneMap(bestPamymentClone);
 				iterationIndex++;
@@ -440,6 +458,7 @@ public class PortfolioSolver {
 		Map<String,Object> results = new HashMap<String,Object>();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(p1Start);
+		Date psd = projectW.getProject().getPropusedStartDate();
 		int requestPeriod = projectW.getProject().getPaymentRequestPeriod();
 		int paymentPeriod = projectW.getProject().getCollectPaymentPeriod();
 		 double advancedPercentage = projectW.getProject().getAdvancedPaymentPercentage().doubleValue();
@@ -486,7 +505,7 @@ public class PortfolioSolver {
 				results.put(P1_START, new DayDetails(currentProjectDayDetails));
 			}
 			
-			if (!projectDone) {
+			if (!projectDone && !date.before(psd)) {
 				Double O = projectW.getProject().getOverheadPerDay().doubleValue();
 				currentProjectDayDetails.addBalance(-O);
 				currentProjectDayDetails.addOverhead(O);
@@ -580,8 +599,8 @@ public class PortfolioSolver {
 		results.put(LEFTOVER_COST,leftOversForNextPeriod);
 		results.put(P2_END, new DayDetails(currentProjectDayDetails));
 		
-		Boolean p1Feasible = (end1Detailes.getBalance() + end1Detailes.getFinance()) >0;
-		Boolean p2Feasible = ((currentProjectDayDetails.getBalance() + currentProjectDayDetails.getFinance() + totalCostForNextPeriod )) >0;
+		Boolean p1Feasible = (end1Detailes.getBalance() + end1Detailes.getFinance() - currentProjectDayDetails.getOtherProjectsCashOut()) >0;
+		Boolean p2Feasible = ((currentProjectDayDetails.getBalance() + currentProjectDayDetails.getFinance() + totalCostForNextPeriod - currentProjectDayDetails.getOtherProjectsCashOut())) >0;
 		Boolean feasible = p1Feasible && p2Feasible;
 		results.put(FEASIBLE, feasible);
 //		results.put(LEFTOVERS, completedDays);
@@ -629,6 +648,10 @@ public class PortfolioSolver {
 				Date pe = TaskUtil.addDays(psd, daysToEnd);
 				if (periodEnd == null || periodEnd.after(pe)) {
 					periodEnd = pe;
+				}
+			} else {
+				if (periodEnd == null || periodEnd.after(psd)) {
+					periodEnd = psd;
 				}
 			}
 		}
