@@ -118,7 +118,6 @@ $(function() {
 });
 
 function solveIt(portfolioId) {
-	$('#loading-indicator').show();
 	var projectsAccordingToPriority = $("#mainAllProjects").find('li');
 	var projectID = projectsAccordingToPriority[0].id;
 	var priorityOrder = "";
@@ -127,8 +126,42 @@ function solveIt(portfolioId) {
 		priorityOrder = priorityOrder + separator + projectsAccordingToPriority[i].id;
 		separator = ",";
 	}
+	window.portfolioId = portfolioId;
 	rpcClient.projectService.getSolution( function(result , exception) {
-			if (result.result == 0 && result.data) {
+			if (result.result == 0 && result.message=='Success' && result.data=='running') {
+				//start dialog with progress
+				window.htmlElement = showMessageWithProgress("Solve Portfolio","Solving the portfolio ...", 'Info');
+				window.intervalId=self.setInterval(function() {
+					if (window.htmlElement.parent().length==0) {
+						window.clearInterval(window.intervalId);
+					} else {
+						rpcClient.projectService.getStatus( function(result , exception) {
+							try {
+								var bar = window.htmlElement[0].children[0].children[0].children[0].children[1].children[0].children[0].children[0];
+								window.htmlElement[0].children[0].children[0].children[0].children[1].children[0].children[0].children[0];
+								var jsn = jQuery.parseJSON( result.data );
+								var ratio = jsn.DONE * 100 / jsn.TOTAL;
+								bar.style.width = ratio+"%";
+								if (jsn.STATUS=='Success') {
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Portfolio fixed successfully";
+									window.clearInterval(window.intervalId);
+								}
+							} catch(e) {
+								try {
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Error updating the status";
+									window.clearInterval(window.intervalId);
+								} catch (e2) {
+								}
+							}
+						},window.portfolioId)
+					}
+				}, 1000);
+			} else if (result.result == 0 && result.message=='Busy') {
+				showMessage("Solve Portfolio",'Error:' + result.data,'error');
+			}
+				/* 
+				showMessage("Solve Portfolio",'Error:' + result.message,'error');
+
 				$("#currentSolution").css('display','');
 				$("#schedResults").html('');
 				$("#schedResults").append("<p style='margin-left:65px'><a href='financials.jsp?portfolioId=" + portfolioId +"'>Go to the current solution.</a></p>"); 
@@ -136,8 +169,7 @@ function solveIt(portfolioId) {
 			} else {
 				showMessage("Solve Portfolio",'Error:' + result.message,'error');
 				$("#currentSolution").css('display','none');
-			}
-			$('#loading-indicator').hide();
+			}*/
 	}, projectID, "", priorityOrder); 
 };
 

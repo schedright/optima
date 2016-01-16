@@ -109,4 +109,33 @@
 		});			
 	}
     
-    
+    function showMessageWithProgress(title, text, type, buttons) {
+    	if (!buttons) {
+		   buttons = {
+			Close : function() {
+				$(this).dialog("close");
+			}
+		};
+    	}
+    	var icon = '';
+    	if (type=='error') {
+    		icon = '<div class="errorIcon"></div>';
+    	} else if (type=='info') {
+    		icon = '<div class="infoIcon"></div>';
+    	} else if (type=='success') {
+    		icon = '<div class="successIcon"></div>';
+    	} else if (type=='warning') {
+    		icon = '<div class="warningIcon"></div>';
+    	}
+    	var xx = $('<div></div>').appendTo('body');
+    	var htmlElement = xx.html('<div><table style="border:0"><tr><td  style="border:0">' + icon + '</td><td style="vertical-align:middle;border:0"><h6>'+ text +'</h6></td></tr><tr><td colspan=2><div style="border:1px solid;width:100%;height:10px;"><div style="background:green;width:0px;height:100%"></div></div></td></tr></table></div>');
+    	var dlg = htmlElement.dialog({
+		      modal: true, title: title, zIndex: 10000, autoOpen: true,
+		      width: '400px', resizable: false,
+		      buttons: buttons,
+		      close: function (event, ui) {
+		          $(this).remove();
+		      }
+		});
+    	return htmlElement;
+	}

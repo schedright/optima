@@ -10,10 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.http.HttpSession;
 
-import com.mysql.jdbc.BestResponseTimeBalanceStrategy;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
@@ -21,9 +22,6 @@ import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.PortfolioFinance;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectTask;
-import com.softpoint.optima.struct.SolvedTask;
-import com.softpoint.optima.util.PaymentUtil;
-import com.softpoint.optima.util.ProjectSolutionDetails;
 import com.softpoint.optima.util.TaskUtil;
 
 public class PortfolioSolver {
@@ -52,6 +50,16 @@ public class PortfolioSolver {
 	Map<Date, Double> payments;
 	List<TaskTreeNode> leftOverTasks;
 	Map<ProjectWrapper,Integer> numberOfDaysSinceLastRequest;
+	public static String STATUS_JSON = "{\"STATUS\":\"%s\",\"DONE\":%d,\"TOTAL\":%d,\"MESSAGE\":\"%s\"}";
+	public static final int MAX_RUNNING_SOLUTIONS = 1;
+	public static ConcurrentMap<Integer, ConcurrentMap<String,Object>> currentWorkingSolutions = new ConcurrentHashMap<Integer, ConcurrentMap<String,Object>>();
+	public static final String STARTING = "STARTING";
+	public static final String TOTAL = "TOTAL";
+	public static final String SOLVER = "SOLVER";
+	public static final String DONE = "DONE";
+	public static final String STATUS = "STATUS";
+	public static final String SUCCESS = "Success";
+	public static final Object MESSAGE = "MESSAGE";
 	
 	public static class DayNumbers {
 		double payment;
@@ -172,16 +180,28 @@ public class PortfolioSolver {
 
 	public String solveIt(HttpSession session) {
 		Date startDate = null;
-
+		int totalTask = 0;
 		// find the portfolio starting date
 		for (ProjectWrapper pw : projects) {
 			Project p = pw.getProject();
+			totalTask += pw.getTotalTasks();
 			Date d = p.getPropusedStartDate();
 			if (startDate == null || d.before(startDate)) {
 				startDate = d;
 			}
 		}
-		currentPeriodStart = startDate;
+		
+		int portfolioOd = portfolio.getPortfolioId();
+    	if (!PortfolioSolver.currentWorkingSolutions.containsKey(portfolioOd)) {
+    		ConcurrentMap<String, Object> solStatus = new ConcurrentHashMap<String,Object>(); 
+    		PortfolioSolver.currentWorkingSolutions.put(portfolioOd,solStatus);
+    	}
+    	
+		ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(portfolioOd);
+		solStatus.put(STATUS,"RUNNING");
+		solStatus.put(TOTAL,totalTask);
+
+    	currentPeriodStart = startDate;
 
 		// the heart of the calculations,
 		// it goes through the period then verify each project feasibility, and
@@ -197,9 +217,8 @@ public class PortfolioSolver {
 		for (ProjectWrapper p:projects) {
 			totalIncome.put(p, Double.valueOf(0));
 		}
-		int temp = 0;
+		int totalDone = 0;
 		while (finishedProjects < projects.size()) {
-			temp++;
 			Date p1Start = currentPeriodStart;
 			Date p1End = getPeriodEnd(p1Start);
 			Date p2End = getPeriodEnd(TaskUtil.addDays(p1End, 1));
@@ -248,6 +267,10 @@ public class PortfolioSolver {
 				Map<String, Object> details = getPeriodSolutionPerProject(projectW, eligibleTasks, leftOverTasks,
 						currentProjectDayDetails,p1Start,p1End,p2End);
 				if (details.get(FEASIBLE)==Boolean.FALSE) {
+					solStatus.remove(SOLVER);
+					solStatus.put(STATUS,"FAILED");
+					solStatus.put(DONE,totalTask);
+
 					return "FAILED"; //check if we can add more details
 				}
 				
@@ -255,6 +278,7 @@ public class PortfolioSolver {
 				List<TaskTreeNode> finishedTasks = (List<TaskTreeNode>) details.get(COMPLETED_TASKS);
 				projectW.completedTasks.addAll(finishedTasks);
 				for (TaskTreeNode completed:finishedTasks) {
+					totalDone++;
 					projectW.tasks.remove(completed);
 					for (TaskTreeNode dep:completed.getChildren()) {
 						if (!finishedTasks.contains(dep) && !projectW.tasks.contains(dep)) {
@@ -262,6 +286,11 @@ public class PortfolioSolver {
 						}
 					}
 				}
+				/*try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+				}*/
+				solStatus.put(DONE,totalDone);
 				@SuppressWarnings("unchecked")
 				Map<Date,Double> pms = (Map<Date, Double>) details.get(PAYMENTS);
 				if (pms!=null) {
@@ -304,6 +333,9 @@ public class PortfolioSolver {
 		for (ProjectWrapper p:allProjects) {
 			commitSolution(taskController, p);
 		}
+		solStatus.remove(SOLVER);
+		solStatus.put(STATUS,SUCCESS);
+		solStatus.put(DONE,totalTask);
 		return "SOLVED";
 	}
 
@@ -661,5 +693,26 @@ public class PortfolioSolver {
 			}
 		}
 		return periodEnd;
+	}
+
+	public static String formatMessage(ConcurrentMap<String, Object> solStatus) {
+		
+		String status = "";
+		if (solStatus.containsKey(STATUS)) {
+			status = (String) solStatus.get(STATUS); 
+		}
+		Integer done = 0;
+		if (solStatus.containsKey(DONE)) {
+			done = (Integer) solStatus.get(DONE); 
+		}
+		Integer total = 100;
+		if (solStatus.containsKey(TOTAL)) {
+			total = (Integer) solStatus.get(TOTAL); 
+		}
+		String message = "";
+		if (solStatus.containsKey(MESSAGE)) {
+			message = (String) solStatus.get(MESSAGE); 
+		}
+		return String.format(STATUS_JSON,status,done,total,message );
 	}
 }

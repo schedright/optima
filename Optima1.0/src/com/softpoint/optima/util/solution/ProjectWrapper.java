@@ -33,6 +33,7 @@ public class ProjectWrapper {
 	Boolean finished;
 	private WeekendDay projectWeekends;
 	private List<DaysOff> projectVacations;
+	int totalTasks;
 	public ProjectWrapper(Project project) {
 		super();
 		this.project = project;
@@ -45,6 +46,7 @@ public class ProjectWrapper {
 		
 		allTreeNodes = new HashMap<ProjectTask,TaskTreeNode>();
 		List<ProjectTask> allTasks = project.getProjectTasks();
+		totalTasks = allTasks.size();
 		for (ProjectTask tsk:allTasks) {
 			addTaskNodes(tsk);
 		}
@@ -55,6 +57,9 @@ public class ProjectWrapper {
 				rootTasks.add(node);
 			}
 		}
+		
+		allTreeNodes.clear();
+		allTreeNodes=null;
 	}
 	
 	private void addTaskNodes(ProjectTask tsk) {
@@ -95,6 +100,10 @@ public class ProjectWrapper {
 			}
 		}
 		return maxDuration;
+	}
+
+	public int getTotalTasks() {
+		return totalTasks;
 	}
 
 }
