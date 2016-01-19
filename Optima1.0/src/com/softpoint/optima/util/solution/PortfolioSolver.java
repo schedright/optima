@@ -1,6 +1,7 @@
 package com.softpoint.optima.util.solution;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,13 +16,14 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.http.HttpSession;
 
-import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.PortfolioFinance;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectTask;
+import com.softpoint.optima.util.PaymentUtil;
+import com.softpoint.optima.util.PeriodLogGeneratorNew;
 import com.softpoint.optima.util.TaskUtil;
 
 public class PortfolioSolver {
@@ -35,7 +37,12 @@ public class PortfolioSolver {
 //	private static final String DAYS_COMPLETED_FIRSTPERIOD = "DAYS_COMPLETED_FIRSTPERIOD";
 	private static final String LEFTOVER_COST = "LEFTOVER_COST";
 	private static final String P1_START = "P1_START";
+	private static final String P1_PRE_START = "P1_PRE_START";
 	private static final String P1_END = "P1_END";
+	
+	private static String logLevel = "detailed"; //off , short, detailed
+	SimpleDateFormat fileNameDateFormatter = new SimpleDateFormat("yyyyMMdd_Hm");
+	SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM, yyyy");
 	
 	Portfolio portfolio;
 	List<ProjectWrapper> projects;
@@ -61,6 +68,9 @@ public class PortfolioSolver {
 	public static final String SUCCESS = "Success";
 	public static final Object MESSAGE = "MESSAGE";
 	
+	String timestamp;
+	private HttpSession session;
+
 	public static class DayNumbers {
 		double payment;
 		double cost;
@@ -121,7 +131,8 @@ public class PortfolioSolver {
 		}
 		
 		projectLeftovers = new HashMap<ProjectWrapper,List<TaskTreeNode>>();
-
+		
+		timestamp = fileNameDateFormatter.format(new Date());
 	}
 
 	// add a payment, if another payment exists in the same date (probably from
@@ -179,6 +190,7 @@ public class PortfolioSolver {
 	}
 
 	public String solveIt(HttpSession session) {
+		this.session = session;
 		Date startDate = null;
 		int totalTask = 0;
 		// find the portfolio starting date
@@ -246,7 +258,7 @@ public class PortfolioSolver {
 					if (LO!=null) {
 						tmpLO.addAll(LO);
 					}
-					Map<String, Object> tmpResult = isValidPeriod(next, tmpLO, tmpLO, tmp,p1Start,p1End,p2End,0);
+					Map<String, Object> tmpResult = isValidPeriod(next, tmpLO, tmpLO, tmp,p1Start,p1End,addDays(p2End,1),0);
 					payments = cloneMap(pamymentClone);
 					
 					tmp = (DayDetails) tmpResult.get(P1_END);
@@ -348,6 +360,20 @@ public class PortfolioSolver {
 		DayDetails tempDayDetails = new DayDetails(currentProjectDayDetails);
 		Map<Date, Double> pamymentClone = cloneMap(payments);
 		Map<String, Object> result = isValidPeriod(projectW, eligibleTasks, leftOverTasks, tempDayDetails,p1Start,p1End,p2End,numberOfDaysSinceLastRequest.get(projectW));
+		PeriodLogGeneratorNew logGenerator = null;
+		String shortVersion = "";
+		int iterationIndex = 0;
+		if (logLevel.equals("short") || logLevel.equals("detailed")) {
+			logGenerator = new PeriodLogGeneratorNew(session.getServletContext(), projectW.getProject().getProjectCode() + "_" + timestamp, dateFormatter.format(p1Start), dateFormatter.format(p1End));
+			logGenerator.setProject(portfolio.getPortfolioName(),
+					projectW.getProject().getProjectCode() + "-" + projectW.getProject().getProjectName());
+			shortVersion = getShortVersion(result,projectW,eligibleTasks,p1Start,p1End,iterationIndex,null);
+			Date psd = projectW.getProject().getPropusedStartDate();
+			Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
+			writeTrialToHTMLLogFile(logGenerator,iterationIndex,shortVersion,p1Start,p1End,projectW,ped,result,null);
+//			private void writeTrialToHTMLLogFile(PeriodLogGeneratorNew report, int iteration, String shortVersion, Date from,
+//					Date to, Project project, Date projectEnd, double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost,double openBalance, double cashOutOthers) {
+		}
 		if (result.get(FEASIBLE)==Boolean.TRUE) {
 			numberOfDaysSinceLastRequest.put(projectW, (Integer) result.get(DAYSSINCELASTREQUEST2));
 			List<TaskTreeNode> newLeftOvers = new ArrayList<TaskTreeNode>();
@@ -366,10 +392,15 @@ public class PortfolioSolver {
 
 		} else {
 			Map<String, Object> bestResult = null;
+			if (logGenerator != null) {
+				shortVersion = getShortVersion(result,projectW,eligibleTasks,p1Start,p1End,iterationIndex,null);
+				Date psd = projectW.getProject().getPropusedStartDate();
+				Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
+				writeTrialToHTMLLogFile(logGenerator,iterationIndex,shortVersion,p1Start,p1End,projectW,ped,result,null);
+			}
+
 			//do the shifting
-			int iterationIndex = 0;
 			while (result.get(FEASIBLE)!=Boolean.TRUE) {
-				boolean bestIsSet = false;
 				boolean bestIsFeasible = false;
 				
 				Boolean first = true;
@@ -391,6 +422,14 @@ public class PortfolioSolver {
 					int actualShift = task.shift(1);
 					payments = cloneMap(pamymentClone);
 					result = isValidPeriod(projectW, eligibleTasks, leftOverTasks, tempDayDetails,p1Start,p1End,p2End,numberOfDaysSinceLastRequest.get(projectW));
+					
+					if (logGenerator != null) {
+						shortVersion = getShortVersion(result,projectW,eligibleTasks,p1Start,p1End,iterationIndex,task);
+						Date psd = projectW.getProject().getPropusedStartDate();
+						Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
+						writeTrialToHTMLLogFile(logGenerator,iterationIndex,shortVersion,p1Start,p1End,projectW,ped,result,task);
+					}
+					
 					boolean resultFeasible = result.get(FEASIBLE)==Boolean.TRUE;
 					DayDetails p1EndDetails = (DayDetails) result.get(P1_END);
 					Boolean newIsBetter = false;
@@ -452,16 +491,49 @@ public class PortfolioSolver {
 				}
 				shiftedTask.shift(1);
 				result = bestResult;
-				Date ccc = eligibleTasks.get(3).getCalculatedTaskStart();
 				numberOfDaysSinceLastRequest.put(projectW, (Integer) result.get(DAYSSINCELASTREQUEST2));
 				payments = cloneMap(bestPamymentClone);
 				iterationIndex++;
 			}
 			
 		}
+		if (logGenerator!=null) {
+			logGenerator.flushFile();
+		}
 		return result;
 	}
 	
+	
+	private String getShortVersion(Map<String, Object> result, ProjectWrapper project, List<TaskTreeNode> eligibleTasks, Date p1Start,
+			Date p1End,int iteration, TaskTreeNode shifterTask) {
+		String tasks = "";
+		String dates = "";
+		SimpleDateFormat df = new SimpleDateFormat("dd/MM");
+
+		for (TaskTreeNode task : eligibleTasks) {
+			Date date = task.getCalculatedTaskStart();
+			if (date.before(p1Start) || !date.before(p1End)) {
+				continue;
+			}
+			if (!tasks.isEmpty()) {
+				tasks+=",";
+			}
+			if (task==shifterTask) {
+				tasks += ">>";
+			}
+			tasks += task.getTask().getTaskName();
+			if (!dates.isEmpty()) {
+				dates+=",";
+			}
+			dates += df.format(date);
+		}
+		int d = project.getProjectDuratoin();
+		
+		String SHORT_TEMPLATE = "<p>Iteration [%d] Activities:[%s] Start [%s] Project Duration: [%d] Feasible: %s</p>";
+		String f = (result.get(FEASIBLE)==Boolean.TRUE)?"YES":"NO";
+		return String.format(SHORT_TEMPLATE, iteration,tasks,dates,d,f) ;
+	}
+
 	Date getMaxProjectEnd(TaskTreeNode task) {
 		if (task.getChildren().size()==0) {
 			return task.getCalculatedTaskEnd();
@@ -488,6 +560,7 @@ public class PortfolioSolver {
 	private Map<String,Object> isValidPeriod(ProjectWrapper projectW, List<TaskTreeNode> eligibleTasks,
 			List<TaskTreeNode> leftOverTasks, DayDetails currentProjectDayDetails, Date p1Start, Date p1End, Date p2End, Integer daysSinceLastRequest) {
 		Map<String,Object> results = new HashMap<String,Object>();
+		results.put(P1_PRE_START, new DayDetails(currentProjectDayDetails));
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(p1Start);
 		Date psd = projectW.getProject().getPropusedStartDate();
@@ -715,4 +788,113 @@ public class PortfolioSolver {
 		}
 		return String.format(STATUS_JSON,status,done,total,message );
 	}
+	private void writeTrialToHTMLLogFile(PeriodLogGeneratorNew report, int iteration, String shortVersion, Date from,
+			Date to, ProjectWrapper projectW, Date projectEnd, Map<String, Object> result, TaskTreeNode shiftedTask) {
+			
+			DayDetails p1StartDetails = (DayDetails) result.get(P1_START);
+			DayDetails p1EndDetails = (DayDetails) result.get(P1_END);
+			DayDetails p2StartDetails = (DayDetails) result.get(P2_START);
+			DayDetails p2EndDetails = (DayDetails) result.get(P2_END);
+			DayDetails p1PreStart = (DayDetails)result.get(P1_PRE_START);
+			
+			double totalCostCurrent=p1EndDetails.getPeriodCost();
+			double payment=p1StartDetails.getPayments();
+			double extraPaymentNextPeriod=p2StartDetails.getPayments();
+			double financeLimit=p1StartDetails.getFinance();
+			double financeLimitNextPeriod=p2StartDetails.getFinance();
+			double leftOverCost= p1EndDetails.getLeftOver() + p1EndDetails.getOverhead();
+			double leftOverNextCost=p2EndDetails.getOverhead()+(Double)result.get(LEFTOVER_COST);
+			double openBalance=p1PreStart.getBalance();
+			double cashOutOthers=p1PreStart.getOtherProjectsCashOut();
+			
+		try {
+			Date start = from;
+			Date end = to;
+			if (logLevel.equals("detailed")) {
+				end = projectEnd;
+			}
+
+			// write header
+			String header = "<td></td>";
+			Date index = start;
+			while (index.before(end)) {
+				boolean offDay = TaskUtil.isWeekendDay(index, projectW.getProjectWeekends()) || TaskUtil.isDayOff(index, projectW.getProjectVacations());
+				if (!index.before(to)) {
+					// future
+					header = header + "<td bgcolor=\"CC9900\">" + (offDay?"<div class=\"stripedDiv\"></div>":"") + new SimpleDateFormat("dd/MM").format(index) +  "</td>";
+				} else {
+					// current
+					header = header + "<td bgcolor=\"lightgreen\">"  + (offDay?"<div class=\"stripedDiv\"></div>":"") + new SimpleDateFormat("dd/MM").format(index) 
+							+ "</td>";
+				}
+				index = addDays(index, 1);
+			}
+
+			report.startIteration(iteration, shortVersion);
+			report.setIterationDates(header);
+
+			for (TaskTreeNode task : projectW.getAllTasks()) {
+				Date taskStart = task.getCalculatedTaskStart();
+				Date taskEnd = task.getCalculatedTaskEnd();
+				if (!taskEnd.before(from)) {
+					if (logLevel.equals("detailed") || taskStart.before(to)) {
+						
+						String line = "<tr><td>" + task.getTask().getTaskDescription() + ((shiftedTask==task)?">>":"")+ "</td>";
+						Date index2 = start;
+						while (index2.before(end)) {
+							boolean offDay = TaskUtil.isWeekendDay(index2, projectW.getProjectWeekends()) || TaskUtil.isDayOff(index2, projectW.getProjectVacations());;
+							String color = "lightgreen";
+							if (taskStart.before(start)) {
+								color = "lightgrey";
+							} else if (!index2.before(to)) {
+								if (!taskStart.before(to)) {
+									color = "orange";
+								} else {
+									color = "yellow";
+								}
+							}
+							if (index2.before(taskStart) || index2.after(taskEnd)) {
+								line += "<td>"  + (offDay?"<div class=\"stripedDiv\"></div>":"") +"</td>";
+							} else {
+								line += "<td bgcolor=\"" + color + "\">"  + (offDay?"<div class=\"stripedDiv\"></div>":"") + "</td>";
+							}
+							index2 = addDays(index2, 1);
+						}
+						report.addIterationTask(line);
+					}
+				}
+			}
+			report.setDetails(totalCostCurrent,payment, extraPaymentNextPeriod,financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance,cashOutOthers);
+			report.finishTask();
+			// solutionReport.info(",");
+		} catch (Exception ex) {
+			// solutionReport.error("error in reporting iteration");
+		}
+
+	}
+
+	public static boolean isIffDay(Project project,Date date) {
+		return PaymentUtil.isDayOff(date, project.getDaysOffs())
+		|| PaymentUtil.isWeekendDay(date, project.getWeekendDays());
+	}
+
+	public static long differenceInDays(Date start, Date end) {
+		Calendar calendar1 = Calendar.getInstance();
+		Calendar calendar2 = Calendar.getInstance();
+		calendar1.setTime(start);
+		calendar2.setTime(end);
+		long milliseconds1 = calendar1.getTimeInMillis();
+		long milliseconds2 = calendar2.getTimeInMillis();
+		long diff = milliseconds2 - milliseconds1;
+		long diffDays = diff / (24 * 60 * 60 * 1000);
+		return diffDays;
+	}
+
+	public static Date addDays(Date date, int days) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.add(Calendar.DATE, days); // minus number would decrement the days
+		return cal.getTime();
+	}
+
 }

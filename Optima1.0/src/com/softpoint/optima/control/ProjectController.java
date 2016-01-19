@@ -913,32 +913,8 @@ public class ProjectController {
 
 	}
 
-	public static Date addDays(Date date, int days) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		cal.add(Calendar.DATE, days); // minus number would decrement the days
-		return cal.getTime();
-	}
-
-	public static long differenceInDays(Date start, Date end) {
-		Calendar calendar1 = Calendar.getInstance();
-		Calendar calendar2 = Calendar.getInstance();
-		calendar1.setTime(start);
-		calendar2.setTime(end);
-		long milliseconds1 = calendar1.getTimeInMillis();
-		long milliseconds2 = calendar2.getTimeInMillis();
-		long diff = milliseconds2 - milliseconds1;
-		long diffDays = diff / (24 * 60 * 60 * 1000);
-		return diffDays;
-	}
-
 	private static boolean SHOW_COMING_TASKS = true;
 
-	private boolean isIffDay(Project project,Date date) {
-		return PaymentUtil.isDayOff(date, project.getDaysOffs())
-		|| PaymentUtil.isWeekendDay(date, project.getWeekendDays());
-	}
-	
 	private void writeTrialToHTMLLogFile(PeriodLogGenerator report, int iteration, String shortVersion, Date from,
 			Date to, Project project, Date projectEnd, double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost,double openBalance, double cashOutOthers) {
 		try {
@@ -958,13 +934,13 @@ public class ProjectController {
 			 * (taskEnd.after(end)) { end = taskEnd; } } if (start == null ||
 			 * end == null) { return; }
 			 */
-			long daysCount = differenceInDays(start, end) + 1;
+			long daysCount = PortfolioSolver.differenceInDays(start, end) + 1;
 
 			// write header
 			String header = "<td></td>";
 			Date index = start;
-			while (differenceInDays(index, end) > -1) {
-				boolean offDay = isIffDay(project, index);
+			while (PortfolioSolver.differenceInDays(index, end) > -1) {
+				boolean offDay = PortfolioSolver.isIffDay(project, index);
 				if (!index.before(to)) {
 					// future
 					header = header + "<td bgcolor=\"CC9900\">" + (offDay?"<div class=\"stripedDiv\"></div>":"") + new SimpleDateFormat("dd/MM").format(index) +  "</td>";
@@ -973,7 +949,7 @@ public class ProjectController {
 					header = header + "<td bgcolor=\"lightgreen\">"  + (offDay?"<div class=\"stripedDiv\"></div>":"") + new SimpleDateFormat("dd/MM").format(index) 
 							+ "</td>";
 				}
-				index = addDays(index, 1);
+				index = PortfolioSolver.addDays(index, 1);
 			}
 
 			report.startIteration(iteration, shortVersion);
@@ -981,13 +957,13 @@ public class ProjectController {
 
 			for (ProjectTask task : project.getProjectTasks()) {
 				Date taskStart = task.getCalendarStartDate();
-				Date taskEnd = addDays(task.getCalendarStartDate(), task.getCalenderDuration() - 1);
+				Date taskEnd = PortfolioSolver.addDays(task.getCalendarStartDate(), task.getCalenderDuration() - 1);
 				if (!taskEnd.before(from)) {
 					if (SHOW_COMING_TASKS || !taskStart.after(to)) {
 						String line = "<tr><td>" + task.getTaskDescription() + "</td>";
 						Date index2 = start;
-						while (differenceInDays(index2, end) > -1) {
-							boolean offDay = isIffDay(project, index2);
+						while (PortfolioSolver.differenceInDays(index2, end) > -1) {
+							boolean offDay = PortfolioSolver.isIffDay(project, index2);
 							String color = "lightgreen";
 							if (taskStart.before(start)) {
 								color = "lightgrey";
@@ -1003,7 +979,7 @@ public class ProjectController {
 							} else {
 								line += "<td bgcolor=\"" + color + "\">"  + (offDay?"<div class=\"stripedDiv\"></div>":"") + "</td>";
 							}
-							index2 = addDays(index2, 1);
+							index2 = PortfolioSolver.addDays(index2, 1);
 						}
 						report.addIterationTask(line);
 					}

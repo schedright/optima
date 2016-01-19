@@ -44,6 +44,7 @@ import com.softpoint.optima.struct.SchedulePeriod;
 import com.softpoint.optima.util.PaymentUtil;
 import com.softpoint.optima.util.ProjectSolutionDetails;
 import com.softpoint.optima.util.TaskUtil;
+import com.softpoint.optima.util.solution.PortfolioSolver;
 
 /**
  * @author WDARWISH
@@ -1924,7 +1925,7 @@ public class PortfolioController {
 				}
 			}
 
-			long numOfDayes = ProjectController.differenceInDays(startDate, endDate);
+			long numOfDayes = PortfolioSolver.differenceInDays(startDate, endDate);
 			long width = (numOfDayes + 7) * DAY_WIDTH + 3 * SVG_PADDING; //
 
 			// need to display a bit more in the top and bottom

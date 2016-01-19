@@ -29,7 +29,8 @@ public class ProjectWrapper {
 	}
 
 	List<TaskTreeNode> completedTasks;
-	Map<ProjectTask,TaskTreeNode> allTreeNodes;
+	Map<ProjectTask,TaskTreeNode> allTreeNodesMap;
+	List<TaskTreeNode> allTasks;
 	Boolean finished;
 	private WeekendDay projectWeekends;
 	private List<DaysOff> projectVacations;
@@ -41,38 +42,40 @@ public class ProjectWrapper {
 		tasks = new ArrayList<TaskTreeNode>();
 		rootTasks = new ArrayList<TaskTreeNode>();
 		completedTasks = new ArrayList<TaskTreeNode>();
+		allTasks = new ArrayList<TaskTreeNode>();
 		projectWeekends = project.getWeekendDays();
 		projectVacations = project.getDaysOffs();
 		
-		allTreeNodes = new HashMap<ProjectTask,TaskTreeNode>();
+		allTreeNodesMap = new HashMap<ProjectTask,TaskTreeNode>();
 		List<ProjectTask> allTasks = project.getProjectTasks();
 		totalTasks = allTasks.size();
 		for (ProjectTask tsk:allTasks) {
 			addTaskNodes(tsk);
 		}
 		
-		for (TaskTreeNode node : allTreeNodes.values()) {
+		for (TaskTreeNode node : allTreeNodesMap.values()) {
+			this.allTasks.add(node);
 			if (node.parents.size()==0) {
 				tasks.add(node);
 				rootTasks.add(node);
 			}
 		}
 		
-		allTreeNodes.clear();
-		allTreeNodes=null;
+		allTreeNodesMap.clear();
+		allTreeNodesMap=null;
 	}
 	
 	private void addTaskNodes(ProjectTask tsk) {
-		TaskTreeNode node = allTreeNodes.get(tsk);
+		TaskTreeNode node = allTreeNodesMap.get(tsk);
 		if (node==null) {
 			node = new TaskTreeNode(tsk, this);
-			allTreeNodes.put(tsk, node);
+			allTreeNodesMap.put(tsk, node);
 			
 			List<TaskDependency> dependencies = tsk.getAsDependency();
 			for (TaskDependency dep:dependencies) {
 				ProjectTask tsk2 = dep.getDependent();
 				addTaskNodes(tsk2);
-				TaskTreeNode tsk2Node = allTreeNodes.get(tsk2);
+				TaskTreeNode tsk2Node = allTreeNodesMap.get(tsk2);
 				node.children.add(tsk2Node);
 				tsk2Node.parents.add(node);
 			}
@@ -104,6 +107,10 @@ public class ProjectWrapper {
 
 	public int getTotalTasks() {
 		return totalTasks;
+	}
+
+	public List<TaskTreeNode> getAllTasks() {
+		return allTasks;
 	}
 
 }
