@@ -14,8 +14,15 @@ $(function() {
 	buttonImage : "images/calendar.png",
 	buttonImageOnly : true
     });
+    
+    $('#extraPaymentDate').datepicker({
+    	showOn : "button",
+    	buttonImage : "images/calendar.png",
+    	buttonImageOnly : true
+        });
 
     var fColumns = [];
+    var eColumns = [];
 
     
     
@@ -67,10 +74,10 @@ $(function() {
 		    if (createTaskResult.result == 0) {
 			location.reload(true);
 		    } else {
-			alert("Error creating payment: " + createTaskResult.message);
+		    	showMessage("Create Payment",'Error:' + createTaskResult.message,'error');
 		    }
 		} else {
-		    alert("Error: Please check your input");
+	    	showMessage("Create Payment","Error: Please check your input",'error');
 		}
 	    });
 
@@ -83,7 +90,6 @@ $(function() {
 
 	var bValid = true;
 	var dateExists = false;
-	$("#financeNumber").removeClass("ui-state-error");
 	$("#financeAmount").removeClass("ui-state-error");
 	$("#financeDate").removeClass("ui-state-error");
 
@@ -104,7 +110,7 @@ $(function() {
 	    bValid = false;
 	}
 	if (dateExists) {
-	    alert("The entered date exists already in the finaces grid");
+    	showMessage("Add Finance","The entered date exists already in the finaces grid",'error');
 	    return;
 	}
 
@@ -114,12 +120,61 @@ $(function() {
 	    if (createFinanceResult.result == 0) {
 		location.reload(true);
 	    } else {
-		alert("Error creating payment: " + createTaskResult.message);
+	    	showMessage("Create Payment",'Error:' + createTaskResult.message,'error');
 	    }
 	} else {
-	    alert("Error: Please check your input");
+    	showMessage("Create Payment","Error: Please check your input",'error');
 	}
     });
+    
+    $("#addExtraPayment").button({
+    	icons : {
+    	    primary : "ui-icon-circle-plus"
+    	},
+    	text : true
+        }).click(function() {
+
+    	var bValid = true;
+    	var dateExists = false;
+    	$("#extraPaymentAmount").removeClass("ui-state-error");
+    	$("#extraPaymentDate").removeClass("ui-state-error");
+
+    	var extraPaymentDate = $("#extraPaymentDate").val();
+    	if (extraPaymentDate != null && extraPaymentDate.length != 0) {
+    		extraPaymentDate = new Date(extraPaymentDate);
+    	    if (dateExistes(extraPaymentDate, eColumns)) {
+    		$("#extraPaymentDate").addClass("ui-state-error");
+    		dateExists = true;
+    	    }
+    	} else {
+    	    $("#extraPaymentDate").addClass("ui-state-error");
+    	    bvalid = false;
+    	}
+    	var extraPaymentAmount = $("#extraPaymentAmount").val();
+    	if (extraPaymentAmount == null || extraPaymentAmount.length == 0 || !/^-?\d*\.?\d*$/.test(extraPaymentAmount)) {
+    	    $("#extraPaymentAmount").addClass("ui-state-error");
+    	    bValid = false;
+    	}
+    	if (dateExists) {
+	    	showMessage("Add Payment","The entered date exists already in the Extra Payment grid",'error');
+    	    return;
+    	}
+
+    	if (bValid) {
+    	    var createExtraPaymentResult = rpcClient.extraPaymentService.create(portfolioId, extraPaymentAmount, extraPaymentDate);
+    	    if (createExtraPaymentResult.result == 0) {
+    		location.reload(true);
+    	    } else {
+		    	showMessage("Create Payment",'Error:' + createExtraPaymentResult.message,'error');
+    	    }
+    	} else {
+	    	showMessage("Create Payment","Error: Please check your input",'error');
+    	}
+        });
+    
+    
+    
+    
     $("#FinPeriods").accordion({
 
 	activate : function(event, ui) {
@@ -150,7 +205,7 @@ $(function() {
 	    formatter : formatter
 	}, {
 	    id : "projectName",
-	    name : "Project Name" ,
+	    name : "Project Name",
 	    field : "projectName",
 	    tag : "projectName",
 	    minWidth : 180
@@ -236,7 +291,7 @@ $(function() {
 		pGrid.updateRow(cell.row);
 		location.reload(true);
 	    } else {
-		alert("Error: ", deletePaymentsResult.message);
+	    	showMessage("Create Payment",'Error:' + deletePaymentsResult.message,'error');
 	    }
 	});
 
@@ -245,7 +300,6 @@ $(function() {
     var result = rpcClient.financeService.findAllByPortfolio(portfolioId);
     if (result.result == 0) {
 	var fmt = new DateFmt("%w %d-%n-%y");
-
 	var fData = [];
 	fData[0] = {}
 	fColumns.length = 0;
@@ -302,11 +356,86 @@ $(function() {
 		fGrid.render();
 		location.reload(true);
 	    } else {
-		alert("Error: " + deleteFinanceResult.message);
+	    	showMessage("Delete Finance Result",'Error:' + deleteFinanceResult.message,'error');
 	    }
 	});
 
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    var result = rpcClient.extraPaymentService.findAllByPortfolio(portfolioId);
+    if (result.result == 0) {
+	var emt = new DateFmt("%w %d-%n-%y");
+	var eData = [];
+	eData[0] = {}
+	eColumns.length = 0;
+	var extraPaymentsList = result.data.list;
+
+	for (var i = 0; i < extraPaymentsList.length; i++) {
+	    var theDate = new Date(extraPaymentsList[i].extraPayment_date.time);
+	    eColumns.push({
+		id : extraPaymentsList[i].extraPayment_id,
+		name : fmt.format(theDate),
+		tag : theDate,
+		field : "extraPayment_" + extraPaymentsList[i].extraPayment_id,
+		minWidth : 120 , formatter : Slick.Formatters.Currency
+	    });
+	    eData[0]["extraPayment_" + extraPaymentsList[i].extraPayment_id] =  extraPaymentsList[i].extraPayment_amount;
+	}
+
+	eColumns.sort(function(a, b) {
+	    return a.tag - b.tag;
+	});
+
+	var eGrid = new Slick.Grid("#extraPaymentGrid", eData, eColumns, {
+	    editable : true,
+	    enableAddRow : true,
+
+	    enableCellNavigation : true,
+	    enableColumnReorder : true
+	});
+
+	eGrid.onContextMenu.subscribe(function(e, args) {
+	    e.preventDefault();
+	    var cell = eGrid.getCellFromEvent(e);
+	    $("#extraPaymentMenu").data("cell", cell).css("top", e.pageY).css("left", e.pageX).show();
+
+	    $("body").one("click", function() {
+		$("#extraPaymentMenu").hide();
+	    });
+
+	});
+
+	$("#extraPaymentMenu").click(function(e) {
+	    if (!$(e.target).is("li")) {
+		return;
+	    }
+	    if (!eGrid.getEditorLock().commitCurrentEdit()) {
+		return;
+	    }
+	    var cell = $(this).data("cell");
+	    var extraPaymentId = eColumns[cell.cell].id;
+	    var deleteExtraPaymentResult = rpcClient.extraPaymentService.remove(extraPaymentId);
+	    if (deleteExtraPaymentResult.result == 0) {
+		eColumns.splice(cell.cell, 1);
+		eGrid.invalidate();
+		eGrid.render();
+		location.reload(true);
+	    } else {
+	    	showMessage("Delete Payment",'Error:' + deleteExtraPaymentResult.message,'error');
+	    }
+	});
+
+    }
+    
+    
+    
     
     $("#collectionProject").change(function() {
     	$('#paymentToCollect').empty();
@@ -325,7 +454,7 @@ $(function() {
     			}
    
     		} else {
-    			alert("Error:" + result.message);
+		    	showMessage("Get Payment",'Error:' + result.message,'error');
     		}
     	} , $("#collectionProject option:selected").val());
 		 	
@@ -346,7 +475,7 @@ $(function() {
 			}
 
 		} else {
-			alert("Error:" + result.message);
+	    	showMessage("Get Payment",'Error:' + result.message,'error');
 		}
 	} , $("#collectionProject option:selected").val());
     
@@ -364,7 +493,7 @@ $(function() {
     	if (paymentId == "undefined" || paymentId == null) {
     		$("#paymentToCollect").addClass("ui-state-error");
     	    bValid = false;
-    		alert("No payment selected");
+	    	showMessage("Collect Payment","No payment selected",'error');
     	}
     	if (amount == null || amount.length == 0 || !/^-?\d*\.?\d*$/.test(amount)) {
     	    $("#amountToCollect").addClass("ui-state-error");
@@ -375,10 +504,12 @@ $(function() {
     		
 	    	rpcClient.paymentService.submitAnInterimPayment(function(result, exception) {
 	    		if (result.result) {
-	    			alert("Payment submitted successfully");
-	    			location.reload(true);
+			    	showMessage("Submit Payment","Payment submitted successfully",'error',{Close:function(){
+						$(this).dialog("close");
+						location.reload(true);
+					}});
 	    		} else {
-	    			alert("Error:" + result.message);
+			    	showMessage("Submit Payment",'Error:' + result.message,'error');
 	    		}
 	    	} , paymentId , amount);
     	}

@@ -42,7 +42,7 @@ $(document).ready( function() {
 					if (i != portfolioIndex) {
 						continue;
 					}
-					financingList += liFirstRow + "<a href=\"finDataNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
+					financingList += liFirstRow + "<a href=\"finData.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					schedulingList += liFirstRow + "<a href=\"schedule.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					cashflowList += liFirstRow + "<a href=\"cashFlow.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					financialList += liFirstRow + "<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
