@@ -496,7 +496,7 @@ $(document).ready( function() {
 				      icons: {
 				        primary: "ui-icon-calendar"
 				      }
-				    }).attr("href", "scheduling.jsp?portfolioId=" + data.list[i].portfolioId);
+				    }).attr("href", "schedule.jsp?portfolioId=" + data.list[i].portfolioId);
 				 
 				 $("#exportExcel_" + data.list[i].portfolioId).button({
 				      text: true,

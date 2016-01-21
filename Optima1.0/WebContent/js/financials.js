@@ -27,7 +27,7 @@ $(function() {
 		
 	} else {
 		$("#schedResults").html('');
-		$("#schedResults").append("<p style='margin-left:65px'>Project is not solved</p><p style='margin-left:65px'>Go to <a href='scheduleNew.jsp?portfolioId=" + portfolioId + "'>Scheduling tab</a> and solve</p>"); 
+		$("#schedResults").append("<p style='margin-left:65px'>Project is not solved</p><p style='margin-left:65px'>Go to <a href='schedule.jsp?portfolioId=" + portfolioId + "'>Scheduling tab</a> and solve</p>"); 
 		$("#exportSolutionToCSV").attr('disabled','true');
 	}
 	 
