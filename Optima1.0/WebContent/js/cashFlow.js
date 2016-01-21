@@ -1,6 +1,7 @@
 $(function() {
-	document.title = 'Cash Flow';
+	document.title = 'SchedRight - Cash Flow';
     var portfolioId = null;
+    $( "#accordion" ).accordion();
 
     for ( var i in getURLVariables()) {
 	if (i == "portfolioId") {
@@ -8,11 +9,10 @@ $(function() {
 	}
     }
    
-    var dateRangeCall = rpcClient.portfolioService.getPortfolioDateRange(portfolioId);
-
+    var allResults = rpcClient.portfolioService.getPortfolioCashFlowDataNew2(portfolioId);
     var dataView = new Slick.Data.DataView();
 
-    if (dateRangeCall.result == 0) {
+    if (allResults.result == 0) {
 	var fmt = new DateFmt("%w %d-%n-%y");
 	var fmt2 = new DateFmt("%d/%m/%y");
 
@@ -24,8 +24,8 @@ $(function() {
 	} ];
 	var pData = [];
 	var rowCount = 0;
-	var startDate = new Date(dateRangeCall.data[0].time);
-	var endDate = new Date(dateRangeCall.data[1].time);
+	var startDate = new Date(allResults.data.map.start.time);
+	var endDate = new Date(allResults.data.map.end.time);
 	var runningDate = new Date(startDate);
 	while (runningDate <= endDate) {
 
@@ -85,7 +85,7 @@ $(function() {
 		text : true
 	    }).click(
 		    function() {
-		    	var excelFile = rpcClient.portfolioService.downloadCashflowGraph(portfolioId);
+		    	var excelFile = rpcClient.portfolioService.downloadCashflowGraphNew(portfolioId);
 		    	// Convert the Base64 string back to text.
 		    	var byteString = atob(excelFile.data);
 
@@ -106,9 +106,9 @@ $(function() {
 		     
 		});
 	
-	var portfolioCall = rpcClient.portfolioService.find(portfolioId);
-	if (portfolioCall.result == 0) {
-	    var projects = portfolioCall.data.projects.list;
+//	var portfolioCall = rpcClient.portfolioService.find(portfolioId);
+	if (allResults.result == 0) {
+	    var projects = allResults.data.map.projects.list;
 	    var totalCashout = [];
 	    var totalFinanceCost = [];
 	    var totalBalance = [];
@@ -118,10 +118,10 @@ $(function() {
 			pData[rowCount] = {};
 			pData[rowCount]["day"] = "Project " + projects[i].projectCode + ":";
 			rowCount++;
-			var projectCashFlowData = rpcClient.portfolioService.getProjectCashFlowData(projects[i].projectId);
+			var projectCashFlowData = allResults.data.map[projects[i].projectId];
 	
-			if (projectCashFlowData.result == 0) {
-			    var data = projectCashFlowData.data;
+			if (projectCashFlowData && projectCashFlowData.map) {
+			    var data = projectCashFlowData;
 	
 			    var currentCashOutRow = rowCount;
 			    pData[rowCount] = {};
@@ -164,10 +164,6 @@ $(function() {
 					if (totalBalance[formattedDate1] == null) totalBalance[formattedDate1] = 0;
 					if (totalPayments[formattedDate1] == null) totalPayments[formattedDate1] = 0;
 					if (totalNetBalance[formattedDate1] == null) totalNetBalance[formattedDate1] = 0;
-					// alert(formattedDate2 + "," + projects[i].projectId);
-					// alert(data.map[formattedDate2 + "," +
-					// projects[i].projectId]);
-					// alert(currentCashOutRow);
 					pData[currentCashOutRow][formattedDate1] = data.map[formattedDate2 + ","
 						+ projects[i].projectId].cashout;
 					totalCashout[formattedDate1] += data.map[formattedDate2 + "," + projects[i].projectId].cashout;
@@ -195,6 +191,11 @@ $(function() {
 	
 			}
 
+			var svgGraphCall = rpcClient.portfolioService.getCashFlowSVGGraph(portfolioId)
+			if (svgGraphCall.result && svgGraphCall.data) {
+				$("#cashflowChartDiv").html('');
+				$("#cashflowChartDiv").append(svgGraphCall.data); 
+			}
 	    }
 	    
 		pData[rowCount] = {};

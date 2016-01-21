@@ -19,7 +19,7 @@
 </div>
 	 <script src="js/formutils.js"> </script> 
 
- 	<script src="js/cashFlowNew.js"></script>
+ 	<script src="js/cashFlow.js"></script>
 	<!--  all page specific js goes here -->
 </div>
 <%@ include file="footer.html"%>
