@@ -2,8 +2,6 @@
 
 $(document).ready( function() {
 	document.title = 'SchedRight - Portfolios';
-	$("#portfoliosNavBar").addClass("active");
-	
 	$('#main').tabs({ 
 	    activate: function (e, ui) { 
 	        $.cookie('pf-selected-tab', ui.newTab.index(), { path: '/' }); 
@@ -110,7 +108,7 @@ $(document).ready( function() {
 		        			 $("#projectCountry option[value=" + data.country.locationId + "]").attr('selected', 'selected');
 		        			 $("#projectPostalCode").val(data.projectAddressPostalCode);
 		        		 } else {
-		        			 alert("Error: " + call.message);
+		        			 showMessage("Find project",'Error:' + call.message,'error');
 		        		 }
 	        		 } , projectId);
 	        		
@@ -172,7 +170,7 @@ $(document).ready( function() {
 	        			 $( this ).dialog( "close" );
 	        			 location.reload();
 	        		 } else {
-	        			 alert(call.result + ":" + call.message);
+	        			 showMessage(projectId==null?"Create project":"Update project",'Error:' + call.message,'error');
 	        		 }
      			 } 
 	    	  },
@@ -268,42 +266,52 @@ $(document).ready( function() {
 						"</div>" +
 					"</div>");
 			} else {
-				
+				var currentPortfolio = isNaN(parseInt($.cookie('saved_index_pf')))?0:parseInt($.cookie('saved_index_pf'));
 				for (var i = 0; i< data.list.length; i++) {
 				var projectsHtml = "<h3>" + data.list[i].portfolioName + "</h3><div id=\"portfolio" + data.list[i].portfolioId + "\">" 
 				+ data.list[i].portfolioDescreption + "<br><br><br>" ;
+				
+				if (currentPortfolio!=i) {
+					$("#accordion").append(projectsHtml + " Loading");
+					continue;
+				}
 				
 				var result2 = rpcClient.projectService.findAllByPortfolio(data.list[i].portfolioId);
 				
 				if (result2.result == 0) {
 					 var projects = result2.data;
-					 if (projects != null && projects.list.length != 0 ) {
+					 if (projects != null) {
 						 projectsHtml += " <div class=\"prods-cnt\">";
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "list\" class=\"list\"></div>";
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "grid\" class=\"grid\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "list\" class=\"listPortfolioBtn\" title=\"List View\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "grid\" class=\"gridPortfolioBtn\" title=\"Grid View\"></div>";
+						 
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "delete\" class=\"deletePortfolioBtn\" title=\"Delete Portfolio\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "edit\" class=\"editPortfolioBtn\" title=\"Edit Portfolio\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "add\" class=\"addPortfolioBtn\" title=\"Add Project\"></div>";
 						 projectsHtml += "<div class=\"clear\"></div>";
+						 if (projects.list.length != 0 ) {
 						for (var j = 0; j < projects.list.length; j++) {
 							var contents = projects.list[j].projectName + "[" + projects.list[j].projectDescription + "]" ;
 							projectsHtml += " <div class=\"prod-box shadow\"> "
-							+ " <button id=\"deleteProject_" + projects.list[j].projectId  + "\" class=\"projbutton_delete\" onClick=\"deleteProject(" + projects.list[j].projectId + ")\"></button>" 
-							+ " <button id=\"editProject_" + projects.list[j].projectId  + "\" class=\"projbutton_edit\" onClick=\"editProject(" + projects.list[j].projectId + " , " + data.list[i].portfolioId  + ")\"></button>" 
+							+ " <button id=\"deleteProject_" + projects.list[j].projectId  + "\" class=\"projbuttonDelete\" onClick=\"deleteProject(" + projects.list[j].projectId + ")\"></button>" 
+							+ " <button id=\"editProject_" + projects.list[j].projectId  + "\" class=\"projbuttonEdit\" onClick=\"editProject(" + projects.list[j].projectId + " , " + data.list[i].portfolioId  + ")\"></button>" 
 							+ "<a id=\"project_"+projects.list[j].projectId+"\" class=\"projLink\"  href=\"projectDetails.jsp?projectId=" + projects.list[j].projectId + "\" target=\"_blank\">" 
 							+ projects.list[j].projectCode  + "</a> <br><br>" 						
 							+ "<div class=\"projectDescCls\">" + contents + "</div>"
 							+ "</div>";
 						} 	
-						
+						 }
 						projectsHtml += "</div>";
 					}	
 				} 
 				 projectsHtml += "<div id=\"projectDetails\"></div>";
 		
-				 projectsHtml += " <br><br><div id=\"toolbar" + data.list[i].portfolioId  + "\" class=\"ui-widget-header ui-corner-all\">"  
-				 +  " <button id=\"addNew" + data.list[i].portfolioId + "\" value=\"Add New Project\">Add New Project</button> ";
-				 if (data.list[i].portfolioId != 1) {
-					 projectsHtml += " <button id=\"deletePort" + data.list[i].portfolioId + "\" value=\"Delete This Portfolio\">Delete This Portfolio</button> ";
-					 projectsHtml += " <button id=\"editPort" + data.list[i].portfolioId + "\" value=\"Edit This Portfolio\">Edit This Portfolio</button> ";
-				 }
+				 projectsHtml += " <br><br><div id=\"toolbar" + data.list[i].portfolioId  + "\" class=\"ui-widget-header ui-corner-all\">";  
+				 //projectsHtml +=  " <button id=\"addNew" + data.list[i].portfolioId + "\" value=\"Add New Project\">Add New Project</button> ";
+				 //if (data.list[i].portfolioId != 1) {
+				 // projectsHtml += " <button id=\"deletePort" + data.list[i].portfolioId + "\" value=\"Delete This Portfolio\">Delete This Portfolio</button> ";
+				 //	 projectsHtml += " <button id=\"editPort" + data.list[i].portfolioId + "\" value=\"Edit This Portfolio\">Edit This Portfolio</button> ";
+				 //}
 				 projectsHtml += " <a id=\"finPeriods" + data.list[i].portfolioId + "\" target=\"_blank\">Setup Financial Periods</a> ";
 				 projectsHtml += " <a id=\"cashFlow" + data.list[i].portfolioId + "\" target=\"_blank\">Cash Flow</a> ";
 				 projectsHtml += " <a id=\"scheduling" + data.list[i].portfolioId + "\" target=\"_blank\">Scheduling</a> ";
@@ -325,23 +333,25 @@ $(document).ready( function() {
 				    	$( "#createOrEditProjectDialog" ).data("projectId", null ).data("portfolioId" , portfolioId).dialog("open");
 				    	
 				    });
+				
+				$("#portfolio" + data.list[i].portfolioId + "add").data("portfolioId" , data.list[i].portfolioId).click(function () {
+				    	var portfolioId = $(this).data("portfolioId");
+				    	$( "#createOrEditProjectDialog" ).data("projectId", null ).data("portfolioId" , portfolioId).dialog("open");
+				    	
+				    });
+				
 				 if (data.list[i].portfolioId != 1) {
-					 $("#editPort" + data.list[i].portfolioId).data("portfolio" , data.list[i]).button({
-					      text: true,
-					      icons: {
-					        primary: "ui-icon-document"
-					      }
-					    }).click(function () {
-					    	var portfolio = $(this).data("portfolio");
+					 $("#portfolio" + data.list[i].portfolioId + "edit").data("portfolio" , data.list[i]).click(function () {
+						 var portfolio = $(this).data("portfolio");
 					    	if ($("#editPortfolioDialog").length == 0) {
 						    	$("body").append("<div id=\"editPortfolioDialog\" title=\"Edit Portfolio\">"
 						    			+ " <p class=\"validateTips\">All form fields are required.</p>"
 						    			+ " <form>"
 						    			+ " <fieldset>"
 						    			+ " <label for=\"portName\">Name</label>"
-						    			+ " <input type=\"text\" name=\"ePortName\" id=\"ePortName\" class=\"text ui-widget-content ui-corner-all\" />"
+						    			+ " <input type=\"text\" name=\"ePortName\" id=\"ePortName\" class=\"text ui-widget-content ui-corner-all\"  placeholder=\"Enter Portfolio Name, from 3 to 32 characters\" />"
 						    			+ " <label for=\"portDescription\">Description</label>"
-						    			+ " <input type=\"text\" name=\"ePortDescription\" id=\"ePortDescription\" value=\"\" class=\"text ui-widget-content ui-corner-all\" />"
+						    			+ " <input type=\"text\" name=\"ePortDescription\" id=\"ePortDescription\" value=\"\" class=\"text ui-widget-content ui-corner-all\" placeholder=\"Enter Description, from 1 to 1024 characters\"/>"
 						    			+ " </fieldset>"
 						    			+ " </form>"
 						    			+ " </div>");
@@ -389,17 +399,13 @@ $(document).ready( function() {
 						    		          bValid = bValid && checkLength( portDescription, "ePortDescription", 1, 1024 );
 						    		       
 						    		          if ( bValid ) {
+						    		        	  var dlg = $(this);
 						    		        	  rpcClient.portfolioService.update(function(result , exception) {
 						    		            	if (result.result == 0) {
-							    		            	$( this ).dialog( "close" );
+						    		            		dlg.dialog( "close" );
 							    		            	location.reload();
 							    		            } else {
-							    		            	$( "#editPortfolioDialog" ).append("<div class=\"ui-widget\">" +
-							    						"<div class=\"ui-state-error ui-corner-all\" style=\"padding: 0 .7em;\">" +
-							    							"<p><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin-right: .3em;\"></span>" +
-							    							"<strong>Alert:</strong>Error: "  + result.message + "</p>" +
-							    						"</div>" +
-							    		            	"</div>");
+							    		            	showMessage("Update Portfolio",'Error:' + result.message,'error');
 							    		            }	
 						    		            } ,portfolio.portfolioId, portName.val() , portDescription.val()); 
 						    		            
@@ -413,62 +419,62 @@ $(document).ready( function() {
 					    	} else {
 					    		$("#editPortfolioDialog").data("portfolio" , data.list[i]).dialog("open");
 					    	}
-						    });
-					    
-					
-					 $("#deletePort" + data.list[i].portfolioId).data("portfolioId" , data.list[i].portfolioId).button({
-					      text: true,
-					      icons: {
-					        primary: "ui-icon-trash"
-					      }
-					    }).click(function () {	
-					    	 var portfolioId = $(this).data('portfolioId');
-					    	 if ($("deletePortConfirmDialog").length == 0) {
-						    	$("body").append( "	<div id=\"deletePortConfirmDialog\" title=\"Delete portfolio?\"> " 
-						    			+ " <p><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin: 0 7px 20px 0;\"> "
-						    			+ "</span> This portfolio with all its projects will be permanently deleted and cannot be recovered. Are you sure?</p>"
-						    	 		+ "</div>"); 
-						    	
-						    	$( "#deletePortConfirmDialog").data("portfolioId" , portfolioId ).dialog({
-						    	      resizable: false,
-						    	      height:240,
-						    	      modal: true,
-						    	      show: {
-						    	          effect: "blind",
-						    	          duration: 1000
-						    	        },
-						    	        hide: {
-						    	          effect: "fade",
-						    	          duration: 1000
-						    	        },
-						    	      buttons: {
-						    	    	  "Yes, Delete" : function() {
-						    	    		  var portfolioId = $(this).data('portfolioId');
-						    	    		  var deletePortResult = rpcClient.portfolioService.remove(portfolioId);
-						    	    		  if (deletePortResult.result == 0) {
-						    		            	$( this ).dialog( "close" );
-						    		            	location.reload();
-						    		            } else {
-						    		            	$( "#deletePortConfirmDialog").append("<div class=\"ui-widget\">" +
-						    						"<div class=\"ui-state-error ui-corner-all\" style=\"padding: 0 .7em;\">" +
-						    							"<p><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin-right: .3em;\"></span>" +
-						    							"<strong>Alert:</strong>Error: "  + deletePortResult.message + "</p>" +
-						    						"</div>" +
-						    					"</div>");
-						    		            }
-						    	        },
-						    	        Cancel: function() {
-						    	          $( this ).dialog( "close" );
-						    	        }
-						    	      }
-						    	    });
-						    	 } else {
-						    		 $( "#deletePortConfirmDialog").data("portfolioId" , portfolioId ).dialog("open");
-						    	 }
+			    	
+					 });
+				
+					$("#portfolio" + data.list[i].portfolioId + "delete").data("portfolio" , data.list[i]).click(function () {
+						var portfolioId = $(this).data('portfolio').portfolioId;
+				    	 if ($("deletePortConfirmDialog").length == 0) {
+					    	$("body").append( "	<div id=\"deletePortConfirmDialog\" title=\"Delete portfolio?\"> " 
+					    			+ " <p><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin: 0 7px 20px 0;\"> "
+					    			+ "</span> This portfolio with all its projects will be permanently deleted and cannot be recovered. Are you sure?</p>"
+					    	 		+ "</div>"); 
+					    	
+					    	$( "#deletePortConfirmDialog").data("portfolioId" , portfolioId ).dialog({
+					    	      resizable: false,
+					    	      height:240,
+					    	      modal: true,
+					    	      show: {
+					    	          effect: "blind",
+					    	          duration: 1000
+					    	        },
+					    	        hide: {
+					    	          effect: "fade",
+					    	          duration: 1000
+					    	        },
+					    	      buttons: {
+					    	    	  "Yes, Delete" : function() {
+					    	    		  var portfolioId = $(this).data('portfolioId');
+					    	    		  var deletePortResult = rpcClient.portfolioService.remove(portfolioId);
+					    	    		  if (deletePortResult.result == 0) {
+					    		            	$( this ).dialog( "close" );
+					    		            	location.reload();
+					    		            } else {
+					    		            	$( "#deletePortConfirmDialog").append("<div class=\"ui-widget\">" +
+					    						"<div class=\"ui-state-error ui-corner-all\" style=\"padding: 0 .7em;\">" +
+					    							"<p><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin-right: .3em;\"></span>" +
+					    							"<strong>Alert:</strong>Error: "  + deletePortResult.message + "</p>" +
+					    						"</div>" +
+					    					"</div>");
+					    		            }
+					    	        },
+					    	        Cancel: function() {
+					    	          $( this ).dialog( "close" );
+					    	        }
+					    	      }
+					    	    });
+					    	 } else {
+					    		 $( "#deletePortConfirmDialog").data("portfolioId" , portfolioId ).dialog("open");
 					    	 }
-					    	 
-					    );
+				    	
+				    });
+				 }else{
+					 $("#portfolio" + data.list[i].portfolioId + "edit").hide();
+					  $("#portfolio" + data.list[i].portfolioId + "delete").hide();
 				 }
+				
+				 
+				 
 				 $("#finPeriods" + data.list[i].portfolioId).button({
 				      text: true,
 				      icons: {
@@ -490,7 +496,7 @@ $(document).ready( function() {
 				      icons: {
 				        primary: "ui-icon-calendar"
 				      }
-				    }).attr("href", "scheduling.jsp?portfolioId=" + data.list[i].portfolioId);
+				    }).attr("href", "schedule.jsp?portfolioId=" + data.list[i].portfolioId);
 				 
 				 $("#exportExcel_" + data.list[i].portfolioId).button({
 				      text: true,
@@ -526,8 +532,9 @@ $(document).ready( function() {
 			                    $.cookie('saved_index_pf', null);
 			                    $.cookie('saved_index_pf', $("#accordion")
 			                            .accordion("option", "active"));
+			                    location.reload(false);
 			                },
-			                active: parseInt($.cookie('saved_index_pf')),
+			                active: isNaN(parseInt($.cookie('saved_index_pf')))?0:parseInt($.cookie('saved_index_pf')),
 				      heightStyle: "content"
 			    });
 			}

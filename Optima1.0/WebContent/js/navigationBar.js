@@ -1,5 +1,5 @@
 $(document).ready( function() {
-	$("#portfoliosNavBar").append("<a href=\"mainNew.jsp\"><img src=\"css/header/images/portfolio.png\" />Portfolios</a>");
+	$("#portfoliosNavBar").append("<a href=\"main.jsp\"><img src=\"css/header/images/portfolio.png\" />Portfolios</a>");
 	
 	rpcClient.portfolioService.findAll(function(result , exception) {
 		if (result.result == 0) {
