@@ -37,6 +37,18 @@ $(function() {
 	max : 100000,
 	step : 1
     });
+    
+    $("#retainedPercentageTxt").pcntspinner({
+    	min : 0,
+    	max : 100000,
+    	step : 1
+        });
+    
+    $("#advancedPaymentPercentage").pcntspinner({
+    	min : 0,
+    	max : 100000,
+    	step : 1
+        });
 
     $(".spin").spinner({
 	min : 0,
@@ -94,18 +106,23 @@ $(function() {
 	accept : "#daysOffList li",
 	hoverClass : "ui-state-hover",
 	drop : function(ev, ui) {
-	    var agree = confirm('The selected day will be deleted permanently!');
-	    if (agree) {
-		ui.draggable.remove();
-		var delDayCall = rpcClient.daysOffService.remove(ui.draggable.attr("id"));
-		if (delDayCall.result == 0) {
-		    alert('Day deleted!');
-		} else
-		    alert('Error occured: ' + delDayCall.message);
-	    } else {
-		return false;
-	    }
+		var buttons = {
+		          Yes: function () {
+		            $(this).dialog("close");
 
+		      		ui.draggable.remove();
+		    		var delDayCall = rpcClient.daysOffService.remove(ui.draggable.attr("id"));
+		    		if (delDayCall.result == 0) {
+		    			showMessage("Day deleted",'Day deleted successfully.','success');
+		    		} else
+		    			showMessage("Day deleted",'Error occured: ' + delDayCall.message,'error');
+		          },
+		          No: function () {
+		              $(this).dialog("close");
+		  			return false;
+		          }
+		      }
+		showMessage('Delete day Confirmation','The selected day will be deleted permanently!','warning',buttons);
 	}
     });
     
@@ -119,10 +136,12 @@ $(function() {
     		function() {
     			rpcClient.taskService.resetScheduling(function(result, exception) {
     				if (result.result == 0) {
-    					alert("Project Scheduling successfully reset.");
-    					location.reload(true);
+    					showMessage("Reset Schedule",'Project scheduling successfully reset.','success',{Close:function(){
+							$(this).dialog("close");
+							location.reload(true);
+						}});
     				} else {
-    					alert("Error:" + result.message )
+    					showMessage("Reset Schedule",'Error:' + result.message,'error');
     				}
     			} , projectId);
     		}
@@ -137,7 +156,7 @@ $(function() {
 	    function() {
 		var dayoff = $("#pDayOffDateTxt").val();
 		if (dayoff == null || dayoff == "") {
-		    alert("A Date must be selected!");
+			showMessage("Add day",'A date must be selected','error');
 		} else {
 		    var dayOffDate = new Date(dayoff);
 		    var createDayOffRequest = rpcClient.daysOffService.create(dayOffDate, "VACATION", projectId);
@@ -149,7 +168,7 @@ $(function() {
 
 			$("#daysOffList").append(li);
 		    } else {
-			alert(createDayOffRequest.message);
+				showMessage("Add day",'error:' + createDayOffRequest.message,'error');
 		    }
 		}
 	    });
@@ -183,24 +202,29 @@ $(function() {
 		accept : "#mainAllTasks li",
 		hoverClass : "ui-state-hover",
 		drop : function(ev, ui) {
-		    var agree = confirm('The selected task dependency will be deleted permanently!');
-		    if (agree) {
-			ui.draggable.remove();
-			var delTaskCall = rpcClient.taskService.remove(ui.draggable.attr("id"));
-			if (delTaskCall.result == 0) {
-			    alert('Task deleted!');
-			    location.reload(true);
-			} else
-			    alert('Error occured: ' + delTaskCall.message);
-		    } else {
-			return false;
-		    }
-
+			var buttons = {
+			          Yes: function () {
+			                $(this).dialog("close");
+			                
+				  			ui.draggable.remove();
+							var delTaskCall = rpcClient.taskService.remove(ui.draggable.attr("id"));
+							if (delTaskCall.result == 0) {
+								showMessage("Task deleted","Task deleted Successfully",'success',{Close:function() {$(this).dialog("close");location.reload(true);}})
+							} else {
+								showMessage("Task deleted",'Error occured: ' + delTaskCall.message,'error')
+							}
+			          },
+			          No: function () {
+			              $(this).dialog("close");
+			  			return false;
+			          }
+			      };
+			showMessage('Delete Task Confirmation','The selected task dependency will be deleted permanently!','warning',buttons);
 		}
 	    });
 
 	} else {
-	    alert('error: ' + tskCall.message);
+		showMessage("Show Project Details",'Error: ' + tskCall.message,'error')
 	}
     }
 
@@ -247,7 +271,7 @@ $(function() {
 	    $("#projTasksDialog").data("task", d).dialog('option', 'title', 'Update Task').dialog('open');
 
 	} else {
-	    Alert('error: ' + taskCall.message);
+		showMessage("Get Task",'Error: ' + tskCall.message,'error')
 	}
 
     });
@@ -304,8 +328,6 @@ $(function() {
 			    
 			    for (var i = 0; i < depList.length; i++) {
 				
-				//alert(' depList[i].taskId: ' +  depList[i].projectTask1.taskId);
-				
 				    var li = $('<li></li>').addClass('ui-state-default').attr('id', depList[i].dependency.taskId)
 					    .text(depList[i].dependency.taskName);
 				    li.attr('title', depList[i].dependency.taskName);
@@ -361,7 +383,7 @@ $(function() {
 				    });
 
 			} else {
-			    alert("Failed to load tasks: " + allTaskCall.message);
+				showMessage("Load Tasks",'error:' + allTaskCall.message,'error')
 			}
 		    }
 		},
@@ -441,7 +463,7 @@ $(function() {
 				    $(this).dialog("close");
 				    location.reload(true)
 				} else {
-				    alert('error: ' + updCall.message);
+					showMessage("Update Task",'error:' + updCall.message,'error')
 				}
 
 			    } else { // new task
@@ -455,14 +477,14 @@ $(function() {
 				    $(this).dialog("close");
 				    location.reload(true);
 				} else {
-				    alert('Error ..' + call.message);
+					showMessage("Create Task",'error:' + call.message,'error')
 				}
 
 			    }
 			    $(this).dialog("close");
 			  } else { //Invalid
 
-			   alert("Please fix your input. Data is invalid");
+					showMessage("Create Task","Please fix your input. Data is invalid",'error')
 			  }
 		    },
 		    "Reset Task Schedule" : function() {
@@ -471,9 +493,9 @@ $(function() {
 		    		
 		    		if (result.result == 0) {
 		    			$("#sDateScheduled").val("");
-		    			alert("Schedule reset successfully");
+						showMessage("Reset task scheduling","Schedule reset successfully",'success');
 		    		} else {
-		    			alert(result.message);
+						showMessage("Reset task scheduling","Error:" + result.message,'error');
 		    		}
 		    	}, task.taskId);
 		    },
@@ -494,9 +516,6 @@ $(function() {
 	$("#projTasksDialog").data("task", null).dialog('option', 'title', 'Add New Task').dialog('open');
     });
 
-    $('#closeProjectBtn').on('click', function() {
-	close();
-    });
 
     $('#saveProjectBtn').on(
 	    'click',
@@ -505,6 +524,14 @@ $(function() {
 		$("#projnameTxt").removeClass("ui-state-error");
 		$("#interestRateTxt").removeClass("ui-state-error");
 		$("#overHeadPerDayTxt").removeClass("ui-state-error");
+		$("#retainedPercentageTxt").removeClass("ui-state-error");
+		
+		$("#advPaymentAmountTxt").removeClass("ui-state-error");
+		$("#delayPenaltyTxt").removeClass("ui-state-error");
+		$("#collectPaymentPeriodTxt").removeClass("ui-state-error");
+		$("#payRequestsPeriodTxt").removeClass("ui-state-error");
+		
+		$("#advancedPaymentPercentage").removeClass("ui-state-error");
 		var bValid = true;
 
 		bValid = bValid && checkLength($("#projnameTxt"), "projnameTxt", 3, 128);
@@ -518,6 +545,26 @@ $(function() {
 		    $("#interestRateTxt").addClass("ui-state-error");
 		    bValid = false;
 		}
+		
+		var retainedPercentageTxt = $("#retainedPercentageTxt").val();
+		
+		if (retainedPercentageTxt.match("\%$") == "%") {
+			retainedPercentageTxt = retainedPercentageTxt.substr(0, retainedPercentageTxt.length - 1);
+		}
+		if (!/^-?\d*\.?\d*$/.test(retainedPercentageTxt)) {
+		    $("#retainedPercentageTxt").addClass("ui-state-error");
+		    bValid = false;
+		}
+		
+		var advancedPaymentPercentage = $("#advancedPaymentPercentage").val();
+
+		if (advancedPaymentPercentage.match("\%$") == "%") {
+			advancedPaymentPercentage = advancedPaymentPercentage.substr(0, advancedPaymentPercentage.length - 1);
+		}
+		if (!/^-?\d*\.?\d*$/.test(advancedPaymentPercentage)) {
+		    $("#advancedPaymentPercentage").addClass("ui-state-error");
+		    bValid = false;
+		}
 
 		var overHeadPerDayTxt = $("#overHeadPerDayTxt").val();
 
@@ -525,6 +572,23 @@ $(function() {
 		    $("#overHeadPerDayTxt").addClass("ui-state-error");
 		    bValid = false;
 		}
+		
+		
+		var advPaymentAmountTxt = $("#advPaymentAmountTxt").val();
+		if (!/^-?\d*\.?\d*$/.test(advPaymentAmountTxt)) {
+			$("#advPaymentAmountTxt").addClass("ui-state-error");
+		    bValid = false;
+		}
+		
+		var delayPenaltyTxt = $("#delayPenaltyTxt").val();
+		if (!/^-?\d*\.?\d*$/.test(delayPenaltyTxt)) {
+			$("#delayPenaltyTxt").addClass("ui-state-error");
+		    bValid = false;
+		}
+		
+		var collectPaymentPeriodTxt = $("#collectPaymentPeriodTxt").val();
+		var payRequestsPeriodTxt = $("#payRequestsPeriodTxt").val();
+		
 		var pStartDateTxt = $("#pStartDateTxt").val();
 		if (pStartDateTxt != null && pStartDateTxt.length != 0) {
 		    pStartDateTxt = new Date(pStartDateTxt);
@@ -541,19 +605,21 @@ $(function() {
 
 		if (bValid) {
 			var interestRateValue = parseFloat(interestRateTxt) / ( 100*360.0 );
+			var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
+			var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
 		
-		    var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt")
-			    .val(), $("#projectDescTxt").val(), $("#projStreet").val(), $(
-			    "#projectCity option:selected").val(), $("#projectProv option:selected").val(), $(
-			    "#projectCountry option:selected").val(), $("#projPostCode").val(), pStartDateTxt,
-			    pFinishDateTxt, interestRateValue, overHeadPerDayTxt, $("#portfolioId").val(), $(
-				    "#projectClient").val(), $("#weDays option:selected").val(), 0, 0);
+		    var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt").val(), $("#projectDescTxt").val(), $("#projStreet").val(),
+		    		$("#projectCity option:selected").val(), $("#projectProv option:selected").val(), $("#projectCountry option:selected").val(), $("#projPostCode").val(), pStartDateTxt,
+			    pFinishDateTxt, interestRateValue, overHeadPerDayTxt, $("#portfolioId").val(), $("#projectClient").val(), $("#weDays option:selected").val(),
+			    retainedPercentageValue, advancedPaymentPercentageValue, advPaymentAmountTxt, delayPenaltyTxt, collectPaymentPeriodTxt, payRequestsPeriodTxt);
 		    if (call.result == 0) {
-			alert("Project updated successfully");
-			location.reload(true);
+				showMessage("Update Project","Project updated successfully",'success',{Close:function(){
+					$(this).dialog("close");
+					location.reload(true);
+				}});
 
 		    } else {
-			alert("Error: " + call.message);
+				showMessage("Update Project","Error:" + call.message,'error');
 		    }
 		}
 
@@ -576,8 +642,6 @@ $(function() {
 	if (locationsCall.result == 0) {
 	    var lData = locationsCall.data.list;
 
-	    // alert('lData.length: ' + lData.length);
-
 	    for (var i = 0; i < lData.length; i++) {
 		var e = lData[i];
 
@@ -593,7 +657,7 @@ $(function() {
 	    }
 
 	} else {
-	    alert("Error: " + locationsCall.message);
+		showMessage("Find locations","Error:" + locationsCall.message,'error');
 	}
 
 	var clientInfoCall = rpcClient.clientService.findAll();
@@ -609,7 +673,7 @@ $(function() {
 	    }
 
 	} else {
-	    alert("Error: " + clientInfoCall.message);
+		showMessage("Get client information","Error:" + clientInfoCall.message,'error');
 	}
 
 	var projCall = rpcClient.projectService.find(projectId);
@@ -623,7 +687,7 @@ $(function() {
 	    $("#portfolioId").val(pData.portfolio.portfolioId);
 	    $("#projnameTxt").val(pData.projectName);
 	    $("#projCodeTxt").val(pData.projectCode);
-	    document.title = pData.projectCode;
+	    document.title = "SchedRight - " + pData.projectCode;
 	    $("#projectDescTxt").val(pData.projectDescription);
 
 	    $("#projStreet").val(pData.projectAddressStreet);
@@ -652,7 +716,7 @@ $(function() {
 		$("#pStartDateTxt").val(fmt2.format(new Date(pData.propusedStartDate.time)));
 	    }
 	    if (pData.proposedFinishDate != null) {
-		$("#pFinishDateTxt").val(new Date(fmt2.format(pData.proposedFinishDate.time)));
+		$("#pFinishDateTxt").val(fmt2.format(new Date(pData.proposedFinishDate.time)));
 	    }
 	    if (pData.weekendDays != null) {
 		$("#weDays").val(pData.weekendDays.weekendDaysId).prop('selected', true);
@@ -668,9 +732,17 @@ $(function() {
 	    $("#interestRateTxt").val(roundToThreePlaces( parseFloat(pData.interestRate) * 100 * 360));
 
 	    $("#overHeadPerDayTxt").val(pData.overheadPerDay);
+	    $("#retainedPercentageTxt").val(pData.retainedPercentage*100);
+	    $("#advancedPaymentPercentage").val(pData.advancedPaymentPercentage*100);
+	    
+	    $("#advPaymentAmountTxt").val(pData.advancedPaymentAmount);
+	    $("#delayPenaltyTxt").val(pData.delayPenaltyAmount);
+	    $("#collectPaymentPeriodTxt").val(pData.collectPaymentPeriod);
+	    $("#payRequestsPeriodTxt").val(pData.paymentRequestPeriod);
 
+	    
 	} else {
-	    alert("Error: " + projCall.message);
+		showMessage("Find Project","Error:" + projCall.message,'error');
 	}
 
 	// /Load Locations
@@ -678,11 +750,8 @@ $(function() {
 	// /Load clients
 
 	$("#projectClient").change(function() {
-	    // alert( "Handler for .change() called." );
 
 	    var selectedClient = $('#projectClient option:selected').attr("value");
-
-	    // alert( "selectedClient: " + selectedClient);
 
 	    loadClientInfo(selectedClient);
 
@@ -705,7 +774,7 @@ function loadClientInfo(selectedClient){
 			    $("#clientCity").val(cData.city.locationName);
 			    $("#clientPostCode").val(cData.clientAddressPostalCode);
 			} else {
-			    alert("Error: " + clientCall.message);
+				showMessage("Find Client","Error:" + clientCall.message,'error');
 			}
 		}else{
 			$("#clientStreet").val('');
@@ -739,7 +808,6 @@ function fillTaskList(data) {
     $("#mainAllTasks").html('');
     for (var i = 0; i < data.length; i++) {
 
-	// alert(tskData[i].taskId);
 
 	var li = $('<li></li>').addClass('ui-state-default').attr('id', data[i].taskId).text(data[i].taskName);
 

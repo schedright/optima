@@ -54,8 +54,7 @@ $(document).ready( function() {
 						 var projects = result2.data;
 						 if (projects != null && projects.list.length != 0 ) {
 							for (var j = 0; j < projects.list.length; j++) {
-								projectsList += liFirstRowProjects + "<a href=\"projectDetailsNew.jsp?projectId=" +  projects.list[j].projectId + "\">" + projects.list[j].projectCode + "</a></li>";
-								//exportList += liFirstRowProjects + "<a href=\"projectDetailsNew.jsp?projectId=" + projects.list[j].projectId + "\">" + projects.list[j].projectCode + "</a></li>";
+								projectsList += liFirstRowProjects + "<a href=\"projectDetails.jsp?projectId=" +  projects.list[j].projectId + "\">" + projects.list[j].projectCode + "</a></li>";
 								liFirstRowProjects = "<li>";
 							} 	
 						}	
