@@ -44,7 +44,7 @@ $(document).ready( function() {
 					}
 					financingList += liFirstRow + "<a href=\"finDataNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					schedulingList += liFirstRow + "<a href=\"scheduleNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
-					cashflowList += liFirstRow + "<a href=\"cashFlowNew.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
+					cashflowList += liFirstRow + "<a href=\"cashFlow.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					financialList += liFirstRow + "<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
 					
 					
