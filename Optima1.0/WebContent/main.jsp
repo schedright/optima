@@ -17,10 +17,10 @@
 			<a id="dlink" style=""></a>
 		</div>
 		<div id="locations">
-			<%@ include file="views/locationsNew.html"%>
+			<%@ include file="views/locations.html"%>
 		</div>
 		<div id="clients">
-			<%@ include file="views/clientsNew.html"%>
+			<%@ include file="views/clients.html"%>
 		</div>
 	</div>
 	<div id="newPortfolioDialog" title="Portfolio">
