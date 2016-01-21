@@ -1,5 +1,5 @@
 <script>var currentPage=3;</script>
-<%@ include file="headerNew.html"%>
+<%@ include file="header.html"%>
 
 <div class="mainContainer">
 	<div id="projectTabs" style="100%">

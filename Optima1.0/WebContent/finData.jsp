@@ -1,5 +1,5 @@
 <script>var currentPage=2;</script>
-<%@ include file="headerNew.html"%>
+<%@ include file="header.html"%>
 <div class="mainContainer">
  <ul id="paymentMenu" class="contextMenu" style="display:none;position:absolute">
   	<li data="Delete">Delete</li>

@@ -1,5 +1,5 @@
 <script>var currentPage=1;</script>
-<%@ include file="headerNew.html"%>
+<%@ include file="header.html"%>
 <div class="mainContainer">
 
 	<div id="main" style="width: 100%; text-align: center;">
@@ -9,4 +9,4 @@
 <script src="js/formutils.js"></script>
 
 
-<%@ include file="footerNew.html"%>
+<%@ include file="footer.html"%>

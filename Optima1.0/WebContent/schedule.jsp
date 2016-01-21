@@ -1,7 +1,7 @@
 <script>
 	var currentPage = 4;
 </script>
-<%@ include file="headerNew.html"%>
+<%@ include file="header.html"%>
 <div class="mainContainer">
 	<div id="main" style="width: 100%;" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
 		<label>Projects Priority</label>

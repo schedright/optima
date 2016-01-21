@@ -1,5 +1,5 @@
 <script>var currentPage=5;</script>
-<%@ include file="headerNew.html"%>
+<%@ include file="header.html"%>
 
 <div style="margin-left: auto; margin-right: auto;">
 <div id="accordion">
