@@ -1,13 +1,6 @@
 
 $(function() {
 	document.title = 'SchedRight - Financial Periods';
-    $("#paymentTypeRadio").buttonset();
-
-    $('#paymentDate').datepicker({
-	showOn : "button",
-	buttonImage : "images/calendar.png",
-	buttonImageOnly : true
-    });
 
     $('#financeDate').datepicker({
 	showOn : "button",
@@ -26,61 +19,6 @@ $(function() {
 
     
     
-    $("#addPayment").button({
-	icons : {
-	    primary : "ui-icon-circle-plus"
-	},
-	text : true
-    }).click(
-	    function() {
-		var bValid = true;
-		$("#paymentDate").removeClass("ui-state-error");
-		$("#intremPaymentNumber").removeClass("ui-state-error");
-		$("#advancePaymentAmount").removeClass("ui-state-error");
-		var projectId = $("#projCodeSelect").val();
-		var paymentType = $("input[name=paymentTypeRadio]:checked").attr("id");
-		var paymentTypeId = 1;
-		var intremPaymentNumber = $("#intremPaymentNumber").val();
-		var advancePaymentAmount = $("#advancePaymentAmount").val();
-		var intrimPaymentAmount = advancePaymentAmount;
-		if (paymentType == "interimPayment") {
-		    paymentTypeId = 2;
-		    advancePaymentAmount = 0;
-		    if (intremPaymentNumber == null || intremPaymentNumber.length == 0) {
-			$("#intremPaymentNumber").addClass("ui-state-error");
-			bValid = false;
-		    }
-		} else if (paymentType == "advancePayment") {
-		    paymentTypeId = 1;
-		    intremPaymentNumber = 0;
-		    if (advancePaymentAmount == null || advancePaymentAmount.length == 0
-			    || !/^-?\d*\.?\d*$/.test(advancePaymentAmount)) {
-			$("#advancePaymentAmount").addClass("ui-state-error");
-			bValid = false;
-		    }
-		}
-		var paymentDate = $("#paymentDate").val();
-		if (paymentDate != null && paymentDate.length != 0) {
-		    paymentDate = new Date(paymentDate);
-		} else {
-		    $("#paymentDate").addClass("ui-state-error");
-		    bvalid = false;
-		}
-
-		if (bValid) {
-		    var createTaskResult = rpcClient.paymentService.create(projectId, paymentTypeId,
-			    advancePaymentAmount,intrimPaymentAmount, paymentDate, intremPaymentNumber);
-
-		    if (createTaskResult.result == 0) {
-			location.reload(true);
-		    } else {
-		    	showMessage("Create Payment",'Error:' + createTaskResult.message,'error');
-		    }
-		} else {
-	    	showMessage("Create Payment","Error: Please check your input",'error');
-		}
-	    });
-
     $("#addFinance").button({
 	icons : {
 	    primary : "ui-icon-circle-plus"
@@ -218,12 +156,6 @@ $(function() {
 
 	for (var i = 0; i < projectsList.length; i++) {
 
-	    $('#projCodeSelect').append(
-		    $("<option></option>").val(projectsList[i].projectId).text(projectsList[i].projectCode));
-	    
-	    $('#collectionProject').append(
-			    $("<option></option>").val(projectsList[i].projectId).text(projectsList[i].projectCode));
-
 	    pData[i] = {
 		project : "<a id= '" + projectsList[i].projectId + "' href='projectDetails.jsp?projectId="
 			+ projectsList[i].projectId + "' target='_blank' tabindex='0'>" + projectsList[i].projectCode
@@ -254,46 +186,6 @@ $(function() {
 		    pData[i][formattedDate] += paymentAmount;
 	    }
 	}
-
-	var pGrid = new Slick.Grid("#paymentsGrid", pData, pColumns, {
-	    editable : true,
-	    enableAddRow : true,
-	    enableCellNavigation : true,
-	    enableColumnReorder : true
-	});
-
-	pGrid.onContextMenu.subscribe(function(e, args) {
-	    e.preventDefault();
-	    var cell = pGrid.getCellFromEvent(e);
-	    if (cell.cell > 1) {
-		$("#paymentMenu").data("cell", cell).css("top", e.pageY).css("left", e.pageX).show();
-
-		$("body").one("click", function() {
-		    $("#paymentMenu").hide();
-		});
-	    }
-
-	});
-	$("#paymentMenu").click(function(e) {
-	    if (!$(e.target).is("li")) {
-		return;
-	    }
-	    if (!pGrid.getEditorLock().commitCurrentEdit()) {
-		return;
-	    }
-	    var cell = $(this).data("cell");
-	    var projectId = $(pData[cell.row].project).attr("id");
-	    var paymentDate = pColumns[cell.cell].tag;
-
-	    var deletePaymentsResult = rpcClient.paymentService.removePaymentsByDate(projectId, paymentDate);
-	    if (deletePaymentsResult.result == 0) {
-		pData[cell.row][pColumns[cell.cell].id] = "";
-		pGrid.updateRow(cell.row);
-		location.reload(true);
-	    } else {
-	    	showMessage("Create Payment",'Error:' + deletePaymentsResult.message,'error');
-	    }
-	});
 
     }
 
@@ -433,89 +325,6 @@ $(function() {
 	});
 
     }
-    
-    
-    
-    
-    $("#collectionProject").change(function() {
-    	$('#paymentToCollect').empty();
-    	rpcClient.paymentService.getIntrimPaymentsPerProject(function(result, exception) {
-    		
-    		var fmt = new DateFmt("%w %d-%n-%y");
-    		if (result.result == 0) {
-    			var data = result.data.list;
-    			for (var i = 0 ; i < data.length ; i++) {
-    				var theDate = new Date(data[i].paymentDate.time);
-    				$('#paymentToCollect').append($("<option></option>").val(data[i].paymentId).text(
-    						data[i].paymentInterimNumber + ":" +
-    						fmt.format(theDate)  + ":" +
-    						data[i].paymentInitialAmount + ":" +
-    						data[i].paymentAmount));
-    			}
-   
-    		} else {
-		    	showMessage("Get Payment",'Error:' + result.message,'error');
-    		}
-    	} , $("#collectionProject option:selected").val());
-		 	
-	 });
-    
-    rpcClient.paymentService.getIntrimPaymentsPerProject(function(result, exception) {
-		
-		var fmt = new DateFmt("%w %d-%n-%y");
-		if (result.result == 0) {
-			var data = result.data.list;
-			for (var i = 0 ; i < data.length ; i++) {
-				var theDate = new Date(data[i].paymentDate.time);
-				$('#paymentToCollect').append($("<option></option>").val(data[i].paymentId).text(
-						data[i].paymentInterimNumber + ":" +
-						fmt.format(theDate) + ":" +
-						data[i].paymentInitialAmount + ":" +
-						data[i].paymentAmount));
-			}
-
-		} else {
-	    	showMessage("Get Payment",'Error:' + result.message,'error');
-		}
-	} , $("#collectionProject option:selected").val());
-    
-    $("#collectPayment").button({
-    	icons : {
-    	    primary : "ui-icon-circle-plus"
-    	},
-    }).click(function(){
-    	var bValid = true;
-    	$("#paymentToCollect").removeClass("ui-state-error");
-        $("#amountToCollect").removeClass("ui-state-error");
-    	
-    	var paymentId = $("#paymentToCollect option:selected").val();
-    	var amount = $("#amountToCollect").val();
-    	if (paymentId == "undefined" || paymentId == null) {
-    		$("#paymentToCollect").addClass("ui-state-error");
-    	    bValid = false;
-	    	showMessage("Collect Payment","No payment selected",'error');
-    	}
-    	if (amount == null || amount.length == 0 || !/^-?\d*\.?\d*$/.test(amount)) {
-    	    $("#amountToCollect").addClass("ui-state-error");
-    	    bValid = false;
-    	    
-    	}
-    	if (bValid) {
-    		
-	    	rpcClient.paymentService.submitAnInterimPayment(function(result, exception) {
-	    		if (result.result) {
-			    	showMessage("Submit Payment","Payment submitted successfully",'error',{Close:function(){
-						$(this).dialog("close");
-						location.reload(true);
-					}});
-	    		} else {
-			    	showMessage("Submit Payment",'Error:' + result.message,'error');
-	    		}
-	    	} , paymentId , amount);
-    	}
-    	// Validate amount is numeric and >= 0. 
-    	// Update payment record with amount
-    });
 
 });
 
