@@ -6,7 +6,8 @@
 
 <div class="mainContainer">
 	<div id="projectsGantt" class="gantt"></div>
-		<div id="projectPayments" style="width:100%; height:500px;"></div>
+	<H1>Payments</H1>
+	<div id="projectPayments" style="width: 100%; height: 500px;"></div>
 </div>
 
 <script src="js/formutils.js">

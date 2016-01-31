@@ -1,11 +1,14 @@
 function getGanttSource() {
 	var tasksSource = [];
 	var projects = daysOffList.data.list;
+	var fmt = new DateFmt("%d-%m-%y");
+
 	for (var i=0;i<projects.length;i++) {
 		var proj = projects[i].map;
 		var startDate = proj.Start;
 		var endDate = proj.End;
 		
+		var title  =proj.Project.projectName + '&#013;' + proj.Project.projectDescription + '&#013;' + fmt.format(new Date(startDate.time)) + " - " + fmt.format(new Date(endDate.time));
 		tasksSource.push({
 			name : proj.Project.projectName,
 
@@ -21,7 +24,9 @@ function getGanttSource() {
 
 				customClass : "ganttRed",
 
-				dataObj : proj.Project.projectId
+				dataObj : proj.Project.projectId,
+				
+				title : title
 
 			} ]
 		});
