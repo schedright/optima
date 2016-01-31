@@ -20,15 +20,18 @@ $(function() {
     }
     
 	var solutionResponse = rpcClient.portfolioService.getSolution(portfolioId);
+	
 	if (solutionResponse.result==0 && solutionResponse.data) {
 		$("#schedResults").html('');
-		$("#schedResults").append(solutionResponse.data); 
-		$("#exportSolutionToCSV").removeAttr('disabled');
 		
-	} else {
-		$("#schedResults").html('');
-		$("#schedResults").append("<p style='margin-left:65px'>Project is not solved</p><p style='margin-left:65px'>Go to <a href='schedule.jsp?portfolioId=" + portfolioId + "'>Scheduling tab</a> and solve</p>"); 
-		$("#exportSolutionToCSV").attr('disabled','true');
+		if (solutionResponse.message=='Not Solved') {
+			$("#schedResults").append("<p style='margin-left:65px'>Project is not solved</p><p style='margin-left:65px'>Go to <a href='schedule.jsp?portfolioId=" + portfolioId + "'>Scheduling tab</a> and solve</p>"); 
+			$("#exportSolutionToCSV").attr('disabled','true');
+		} else {
+			$("#exportSolutionToCSV").removeAttr('disabled');
+		}
+
+		$("#schedResults").append(solutionResponse.data); 
 	}
 	 
     $("#exportSolutionToCSV").button(

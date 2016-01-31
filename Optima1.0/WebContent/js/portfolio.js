@@ -312,10 +312,6 @@ $(document).ready( function() {
 				 // projectsHtml += " <button id=\"deletePort" + data.list[i].portfolioId + "\" value=\"Delete This Portfolio\">Delete This Portfolio</button> ";
 				 //	 projectsHtml += " <button id=\"editPort" + data.list[i].portfolioId + "\" value=\"Edit This Portfolio\">Edit This Portfolio</button> ";
 				 //}
-				 projectsHtml += " <a id=\"finPeriods" + data.list[i].portfolioId + "\" target=\"_blank\">Setup Financial Periods</a> ";
-				 projectsHtml += " <a id=\"cashFlow" + data.list[i].portfolioId + "\" target=\"_blank\">Cash Flow</a> ";
-				 projectsHtml += " <a id=\"scheduling" + data.list[i].portfolioId + "\" target=\"_blank\">Scheduling</a> ";
-				 projectsHtml += " <a id=\"exportExcel_" + data.list[i].portfolioId + "\" target=\"_blank\">Export to Excel</a> ";
 				 projectsHtml +=  "</div>";
 			 	 projectsHtml +=  "</div>";
 				

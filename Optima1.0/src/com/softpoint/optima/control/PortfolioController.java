@@ -196,9 +196,8 @@ public class PortfolioController {
 	}
 
 	public ServerResponse getSolution(HttpSession session, int portfolioId) throws OptimaException {
-		if (!isSolved(session, portfolioId)) {
-			return new ServerResponse("0", "Success", "");
-		}
+		Boolean solved = isSolved(session, portfolioId);
+		
 		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
 		Portfolio portfolio = null;
 		try {
@@ -215,8 +214,13 @@ public class PortfolioController {
 				sb.append("<table class=\"solutionTable\">");
 				StringBuilder projSB = new StringBuilder();
 				projSB.append("<table class=\"solutionTable\">\r")
-						.append("<tr><td>").append(project.getProjectCode()).append("</td><td>change</td><td>Original</td><td>Final</td></tr>");
-
+						.append("<tr><td>").append(project.getProjectCode()).append("</td>");
+				if (solved) {
+					projSB.append("<td>change</td><td>Original</td><td>Final</td></tr>");
+				} else {
+					projSB.append("<td>Original</td></tr>");
+				}
+				
 				double totalCost = 0;
 				double totalIncome = 0;
 
@@ -234,16 +238,22 @@ public class PortfolioController {
 					totalCost += task.getUniformDailyCost().doubleValue() * task.getDuration();
 					totalIncome += task.getUniformDailyIncome().doubleValue() * task.getDuration();
 
-					sb.append("<tr><td  width=\"30px\"></td><td  width=\"10px\">");
-					if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
-						sb.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
-					} else {
-						sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
+					sb.append("<tr><td  width=\"30px\">");
+					if (solved) {
+						sb.append("</td><td  width=\"10px\">");
+						if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
+							sb.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
+						} else {
+							sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
+						}
 					}
-					sb.append("</td><td>").append(task.getTaskDescription()).append("</td><td>")
-							.append(format.format(task.getTentativeStartDate())).append("</td><td>")
-							.append(format.format(task.getScheduledStartDate())).append("</td></tr>\r");
-
+					sb.append("</td><td>").append(task.getTaskDescription()).append("</td><td>");
+					sb.append(format.format(task.getTentativeStartDate())).append("</td>");
+					if (solved) {
+						sb.append("<td>").append(format.format(task.getScheduledStartDate())).append("</td>");
+					}
+					sb.append("</tr>\r");
+					
 					int oldDuration = TaskUtil.calculateTaskDuration(task);
 					if (lastDate == null) {
 						lastDate = addDayes(task.getTentativeStartDate(), oldDuration-1);
@@ -282,23 +292,34 @@ public class PortfolioController {
 				double profitAfter = totalIncome - totalCost - penaltiesAfter - overHeadAfter;
 
 				projSB.append("<tr><td>Profit</td><td>");
-
-				if (profitBefore > profitAfter) {
-					projSB.append("<div style=\"width:16px;height:16px\" class=\"decreasetProjectProfitLogo\"></div>");
-				} else {
-					projSB.append("<div style=\"width:16px;height:16px\" class=\"sameProjectProfitLogo\"></div>");
+				
+				if (solved) {
+					if (profitBefore > profitAfter) {
+						projSB.append("<div style=\"width:16px;height:16px\" class=\"decreasetProjectProfitLogo\"></div>");
+					} else {
+						projSB.append("<div style=\"width:16px;height:16px\" class=\"sameProjectProfitLogo\"></div>");
+					}
+					projSB.append("</td><td>");
 				}
-				projSB.append("</td><td>").append(profitBefore).append("</td><td>").append(profitAfter)
-						.append("</td></tr>");
+				projSB.append(profitBefore);
+				if (solved) {
+					projSB.append("</td><td>").append(profitAfter);
+				}
+				projSB.append("</td></tr>");
 
 				projSB.append("<tr><td>Finish Date</td><td>");
-				if (scheduledEnd.after(lastDate)) {
-					projSB.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
-				} else {
-					projSB.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
+				if (solved) {
+					if (scheduledEnd.after(lastDate)) {
+						projSB.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
+					} else {
+						projSB.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
+					}
+					projSB.append("</td><td>");
 				}
-				projSB.append("</td><td>").append(format.format(lastDate));
-				projSB.append("</td><td>").append(format.format(scheduledEnd));
+				projSB.append(format.format(lastDate));
+				if (solved) {
+					projSB.append("</td><td>").append(format.format(scheduledEnd));
+				}
 				projSB.append("</td></tr>");
 				
 				projSB.append("</table>");
@@ -306,7 +327,7 @@ public class PortfolioController {
 				sb.append("</table>\r").append(projSB.toString());
 				
 			}
-			return new ServerResponse("0", "Success", sb.toString());
+			return new ServerResponse("0", solved?"Success":"Not Solved", sb.toString());
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
 			return new ServerResponse("PORT0002", String.format("Error updating Portfolio %s: %s",
