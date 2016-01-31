@@ -543,10 +543,17 @@ public class PortfolioSolver {
 			dates += df.format(date);
 		}
 		int d = project.getProjectDuratoin();
-		
-		String SHORT_TEMPLATE = "<p>Iteration [%d] Activities:[%s] Start [%s] Project Duration: [%d] Feasible: %s</p>";
+		DayDetails preStart = (DayDetails) result.get(P1_PRE_START);
+		DayDetails p1StartDetails = (DayDetails) result.get(P1_START);
+		DayDetails p1EndDetails = (DayDetails) result.get(P1_END);
+		DayDetails p2StartDetails = (DayDetails) result.get(P2_START);
+		DayDetails p2EndDetails = (DayDetails) result.get(P2_END);
+		double rc = (preStart.getBalance() + p1StartDetails.getFinance() + p1StartDetails.getPayments() -p1EndDetails.getOverhead() - p1EndDetails.getLeftOver()); 
+		double rn = (p1EndDetails.getBalance() + p2StartDetails.getFinance() + p2StartDetails.getPayments() -p2EndDetails.getOverhead() - (Double)result.get(LEFTOVER_COST));
+		double cc = p1EndDetails.getPeriodCost(); 
+		String SHORT_TEMPLATE = "<p>Iteration [%d] Activities:[%s] Start [%s] Project Duration: [%d] R[Current]=[%.2f] C[Current]=[%.2f] R[NEXT]=[%.2f] Available Cash=[%.2f] Feasible: %s</p>";
 		String f = (result.get(FEASIBLE)==Boolean.TRUE)?"YES":"NO";
-		return String.format(SHORT_TEMPLATE, iteration,tasks,dates,d,f) ;
+		return String.format(SHORT_TEMPLATE, iteration,tasks,dates,d,rc,cc,rn,rc-cc,f) ;
 	}
 
 	Date getMaxProjectEnd(TaskTreeNode task) {

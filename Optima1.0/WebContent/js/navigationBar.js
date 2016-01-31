@@ -5,7 +5,7 @@ $(document).ready( function() {
 	$("#scheduleNavBar").append("<a href=\"#\"><img src=\"css/header/images/schedule.png\" />Scheduling</a>");
 	$("#cashflowNavBar").append("<a href=\"#\"><img src=\"css/header/images/cashflow.png\" />Cashflow</a>");
 	$("#financialNavBar").append("<a href=\"#\"><img src=\"css/header/images/financing.png\" />Results</a>");
-	$("#projectsRoadMapNavBar").append("<a href=\"#\"><img src=\"css/header/images/financing.png\" />Plans</a>");
+	$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\"><img src=\"css/header/images/financing.png\" />Plans</a>");
 	
 	setTimeout(function() {
 	rpcClient.portfolioService.findAll(function(result , exception) {
@@ -42,9 +42,6 @@ $(document).ready( function() {
 
 					$("#financialNavBar").children().get(0).remove();
 					$("#financialNavBar").append("<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img src=\"css/header/images/financing.png\" />Results</a>");
-					
-					$("#projectsRoadMapNavBar").children().get(0).remove();
-					$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img src=\"css/header/images/project.png\" />Plans</a>");
 					
 					var result2 = rpcClient.projectService.findAllByPortfolio(data.list[i].portfolioId);
 					if (result2.result == 0) {
