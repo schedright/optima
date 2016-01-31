@@ -142,7 +142,11 @@ function solveIt(portfolioId) {
 								var jsn = jQuery.parseJSON( result.data );
 								var ratio = jsn.DONE * 100 / jsn.TOTAL;
 								bar.style.width = ratio+"%";
-								if (jsn.STATUS=='Success') {
+								if (jsn.STATUS=='SAVING') {
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Saving tasks ( " + jsn.DONE + " / " + jsn.TOTAL + " )";
+								} else if (jsn.STATUS=='RUNNING') {
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Solving the portfolio ( " + jsn.DONE + " / " + jsn.TOTAL + " )";
+								} else if (jsn.STATUS=='Success') {
 									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Portfolio fixed successfully";
 									window.clearInterval(window.intervalId);
 								}

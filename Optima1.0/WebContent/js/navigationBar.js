@@ -1,34 +1,23 @@
 $(document).ready( function() {
 	$("#portfoliosNavBar").append("<a href=\"main.jsp\"><img src=\"css/header/images/portfolio.png\" />Portfolios</a>");
+	$("#financingNavBar").append("<a href=\"#\"><img src=\"css/header/images/financing.png\" />Financing</a>");
+	$("#projectsNavBar").append("<a href=\"#\"><img src=\"css/header/images/project.png\" />Projects</a>");
+	$("#scheduleNavBar").append("<a href=\"#\"><img src=\"css/header/images/schedule.png\" />Scheduling</a>");
+	$("#cashflowNavBar").append("<a href=\"#\"><img src=\"css/header/images/cashflow.png\" />Cashflow</a>");
+	$("#financialNavBar").append("<a href=\"#\"><img src=\"css/header/images/financing.png\" />Results</a>");
+	$("#projectsRoadMapNavBar").append("<a href=\"#\"><img src=\"css/header/images/financing.png\" />Plans</a>");
 	
+	setTimeout(function() {
 	rpcClient.portfolioService.findAll(function(result , exception) {
 		if (result.result == 0) {
 			var data = result.data;
-			$("#financingNavBar").append("<a href=\"#\"><img src=\"css/header/images/financing.png\" />Financing</a>");
-			$("#projectsNavBar").append("<a href=\"#\"><img src=\"css/header/images/project.png\" />Projects</a>");
-			$("#scheduleNavBar").append("<a href=\"#\"><img src=\"css/header/images/schedule.png\" />Scheduling</a>");
-			$("#cashflowNavBar").append("<a href=\"#\"><img src=\"css/header/images/cashflow.png\" />Cashflow</a>");
-			$("#financialNavBar").append("<a href=\"#\"><img src=\"css/header/images/financing.png\" />Results</a>");
-			//$("#exportNavBar").append("<a href=\"#\"><img src=\"css/header/images/export.png\" />Export Results</a>");
-			
 			
 			if (data.list.length == 0) {
-				$("#financingNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Portfolios defined.</a></li></ul>");
 				$("#projectsNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Projects defined.</a></li></ul>");
-				$("#scheduleNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Portfolios defined.</a></li></ul>");
-				$("#cashflowNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Portfolios defined.</a></li></ul>");
-				$("#financialNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Projects defined.</a></li></ul>");
-				//$("#exportNavBar").append("<ul><li class=\"firstRowMenu\"><a href=\"\">No Projects defined.</a></li></ul>");
-			
 			} else {
 				var liFirstRow = "<li class=\"firstRowMenu\">";
 				var liFirstRowProjects = "<li class=\"firstRowMenu\">";
-				var financingList ="<ul>";
-				var schedulingList ="<ul>";
 				var projectsList ="<ul>";
-				var cashflowList ="<ul>";
-//				var exportList ="<ul>";
-				var financialList ="<ul>";
 				
 				var portfolioIndex = 0;
 				var savedPortfolioIndex = $.cookie('saved_index_pf');
@@ -42,12 +31,20 @@ $(document).ready( function() {
 					if (i != portfolioIndex) {
 						continue;
 					}
-					financingList += liFirstRow + "<a href=\"finData.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
-					schedulingList += liFirstRow + "<a href=\"schedule.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
-					cashflowList += liFirstRow + "<a href=\"cashFlow.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
-					financialList += liFirstRow + "<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\">" + data.list[i].portfolioName + "</a></li>";
+					$("#financingNavBar").children().get(0).remove();
+					$("#financingNavBar").append("<a href=\"finData.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img src=\"css/header/images/financing.png\" />Financing</a>");
+
+					$("#scheduleNavBar").children().get(0).remove();
+					$("#scheduleNavBar").append("<a href=\"schedule.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img src=\"css/header/images/schedule.png\" />Scheduling</a>");
+
+					$("#cashflowNavBar").children().get(0).remove();
+					$("#cashflowNavBar").append("<a href=\"cashFlow.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img src=\"css/header/images/cashflow.png\" />Cashflow</a>");
+
+					$("#financialNavBar").children().get(0).remove();
+					$("#financialNavBar").append("<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img src=\"css/header/images/financing.png\" />Results</a>");
 					
-					
+					$("#projectsRoadMapNavBar").children().get(0).remove();
+					$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img src=\"css/header/images/project.png\" />Plans</a>");
 					
 					var result2 = rpcClient.projectService.findAllByPortfolio(data.list[i].portfolioId);
 					if (result2.result == 0) {
@@ -62,27 +59,13 @@ $(document).ready( function() {
 
 					liFirstRow = "<li>";
 				}
-				financingList += "</ul>";
-				$("#financingNavBar").append(financingList);
 				
 				projectsList += "</ul>";
 				$("#projectsNavBar").append(projectsList);
-				
-				schedulingList += "</ul>";
-				$("#scheduleNavBar").append(schedulingList);
-				
-				cashflowList += "</ul>";
-				$("#cashflowNavBar").append(cashflowList);
-				
-				financialList += "</ul>";
-				$("#financialNavBar").append(financialList);
-
-//				exportList += "</ul>";
-//				$("#exportNavBar").append(exportList);
-				
 			}
 		}
 	});
+	},0);
 	
 	if(currentPage == 1)
 		$("#portfoliosNavBar").addClass("active");

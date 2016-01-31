@@ -4,6 +4,7 @@
 package com.softpoint.optima.control;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,6 +29,7 @@ import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.WeekendDay;
+import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 import com.softpoint.optima.struct.Period;
 import com.softpoint.optima.struct.ProjectPaymentDetail;
 import com.softpoint.optima.struct.SchedulePeriod;
@@ -36,6 +38,7 @@ import com.softpoint.optima.struct.TaskSolution;
 import com.softpoint.optima.struct.TaskState;
 import com.softpoint.optima.util.PaymentUtil;
 import com.softpoint.optima.util.PeriodLogGenerator;
+import com.softpoint.optima.util.ProjectSolutionDetails;
 import com.softpoint.optima.util.solution.PortfolioSolver;
 
 /**
@@ -345,7 +348,7 @@ public class ProjectController {
 		public String projectsPriority;
 		public HttpSession session;
 
-		SolutionRunner(Portfolio portfolio,String projectsPriority,HttpSession session) {
+		SolutionRunner(Portfolio portfolio, String projectsPriority, HttpSession session) {
 			this.portfolio = portfolio;
 			this.projectsPriority = projectsPriority;
 			this.session = session;
@@ -355,24 +358,24 @@ public class ProjectController {
 			long millis1 = System.currentTimeMillis();
 			PortfolioSolver solver = new PortfolioSolver(portfolio, projectsPriority);
 			String ret = solver.solveIt(session);
-			
+
 			long millis2 = System.currentTimeMillis();
-			System.out.println(millis2-millis1);
+			System.out.println(millis2 - millis1);
 		}
-		
+
 	}
-	
+
 	public ServerResponse getStatus(HttpSession session, int portfolioId) {
 
-    	if (PortfolioSolver.currentWorkingSolutions.containsKey(portfolioId)) {
-    		ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(portfolioId);
-    		if (solStatus.containsKey(PortfolioSolver.STATUS)) {
-    			return new ServerResponse("0", PortfolioSolver.SUCCESS, PortfolioSolver.formatMessage(solStatus));
-    		} else {
-    			return new ServerResponse("0", PortfolioSolver.SUCCESS, "running");
-    		}
-    	} 
-   		return new ServerResponse("0", PortfolioSolver.SUCCESS, "notfound");
+		if (PortfolioSolver.currentWorkingSolutions.containsKey(portfolioId)) {
+			ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(portfolioId);
+			if (solStatus.containsKey(PortfolioSolver.STATUS)) {
+				return new ServerResponse("0", PortfolioSolver.SUCCESS, PortfolioSolver.formatMessage(solStatus));
+			} else {
+				return new ServerResponse("0", PortfolioSolver.SUCCESS, "running");
+			}
+		}
+		return new ServerResponse("0", PortfolioSolver.SUCCESS, "notfound");
 	}
 
 	public ServerResponse getSolution(HttpSession session, int projectId, String outputFormat,
@@ -380,42 +383,51 @@ public class ProjectController {
 
 		EntityController<Project> projectController = new EntityController<>(session.getServletContext());
 		try {
-		    synchronized(this){
+			synchronized (this) {
 				Project project = projectController.find(Project.class, projectId);
-		    	int portfolioId = project.getPortfolio().getPortfolioId();
-		    	if (PortfolioSolver.currentWorkingSolutions.containsKey(portfolioId)) {
-		    		ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(portfolioId);
-		    		if (!solStatus.containsKey(PortfolioSolver.SOLVER)) {
-		    			PortfolioSolver.currentWorkingSolutions.remove(portfolioId);
-		    		}
-		    	}
-		    	
+				int portfolioId = project.getPortfolio().getPortfolioId();
 				if (PortfolioSolver.currentWorkingSolutions.containsKey(portfolioId)) {
-		    		return new ServerResponse("0", PortfolioSolver.SUCCESS, "running");
-		    	} else {
-			    	int running = 0;
-			    	for (Integer pid:PortfolioSolver.currentWorkingSolutions.keySet()) {
-			    		ConcurrentMap<String, Object> s = PortfolioSolver.currentWorkingSolutions.get(pid);
-			    		if (s.containsKey(PortfolioSolver.SOLVER)) {
-			    			running++;
-			    		}
-			    	}
-			    	if (running<PortfolioSolver.MAX_RUNNING_SOLUTIONS) {
+					ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(portfolioId);
+					if (!solStatus.containsKey(PortfolioSolver.SOLVER)) {
+						PortfolioSolver.currentWorkingSolutions.remove(portfolioId);
+					}
+				}
+
+				if (PortfolioSolver.currentWorkingSolutions.containsKey(portfolioId)) {
+					return new ServerResponse("0", PortfolioSolver.SUCCESS, "running");
+				} else {
+					int running = 0;
+					for (Integer pid : PortfolioSolver.currentWorkingSolutions.keySet()) {
+						ConcurrentMap<String, Object> s = PortfolioSolver.currentWorkingSolutions.get(pid);
+						if (s.containsKey(PortfolioSolver.SOLVER)) {
+							running++;
+						}
+					}
+					if (running < PortfolioSolver.MAX_RUNNING_SOLUTIONS) {
 						SolutionRunner runner = new SolutionRunner(project.getPortfolio(), projectsPriority, session);
 						ConcurrentMap<String, Object> x = new ConcurrentHashMap<String, Object>();
-						x.put(PortfolioSolver.SOLVER,runner);
-						x.put(PortfolioSolver.TOTAL,100); // temp result, will be updated from the solver
-						x.put(PortfolioSolver.DONE,0); // temp result, will be updated from the solver
-						x.put(PortfolioSolver.STATUS,"running"); // temp result, will be updated from the solver
-						PortfolioSolver.currentWorkingSolutions.put(portfolioId,x);
-						
+						x.put(PortfolioSolver.SOLVER, runner);
+						x.put(PortfolioSolver.TOTAL, 100); // temp result, will
+															// be updated from
+															// the solver
+						x.put(PortfolioSolver.DONE, 0); // temp result, will be
+														// updated from the
+														// solver
+						x.put(PortfolioSolver.STATUS, "running"); // temp
+																	// result,
+																	// will be
+																	// updated
+																	// from the
+																	// solver
+						PortfolioSolver.currentWorkingSolutions.put(portfolioId, x);
+
 						Thread t = new Thread(runner);
 						t.start();
-			    	} else {
-			    		return new ServerResponse("0", "Busy", "server is running other solutions, try again later");
-			    	}
-		    	}
-		    }
+					} else {
+						return new ServerResponse("0", "Busy", "server is running other solutions, try again later");
+					}
+				}
+			}
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, "running");
 
 		} catch (EntityControllerException e) {
@@ -424,7 +436,7 @@ public class ProjectController {
 		}
 
 	}
-	
+
 	private Date getlastDayBeforeScheduling(Project project) {
 		Date lastDay = new Date(0);
 		List<ProjectTask> tasks = project.getProjectTasks();
@@ -743,14 +755,16 @@ public class ProjectController {
 				String shortVersion = String
 						.format("Selected: Iteration [%d] R[Current]:[%.2f] Activities:[%s] Start [%s] Project Duration: [%d] C[Current]: [%f] R[Next]:[%f] Feasible: %s Raimining cash:[%f]%n",
 								iteration, cashAvailable, PaymentUtil.getEligibaleTaskNameList(currentEligibleSet),
-								PaymentUtil.getTaskListStart(currentEligibleSet),
-								projLength, totalCostCurrent,
+								PaymentUtil.getTaskListStart(currentEligibleSet), projLength, totalCostCurrent,
 								cashAvailableNextPeriod - totalCostCurrent + expectedCashIn - leftOverNextCost,
 								totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent
 										+ expectedCashIn >= leftOverNextCost ? "Yes" : "No",
 						cashAvailable - totalCostCurrent < 0 ? 0 : cashAvailable - totalCostCurrent);
 
-				writeTrialToHTMLLogFile(solutionReport, iteration, shortVersion, from, to, project, PaymentUtil.getProjectExpectedEndDate(project), totalCostCurrent,payment,paymentCurrent, financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance,cashOutOthers);
+				writeTrialToHTMLLogFile(solutionReport, iteration, shortVersion, from, to, project,
+						PaymentUtil.getProjectExpectedEndDate(project), totalCostCurrent, payment, paymentCurrent,
+						financeLimit, financeLimitNextPeriod, leftOverCost, leftOverNextCost, openBalance,
+						cashOutOthers);
 
 				if (initial) {
 					initialInfo = cashAvailable + "," + totalCostCurrent + ","
@@ -840,7 +854,10 @@ public class ProjectController {
 												: cashAvailable - solutionTotalCostCurrent);
 
 						writeTrialToHTMLLogFile(solutionReport, iteration, shortVerion, from, to, project,
-								PaymentUtil.getProjectExpectedEndDate(project), solutionEligibleTasksCurrentPeroidCost,payment,paymentCurrent ,financeLimit,financeLimitNextPeriod,leftOverCost,solutionEligibleTasksLeftOverCost+ solutionOtherPojectsEligibleTasksLeftOverCost,openBalance,cashOutOthers);
+								PaymentUtil.getProjectExpectedEndDate(project), solutionEligibleTasksCurrentPeroidCost,
+								payment, paymentCurrent, financeLimit, financeLimitNextPeriod, leftOverCost,
+								solutionEligibleTasksLeftOverCost + solutionOtherPojectsEligibleTasksLeftOverCost,
+								openBalance, cashOutOthers);
 
 						solutions.add(solution);
 						task.setCalendarStartDate(taskDate);
@@ -916,7 +933,9 @@ public class ProjectController {
 	private static boolean SHOW_COMING_TASKS = true;
 
 	private void writeTrialToHTMLLogFile(PeriodLogGenerator report, int iteration, String shortVersion, Date from,
-			Date to, Project project, Date projectEnd, double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost,double openBalance, double cashOutOthers) {
+			Date to, Project project, Date projectEnd, double totalCostCurrent, double payment,
+			double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost,
+			double leftOverNextCost, double openBalance, double cashOutOthers) {
 		try {
 			Date start = from;
 			Date end = to;
@@ -943,11 +962,12 @@ public class ProjectController {
 				boolean offDay = PortfolioSolver.isIffDay(project, index);
 				if (!index.before(to)) {
 					// future
-					header = header + "<td bgcolor=\"CC9900\">" + (offDay?"<div class=\"stripedDiv\"></div>":"") + new SimpleDateFormat("dd/MM").format(index) +  "</td>";
+					header = header + "<td bgcolor=\"CC9900\">" + (offDay ? "<div class=\"stripedDiv\"></div>" : "")
+							+ new SimpleDateFormat("dd/MM").format(index) + "</td>";
 				} else {
 					// current
-					header = header + "<td bgcolor=\"lightgreen\">"  + (offDay?"<div class=\"stripedDiv\"></div>":"") + new SimpleDateFormat("dd/MM").format(index) 
-							+ "</td>";
+					header = header + "<td bgcolor=\"lightgreen\">" + (offDay ? "<div class=\"stripedDiv\"></div>" : "")
+							+ new SimpleDateFormat("dd/MM").format(index) + "</td>";
 				}
 				index = PortfolioSolver.addDays(index, 1);
 			}
@@ -975,9 +995,10 @@ public class ProjectController {
 								}
 							}
 							if (index2.before(taskStart) || index2.after(taskEnd)) {
-								line += "<td>"  + (offDay?"<div class=\"stripedDiv\"></div>":"") +"</td>";
+								line += "<td>" + (offDay ? "<div class=\"stripedDiv\"></div>" : "") + "</td>";
 							} else {
-								line += "<td bgcolor=\"" + color + "\">"  + (offDay?"<div class=\"stripedDiv\"></div>":"") + "</td>";
+								line += "<td bgcolor=\"" + color + "\">"
+										+ (offDay ? "<div class=\"stripedDiv\"></div>" : "") + "</td>";
 							}
 							index2 = PortfolioSolver.addDays(index2, 1);
 						}
@@ -985,7 +1006,8 @@ public class ProjectController {
 					}
 				}
 			}
-			report.setDetails(totalCostCurrent,payment, extraPaymentNextPeriod,financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance,cashOutOthers);
+			report.setDetails(totalCostCurrent, payment, extraPaymentNextPeriod, financeLimit, financeLimitNextPeriod,
+					leftOverCost, leftOverNextCost, openBalance, cashOutOthers);
 			/*
 			 * for (ProjectTask task : currentEligibleSet) { Date taskStart =
 			 * task.getCalendarStartDate(); Date taskEnd =
@@ -1090,4 +1112,73 @@ public class ProjectController {
 		// System.out.println("Inside getProjectCost()");
 		return new ServerResponse("0", PortfolioSolver.SUCCESS, 10.0);
 	}
+
+	SimpleDateFormat yearDF = new SimpleDateFormat("yyyy");
+	SimpleDateFormat monthDF = new SimpleDateFormat("MMM");
+
+
+	public ServerResponse getPlan(HttpSession session) throws OptimaException {
+		// PortfolioCashFlow cashFlow = new PortfolioCashFlow();
+		try {
+			// TODO this should be from the DB
+			DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+			Date planStart = dateFormat.parse("01/01/2014");
+			Date planEnd = dateFormat.parse("31/12/2018");
+			List<String> years = new ArrayList<String>();
+
+			EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+			List<Project> allProjects = controller.findAll(Project.class);
+			List<Map<String, Object>> selectProjectDetails = new ArrayList<Map<String, Object>>();
+
+			for (Project proj : allProjects) {
+				if (proj.getPropusedStartDate() != null) {
+					Date[] dates = PaymentUtil.getProjectExtendedDateRanges(controller, proj.getProjectId());
+					if (!(dates[0].after(planEnd) || planStart.after(dates[1]))) {
+						ProjectSolutionDetails details = new ProjectSolutionDetails(false, proj);
+						Map<String, Object> projDetails = new HashMap<String, Object>();
+						selectProjectDetails.add(projDetails);
+						projDetails.put("Project", proj);
+						projDetails.put("Start", dates[0]);
+						projDetails.put("End", dates[1]);
+
+						for (String dateString : details.getResults().keySet()) {
+							DailyCashFlowMapEntity det = details.getResults().get(dateString);
+							if (det.getPayments() != 0) {
+								Date date = dateFormat.parse(dateString);
+								addPayment(projDetails, date, det.getPayments());
+							}
+						}
+					}
+				}
+			}
+			return new ServerResponse("0", "Success", selectProjectDetails);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ServerResponse("PORT0008", String.format("Error loading portfolios : %s", e.getMessage()), e);
+		}
+	}
+
+	private void addPayment(Map<String, Object> projDetails, Date date, double payments) {
+		Map<String, Map<String, Double>> yearMonthPayment = (Map<String, Map<String, Double>>) projDetails
+				.get("Details");
+		if (yearMonthPayment == null) {
+			yearMonthPayment = new HashMap<String, Map<String, Double>>();
+			projDetails.put("Details", yearMonthPayment);
+		}
+
+		String year = yearDF.format(date);
+		String month = monthDF.format(date);
+		Map<String, Double> yearMap = yearMonthPayment.get(year);
+		if (yearMap == null) {
+			yearMap = new HashMap<String, Double>();
+			yearMonthPayment.put(year, yearMap);
+		}
+		Double d = yearMap.get(month);
+		if (d == null) {
+			d = (double) 0;
+		}
+		d += payments;
+		yearMap.put(month, d);
+	}
+
 }

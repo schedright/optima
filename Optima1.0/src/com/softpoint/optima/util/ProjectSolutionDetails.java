@@ -18,7 +18,7 @@ public class ProjectSolutionDetails {
 	// if true then origianl, if false then final
 	private boolean originalOrFinal;
 
-	private List<Project> projects;
+//	private List<Project> projects;
 	private Date projectStart;
 	private Date lastTaskDate;
 	private Date projectEnd;
@@ -41,7 +41,7 @@ public class ProjectSolutionDetails {
 		super();
 		this.originalOrFinal = originalOrFinal;
 
-		projects = new ArrayList<Project>();
+	//	projects = new ArrayList<Project>();
 		tasksEnd = new HashMap<ProjectTask, Date>();
 		results = new HashMap<String, DailyCashFlowMapEntity>();
 		projectTasks = new ArrayList<ProjectTask>();
@@ -49,7 +49,7 @@ public class ProjectSolutionDetails {
 		// initialize all data for easy access later on
 		List<ProjectTask> tasks = project.getProjectTasks();
 		if (tasks != null && tasks.size() > 0) {
-			projects.add(project);
+		//	projects.add(project);
 			int requestPeriod = project.getPaymentRequestPeriod();
 			int paymentPeriod = project.getPaymentRequestPeriod();
 
@@ -160,6 +160,9 @@ public class ProjectSolutionDetails {
 		for (Project project : currentProject.getPortfolio().getProjects()) {
 			List<ProjectTask> tasks = project.getProjectTasks();
 			int requestPeriod = project.getPaymentRequestPeriod();
+			if (requestPeriod==0) {
+				requestPeriod = 10;
+			}
 			int paymentPeriod = project.getPaymentRequestPeriod();
 
 			Date s = project.getPropusedStartDate();

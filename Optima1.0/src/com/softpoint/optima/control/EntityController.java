@@ -188,6 +188,52 @@ public class EntityController<E> {
 			throw new EntityControllerException("DB005 find - " + t.getMessage() , t);
 		}
 	}
+
+	
+	EntityManager transactionManager;
+	public void mergeTransactionStart() throws EntityControllerException {
+		try { 
+			EntityManagerFactory factory = (EntityManagerFactory)servletContext.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
+			transactionManager = autoClose?factory.createEntityManager():localManager;
+			transactionManager.getTransaction().begin();
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new EntityControllerException("DB005 find - " + t.getMessage() , t);
+		}
+	}
+	
+	/**
+	 * @param e
+	 * @return
+	 * @throws EntityControllerException
+	 */
+	public void mergeTransactionClose() throws EntityControllerException {
+		try { 
+			transactionManager.getTransaction().commit();
+			if (autoClose) {
+				transactionManager.close();
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new EntityControllerException("DB005 find - " + t.getMessage() , t);
+		}
+	}
+
+	/**
+	 * @param e
+	 * @return
+	 * @throws EntityControllerException
+	 */
+	public E mergeTransactionMerge(E e) throws EntityControllerException {
+		try { 
+			e = transactionManager.merge(e);
+			return e;
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new EntityControllerException("DB005 find - " + t.getMessage() , t);
+		}
+	}
+
 	
 	/**
 	 * @param cls
@@ -209,7 +255,23 @@ public class EntityController<E> {
 			throw new EntityControllerException("DB006 findAll - " + t.getMessage() , t);
 		}
 	}
-	
+
+	public List<E> findAllQuery(Class<E> cls,String sqlQuery) throws EntityControllerException {
+		try {
+			EntityManagerFactory factory = (EntityManagerFactory)servletContext.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
+			EntityManager manager = autoClose?factory.createEntityManager():localManager;
+			TypedQuery<E> query = manager.createQuery(sqlQuery , cls);
+			List<E> objects = query.getResultList();
+			if (autoClose) {
+				manager.close();
+			}
+			return objects;
+	    } catch (Throwable t) {
+	    	t.printStackTrace();
+			throw new EntityControllerException("DB006 findAll - " + t.getMessage() , t);
+		}
+	}
+
 	public E refresh(E e) throws EntityControllerException  {
 		try {
 			EntityManagerFactory factory = (EntityManagerFactory)servletContext.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);

@@ -27,6 +27,7 @@ import com.softpoint.optima.util.PeriodLogGeneratorNew;
 import com.softpoint.optima.util.TaskUtil;
 
 public class PortfolioSolver {
+	private static final String SAVING = "SAVING";
 	private static final String P2_START = "P2_START";
 	private static final String PAYMENTS = "PAYMENTS";
 	private static final String COMPLETED_TASKS = "COMPLETED_TASKS";
@@ -40,7 +41,7 @@ public class PortfolioSolver {
 	private static final String P1_PRE_START = "P1_PRE_START";
 	private static final String P1_END = "P1_END";
 	
-	private static String logLevel = "off"; //off , short, detailed
+	private static String logLevel = "detailed"; //off , short, detailed
 	SimpleDateFormat fileNameDateFormatter = new SimpleDateFormat("yyyyMMdd_Hm");
 	SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM, yyyy");
 	
@@ -166,11 +167,11 @@ public class PortfolioSolver {
 		
 		int diff = TaskUtil.daysBetween(d1, d2) + 1;
 		if (task.task.getScheduledStartDate()==null || task.task.getCalendarStartDate()==null ||
-				task.task.getScheduledStartDate().equals(d1) || task.task.getCalendarStartDate().equals(d1)) {
+				!task.task.getScheduledStartDate().equals(d1) || !task.task.getCalendarStartDate().equals(d1)) {
 			task.task.setScheduledStartDate(d1);
 			task.task.setCalendarStartDate(d1);
 			task.task.setCalenderDuration(diff);
-			taskController.merge(task.task);
+			taskController.mergeTransactionMerge(task.task);
 			
 		}
 		for (TaskTreeNode child:task.getChildren()) {
@@ -178,9 +179,15 @@ public class PortfolioSolver {
 		}
 	}
 	
-	public void commitSolution(EntityController<ProjectTask> taskController,ProjectWrapper project) {
+	public void commitSolution(EntityController<ProjectTask> taskController,ProjectWrapper project, ConcurrentMap<String, Object> solStatus) {
 		try {
+			Integer i = (Integer) solStatus.get(DONE);
+			if (i==null) {
+				i=0;
+			}
 			for (TaskTreeNode task:project.rootTasks) {
+				i++;
+				solStatus.put(DONE,i);
 				updateTask(taskController, task);
 			}
 
@@ -341,9 +348,17 @@ public class PortfolioSolver {
 
 			currentPeriodStart = p1End;
 		}
+		solStatus.put(STATUS,SAVING);
+		solStatus.put(DONE,0);
+		
 		EntityController<ProjectTask> taskController = new EntityController<>(session.getServletContext());
-		for (ProjectWrapper p:allProjects) {
-			commitSolution(taskController, p);
+		try {
+			taskController.mergeTransactionStart();
+			for (ProjectWrapper p:allProjects) {
+				commitSolution(taskController, p,solStatus);
+			}
+			taskController.mergeTransactionClose();
+		} catch (EntityControllerException e) {
 		}
 		solStatus.remove(SOLVER);
 		solStatus.put(STATUS,SUCCESS);
