@@ -13,11 +13,10 @@
   	<li data="Delete">Delete</li>
   </ul>
   
-<div id="main" style="width:100%;">
+<div id="main" style="width:100%;padding:20px">
 
 <div id="FinPeriods" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
 
-   <h3 class="ui-widget-header">Finances and Extra payments</h3>
  
    <div id="finances" class="ui-tabs ui-widget ui-widget-content ui-corner-all ui-center"  style="width:90%;">
    

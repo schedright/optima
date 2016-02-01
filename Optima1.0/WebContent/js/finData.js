@@ -113,7 +113,7 @@ $(function() {
     
     
     
-    $("#FinPeriods").accordion({
+ /*   $("#FinPeriods").accordion({
 
 	activate : function(event, ui) {
 	    $.cookie('saved_index_fp', null);
@@ -121,7 +121,7 @@ $(function() {
 	},
 	active : parseInt($.cookie('saved_index_fp')),
 	heightStyle : "content"
-    });
+    });*/
 
     var portfolioId = null;
 

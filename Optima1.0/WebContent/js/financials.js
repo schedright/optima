@@ -25,7 +25,6 @@ $(function() {
 		$("#schedResults").html('');
 		
 		if (solutionResponse.message=='Not Solved') {
-			$("#schedResults").append("<p style='margin-left:65px'>Project is not solved</p><p style='margin-left:65px'>Go to <a href='schedule.jsp?portfolioId=" + portfolioId + "'>Scheduling tab</a> and solve</p>"); 
 			$("#exportSolutionToCSV").attr('disabled','true');
 		} else {
 			$("#exportSolutionToCSV").removeAttr('disabled');

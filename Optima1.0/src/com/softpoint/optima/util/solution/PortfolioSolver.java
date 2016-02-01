@@ -41,7 +41,7 @@ public class PortfolioSolver {
 	private static final String P1_PRE_START = "P1_PRE_START";
 	private static final String P1_END = "P1_END";
 	
-	private static String logLevel = "detailed"; //off , short, detailed
+	private static String logLevel = "off"; //off , short, detailed
 	SimpleDateFormat fileNameDateFormatter = new SimpleDateFormat("yyyyMMdd_Hm");
 	SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM, yyyy");
 	
