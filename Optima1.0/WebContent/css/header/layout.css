@@ -51,7 +51,7 @@ div.wrapper h1, div.wrapper h2, div.wrapper h3, div.wrapper h4, div.wrapper h5, 
 
 /* ----------------------------------------------TopBar------------------------------------- */
 
-#topbar{height:40px; background:url("images/bar_gradient.png") top left repeat-x; z-index:1000;}
+#topbar{height:40px; /* background:url("images/bar_gradient.png") top left repeat-x; */ z-index:1000;}
 
 /* ----------------------------------------------Content------------------------------------- */
 

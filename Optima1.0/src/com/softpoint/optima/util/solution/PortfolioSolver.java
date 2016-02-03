@@ -41,7 +41,7 @@ public class PortfolioSolver {
 	private static final String P1_PRE_START = "P1_PRE_START";
 	private static final String P1_END = "P1_END";
 	
-	private static String logLevel = "off"; //off , short, detailed
+	private static String logLevel = "detailed"; //off , short, detailed
 	SimpleDateFormat fileNameDateFormatter = new SimpleDateFormat("yyyyMMdd_Hm");
 	SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM, yyyy");
 	
@@ -217,153 +217,167 @@ public class PortfolioSolver {
     	}
     	
 		ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(portfolioOd);
-		solStatus.put(STATUS,"RUNNING");
-		solStatus.put(TOTAL,totalTask);
-
-    	currentPeriodStart = startDate;
-
-		// the heart of the calculations,
-		// it goes through the period then verify each project feasibility, and
-		// it does the shifting if not feasible
-		DayDetails dayDetails = new DayDetails();
-/*		Double payment = payments.get(currentPeriodStart);
-		if (payment != null) {
-			dayDetails.setPayments(payment);
-		}*/
-		dayDetails.setFinance(getFinanceAtDate(currentPeriodStart));
-		
-		Map<ProjectWrapper,Double> totalIncome = new HashMap<ProjectWrapper,Double>();
-		for (ProjectWrapper p:projects) {
-			totalIncome.put(p, Double.valueOf(0));
-		}
-		int totalDone = 0;
-		while (finishedProjects < projects.size()) {
-			Date p1Start = currentPeriodStart;
-			Date p1End = getPeriodEnd(p1Start);
-			Date p2End = getPeriodEnd(TaskUtil.addDays(p1End, 1));
-
-//			DayDetails p1EndDetails = new DayDetails();
-//			DayDetails p2EndDefails = new DayDetails();
-			int twoPeriodDuration = TaskUtil.daysBetween(p1Start, p2End);
-
-			for (int projectIndex = 0; projectIndex < projects.size(); projectIndex++) {
-				ProjectWrapper projectW = projects.get(projectIndex);
-				DayDetails currentProjectDayDetails = new DayDetails(dayDetails);
-				currentProjectDayDetails.setLeftOver((double) 0);
-
-				// Add overhead from all next project, we dont add current or
-				// previous cause they are already calculated
-				double totalCashoutOther = 0;
-				for (int i = projectIndex + 1; i < projects.size(); i++) {
-					ProjectWrapper next = projects.get(i);
-					
-					DayDetails tmp = new DayDetails();
-					Map<Date, Double> pamymentClone = cloneMap(payments);
-					//fake call just to find the cash out
-					List<TaskTreeNode> LO = projectLeftovers.get(next);
-					List<TaskTreeNode> tmpLO = new ArrayList<TaskTreeNode>();
-					if (LO!=null) {
-						tmpLO.addAll(LO);
+		try {
+			solStatus.put(STATUS,"RUNNING");
+			solStatus.put(TOTAL,totalTask);
+	
+	    	currentPeriodStart = startDate;
+	
+			// the heart of the calculations,
+			// it goes through the period then verify each project feasibility, and
+			// it does the shifting if not feasible
+			DayDetails dayDetails = new DayDetails();
+	/*		Double payment = payments.get(currentPeriodStart);
+			if (payment != null) {
+				dayDetails.setPayments(payment);
+			}*/
+			dayDetails.setFinance(getFinanceAtDate(currentPeriodStart));
+			
+			Map<ProjectWrapper,Double> totalIncome = new HashMap<ProjectWrapper,Double>();
+			for (ProjectWrapper p:projects) {
+				totalIncome.put(p, Double.valueOf(0));
+			}
+			int totalDone = 0;
+			while (finishedProjects < projects.size()) {
+				Date p1Start = currentPeriodStart;
+				Date p1End = getPeriodEnd(p1Start);
+				Date p2End = getPeriodEnd(TaskUtil.addDays(p1End, 1));
+	
+	//			DayDetails p1EndDetails = new DayDetails();
+	//			DayDetails p2EndDefails = new DayDetails();
+	//			int twoPeriodDuration = TaskUtil.daysBetween(p1Start, p2End);
+	
+				for (int projectIndex = 0; projectIndex < projects.size(); projectIndex++) {
+					ProjectWrapper projectW = projects.get(projectIndex);
+					DayDetails currentProjectDayDetails = new DayDetails(dayDetails);
+					currentProjectDayDetails.setLeftOver((double) 0);
+	
+					// Add overhead from all next project, we dont add current or
+					// previous cause they are already calculated
+					double totalCashoutOther = 0;
+					double totalCashoutOtherNext = 0;
+					for (int i = projectIndex + 1; i < projects.size(); i++) {
+						ProjectWrapper next = projects.get(i);
+						
+						DayDetails tmp = new DayDetails();
+						Map<Date, Double> pamymentClone = cloneMap(payments);
+						//fake call just to find the cash out
+						List<TaskTreeNode> LO = projectLeftovers.get(next);
+						List<TaskTreeNode> tmpLO = new ArrayList<TaskTreeNode>();
+						if (LO!=null) {
+							tmpLO.addAll(LO);
+						}
+						Map<String, Object> tmpResult = isValidPeriod(next, tmpLO, tmpLO, tmp,p1Start,p1End,p2End,0);
+						payments = cloneMap(pamymentClone);
+						
+						tmp = (DayDetails) tmpResult.get(P1_END);
+						totalCashoutOther += tmp.getOverhead() + tmp.getLeftOver();
+						
+						tmp = (DayDetails) tmpResult.get(P2_END);
+						totalCashoutOtherNext += tmp.getOverhead() + (Double)tmpResult.get(LEFTOVER_COST);
 					}
-					Map<String, Object> tmpResult = isValidPeriod(next, tmpLO, tmpLO, tmp,p1Start,p1End,addDays(p2End,1),0);
-					payments = cloneMap(pamymentClone);
+					currentProjectDayDetails.setOtherProjectsCashOut(totalCashoutOther);
+					currentProjectDayDetails.setOtherProjectsCashOutNext(totalCashoutOtherNext);
 					
-					tmp = (DayDetails) tmpResult.get(P1_END);
-					totalCashoutOther += tmp.getOverhead() + tmp.getLeftOver();
-				}
-				currentProjectDayDetails.setOtherProjectsCashOut(totalCashoutOther);
-
-				// list of left over tasks for this project
-				List<TaskTreeNode> leftOverTasks = projectLeftovers.get(projectW);
-				if (leftOverTasks==null) {
-					leftOverTasks = new ArrayList<TaskTreeNode>();
-				}
-
-				List<TaskTreeNode> eligibleTasks = new ArrayList<TaskTreeNode>();
-				getEligibleTasks(projectW, p1Start, p2End, eligibleTasks);
-
-				currentProjectDayDetails.setPeriodIncome(totalIncome.get(projectW));
-				Map<String, Object> details = getPeriodSolutionPerProject(projectW, eligibleTasks, leftOverTasks,
-						currentProjectDayDetails,p1Start,p1End,p2End);
-				if (details.get(FEASIBLE)==Boolean.FALSE) {
-					solStatus.remove(SOLVER);
-					solStatus.put(STATUS,"FAILED");
-					solStatus.put(DONE,totalTask);
-
-					return "FAILED"; //check if we can add more details
-				}
-				
-				@SuppressWarnings("unchecked")
-				List<TaskTreeNode> finishedTasks = (List<TaskTreeNode>) details.get(COMPLETED_TASKS);
-				projectW.completedTasks.addAll(finishedTasks);
-				for (TaskTreeNode completed:finishedTasks) {
-					totalDone++;
-					projectW.tasks.remove(completed);
-					for (TaskTreeNode dep:completed.getChildren()) {
-						if (!finishedTasks.contains(dep) && !projectW.tasks.contains(dep)) {
-							projectW.tasks.add(dep);
+	
+					// list of left over tasks for this project
+					List<TaskTreeNode> leftOverTasks = projectLeftovers.get(projectW);
+					if (leftOverTasks==null) {
+						leftOverTasks = new ArrayList<TaskTreeNode>();
+					}
+	
+					List<TaskTreeNode> eligibleTasks = new ArrayList<TaskTreeNode>();
+					getEligibleTasks(projectW, p1Start, p2End, eligibleTasks);
+	
+					currentProjectDayDetails.setPeriodIncome(totalIncome.get(projectW));
+					Map<String, Object> details = getPeriodSolutionPerProject(projectW, eligibleTasks, leftOverTasks,
+							currentProjectDayDetails,p1Start,p1End,p2End);
+					if (details.get(FEASIBLE)==Boolean.FALSE) {
+						solStatus.remove(SOLVER);
+						solStatus.put(STATUS,"FAILED");
+						solStatus.put(DONE,totalTask);
+	
+						return "FAILED"; //check if we can add more details
+					}
+					
+					@SuppressWarnings("unchecked")
+					List<TaskTreeNode> finishedTasks = (List<TaskTreeNode>) details.get(COMPLETED_TASKS);
+					projectW.completedTasks.addAll(finishedTasks);
+					for (TaskTreeNode completed:finishedTasks) {
+						totalDone++;
+						projectW.tasks.remove(completed);
+						for (TaskTreeNode dep:completed.getChildren()) {
+							if (!finishedTasks.contains(dep) && !projectW.tasks.contains(dep)) {
+								projectW.tasks.add(dep);
+							}
 						}
 					}
-				}
-				/*try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-				}*/
-				solStatus.put(DONE,totalDone);
-				@SuppressWarnings("unchecked")
-				Map<Date,Double> pms = (Map<Date, Double>) details.get(PAYMENTS);
-				if (pms!=null) {
-					for (Date d:pms.keySet()) {
-						Double v = pms.get(d);
-						addPayment(d, v);
+					/*try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+					}*/
+					solStatus.put(DONE,totalDone);
+					@SuppressWarnings("unchecked")
+					Map<Date,Double> pms = (Map<Date, Double>) details.get(PAYMENTS);
+					if (pms!=null) {
+						for (Date d:pms.keySet()) {
+							Double v = pms.get(d);
+							addPayment(d, v);
+						}
 					}
-				}
-
-				List<TaskTreeNode> leftoverTasks = new ArrayList<TaskTreeNode>();
-				for (TaskTreeNode tsk:leftOverTasks) {
-					if (!tsk.getCalculatedTaskEnd().before(p1End) && !leftoverTasks.contains(tsk)) { // TODO verify if p1End is in the old or the new period
-						leftoverTasks.add(tsk);
+	
+					List<TaskTreeNode> leftoverTasks = new ArrayList<TaskTreeNode>();
+					for (TaskTreeNode tsk:leftOverTasks) {
+						if (!tsk.getCalculatedTaskEnd().before(p1End) && !leftoverTasks.contains(tsk)) { // TODO verify if p1End is in the old or the new period
+							leftoverTasks.add(tsk);
+						}
 					}
-				}
-				for (TaskTreeNode tsk:eligibleTasks) {
-					if (tsk.getCalculatedTaskStart().before(p1End) && !tsk.getCalculatedTaskEnd().before(p1End) && !leftoverTasks.contains(tsk)) { // TODO verify if p1End is in the old or the new period
-						leftoverTasks.add(tsk);
+					for (TaskTreeNode tsk:eligibleTasks) {
+						if (tsk.getCalculatedTaskStart().before(p1End) && !tsk.getCalculatedTaskEnd().before(p1End) && !leftoverTasks.contains(tsk)) { // TODO verify if p1End is in the old or the new period
+							leftoverTasks.add(tsk);
+						}
 					}
+					dayDetails = (DayDetails) details.get(P1_END);
+					totalIncome.put(projectW,dayDetails.getPeriodIncome());
+					
+					dayDetails.setOverhead((double)0);
+					dayDetails.setPeriodCost((double)0);
+					projectLeftovers.put(projectW,leftoverTasks);
 				}
-				dayDetails = (DayDetails) details.get(P1_END);
-				totalIncome.put(projectW,dayDetails.getPeriodIncome());
 				
-				dayDetails.setOverhead((double)0);
-				dayDetails.setPeriodCost((double)0);
-				projectLeftovers.put(projectW,leftoverTasks);
-			}
-			
-			for (int i=projects.size()-1;i>-1;i--) {
-				ProjectWrapper p = projects.get(i);
-				if (p.tasks.size()==0) {
-					finishedProjects++;
-					projects.remove(p);
+				for (int i=projects.size()-1;i>-1;i--) {
+					ProjectWrapper p = projects.get(i);
+					if (p.tasks.size()==0) {
+						finishedProjects++;
+						projects.remove(p);
+					}
 				}
+	
+				currentPeriodStart = p1End;
 			}
-
-			currentPeriodStart = p1End;
-		}
-		solStatus.put(STATUS,SAVING);
-		solStatus.put(DONE,0);
-		
-		EntityController<ProjectTask> taskController = new EntityController<>(session.getServletContext());
-		try {
-			taskController.mergeTransactionStart();
-			for (ProjectWrapper p:allProjects) {
-				commitSolution(taskController, p,solStatus);
+			solStatus.put(STATUS,SAVING);
+			solStatus.put(DONE,0);
+			
+			EntityController<ProjectTask> taskController = new EntityController<>(session.getServletContext());
+			try {
+				taskController.mergeTransactionStart();
+				for (ProjectWrapper p:allProjects) {
+					commitSolution(taskController, p,solStatus);
+				}
+				taskController.mergeTransactionClose();
+			} catch (EntityControllerException e) {
 			}
-			taskController.mergeTransactionClose();
-		} catch (EntityControllerException e) {
+			solStatus.remove(SOLVER);
+			solStatus.put(STATUS,SUCCESS);
+			solStatus.put(DONE,totalTask);
+			return "SOLVED";
+		} finally {
+			//for any unexpected return
+			if (solStatus.containsKey(SOLVER)) {
+				solStatus.remove(SOLVER);
+				solStatus.put(STATUS,"FAILED");
+			}
 		}
-		solStatus.remove(SOLVER);
-		solStatus.put(STATUS,SUCCESS);
-		solStatus.put(DONE,totalTask);
-		return "SOLVED";
 	}
 
 	Map<Date, Double> cloneMap(Map<Date,Double> original) {
@@ -727,7 +741,7 @@ public class PortfolioSolver {
 		results.put(P2_END, new DayDetails(currentProjectDayDetails));
 		
 		Boolean p1Feasible = (end1Detailes.getBalance() + end1Detailes.getFinance() - currentProjectDayDetails.getOtherProjectsCashOut()) >0;
-		Boolean p2Feasible = ((currentProjectDayDetails.getBalance() + currentProjectDayDetails.getFinance() + totalCostForNextPeriod - currentProjectDayDetails.getOtherProjectsCashOut())) >0;
+		Boolean p2Feasible = ((currentProjectDayDetails.getBalance() + currentProjectDayDetails.getFinance() + totalCostForNextPeriod - currentProjectDayDetails.getOtherProjectsCashOut() - currentProjectDayDetails.getOtherProjectsCashOutNext())) >0;
 		Boolean feasible = p1Feasible && p2Feasible;
 		results.put(FEASIBLE, feasible);
 //		results.put(LEFTOVERS, completedDays);
@@ -828,6 +842,7 @@ public class PortfolioSolver {
 			double leftOverNextCost=p2EndDetails.getOverhead()+(Double)result.get(LEFTOVER_COST);
 			double openBalance=p1PreStart.getBalance();
 			double cashOutOthers=p1PreStart.getOtherProjectsCashOut();
+			double cashOutOthersNext=p1PreStart.getOtherProjectsCashOutNext();
 			
 		try {
 			Date start = from;
@@ -886,7 +901,7 @@ public class PortfolioSolver {
 					}
 				}
 			}
-			report.setDetails(totalCostCurrent,payment, extraPaymentNextPeriod,financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance,cashOutOthers);
+			report.setDetails(totalCostCurrent,payment, extraPaymentNextPeriod,financeLimit, financeLimitNextPeriod,leftOverCost,leftOverNextCost,openBalance,cashOutOthers,cashOutOthersNext);
 			report.finishTask();
 			// solutionReport.info(",");
 		} catch (Exception ex) {
