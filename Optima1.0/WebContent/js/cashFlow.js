@@ -127,10 +127,10 @@ $(function() {
 			    pData[rowCount] = {};
 			    pData[rowCount]["day"] = "Cashout ";
 			    rowCount++;
-			    var currentFinanceCostRow = rowCount;
+			    /*var currentFinanceCostRow = rowCount;
 			    pData[rowCount] = {};
 			    pData[rowCount]["day"] = "Finance Cost ";
-			    rowCount++;
+			    rowCount++;*/
 	
 			    var currentBalanceRow = rowCount;
 			    pData[rowCount] = {};
@@ -168,8 +168,8 @@ $(function() {
 						+ projects[i].projectId].cashout;
 					totalCashout[formattedDate1] += data.map[formattedDate2 + "," + projects[i].projectId].cashout;
 					
-					pData[currentFinanceCostRow][formattedDate1] = data.map[formattedDate2 + ","
-						+ projects[i].projectId].financeCost;
+//					pData[currentFinanceCostRow][formattedDate1] = data.map[formattedDate2 + ","
+//						+ projects[i].projectId].financeCost;
 				    totalFinanceCost[formattedDate1] +=   data.map[formattedDate2 + "," + projects[i].projectId].financeCost;
 					    
 					pData[currentBalanceRow][formattedDate1] = data.map[formattedDate2 + ","

@@ -564,7 +564,10 @@ margin-top:2px;
 }
 
 .slick-row.even {
-background: rgba(236, 205, 149, 0.98)
+background: #FFDF75
+}
+.slick-row.odd {
+background: #FFF1C2
 }
 .slick-row.totalRow{
 	background: #F5DEB3;
