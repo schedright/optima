@@ -1,7 +1,7 @@
-var daysOffList = rpcClient.projectService.getPlan();
+var plansList = rpcClient.projectService.getPlan();
 
 $(function() {
-	var projects = daysOffList.data.list;
+	var projects = plansList.data.list;
 	var allYears = [];
 	for (var i=0;i<projects.length;i++) {
 		var proj = projects[i].map;
@@ -74,5 +74,38 @@ $(function() {
 	    enableCellNavigation : true,
 	    enableColumnReorder : false
 	  });
+
+	$('input.datepicker').datepicker({
+    	showOn : "button",
+    	buttonImage : "images/calendar.png",
+    	buttonImageOnly : true
+        });
+
+    $('#planTabs').tabs({
+    	activate : function(e, ui) {
+    	    $.cookie('plan-selected-tab', ui.newTab.index(), {
+    		path : '/'
+    	    });
+    	},
+    	active : $.cookie('plan-selected-tab')
+        });
+    
+    var planDates = rpcClient.projectService.getPlanDates();
+    if (planDates.result == 0) {
+    	var data = planDates.data.map;
+    	var sd = data.plan_start;
+    	var ed = data.plan_end;
+    	
+    	$("#pStartDateTxt").val(sd);
+    	$("#pFinishDateTxt").val(ed);
+    }
+
+    $('#savePlanDatesBtn').on(
+    	    'click',
+    	    function() {
+    	    	var sd = $("#pStartDateTxt").val();
+    	    	var ed = $("#pFinishDateTxt").val();
+    	    	rpcClient.projectService.savePlanDates(sd,ed);
+    	    });
 
 })

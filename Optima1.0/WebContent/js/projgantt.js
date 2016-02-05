@@ -1,6 +1,6 @@
 function getGanttSource() {
 	var tasksSource = [];
-	var projects = daysOffList.data.list;
+	var projects = plansList.data.list;
 	var fmt = new DateFmt("%d-%m-%y");
 
 	for (var i=0;i<projects.length;i++) {

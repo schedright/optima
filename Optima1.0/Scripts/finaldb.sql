@@ -244,5 +244,13 @@ extraPayment_date date
 ALTER TABLE portfolio_extraPayment ADD 
 FOREIGN KEY (portfolio_id) REFERENCES portfolio(portfolio_id) 
 ON UPDATE CASCADE ON DELETE CASCADE;
+
+create table settings (
+settings_id INT NOT null AUTO_INCREMENT primary key, 
+name varchar(50) not null, 
+value varchar(10) not null, 
+CONSTRAINT unique_name UNIQUE (name)
+);
+
 commit;
 

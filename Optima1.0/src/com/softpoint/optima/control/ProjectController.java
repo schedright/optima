@@ -28,6 +28,7 @@ import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
+import com.softpoint.optima.db.Settings;
 import com.softpoint.optima.db.WeekendDay;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 import com.softpoint.optima.struct.Period;
@@ -46,6 +47,9 @@ import com.softpoint.optima.util.solution.PortfolioSolver;
  *
  */
 public class ProjectController {
+
+	private static final String PLAN_START = "plan_start";
+	private static final String PLAN_END = "plan_end";
 
 	/**
 	 * 
@@ -1116,14 +1120,34 @@ public class ProjectController {
 	SimpleDateFormat yearDF = new SimpleDateFormat("yyyy");
 	SimpleDateFormat monthDF = new SimpleDateFormat("MMM");
 
+	static DateFormat planDateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 	public ServerResponse getPlan(HttpSession session) throws OptimaException {
 		// PortfolioCashFlow cashFlow = new PortfolioCashFlow();
 		try {
-			// TODO this should be from the DB
-			DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-			Date planStart = dateFormat.parse("01/01/2014");
-			Date planEnd = dateFormat.parse("31/12/2018");
+			Map<String, String> settings = getSettingsMap(session);
+			String sds = settings.get(PLAN_START);
+			Date planStart = null;
+			if (sds == null) {
+				Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.YEAR, -1); // to get previous year add -1
+				planStart = cal.getTime();
+				addSetting(session,PLAN_START, planDateFormatter.format(planStart));
+			} else {
+				planStart = planDateFormatter.parse(sds);
+			}
+
+			sds = settings.get(PLAN_END);
+			Date planEnd = null;
+			if (sds == null) {
+				Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.YEAR, 1); // to get previous year add -1
+				planEnd = cal.getTime();
+				addSetting(session,PLAN_END, planDateFormatter.format(planEnd));
+			} else {
+				planEnd = planDateFormatter.parse(sds);
+			}
+
 			List<String> years = new ArrayList<String>();
 
 			EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
@@ -1144,7 +1168,7 @@ public class ProjectController {
 						for (String dateString : details.getResults().keySet()) {
 							DailyCashFlowMapEntity det = details.getResults().get(dateString);
 							if (det.getPayments() != 0) {
-								Date date = dateFormat.parse(dateString);
+								Date date = planDateFormatter.parse(dateString);
 								addPayment(projDetails, date, det.getPayments());
 							}
 						}
@@ -1181,4 +1205,83 @@ public class ProjectController {
 		yearMap.put(month, d);
 	}
 
+	public Map<String, String> getSettingsMap(HttpSession session) {
+		Map<String, String> settings = new HashMap<String, String>();
+		try {
+			EntityController<Settings> controller = new EntityController<Settings>(session.getServletContext());
+			List<Settings> allSettings = controller.findAll(Settings.class);
+			for (Settings set : allSettings) {
+				settings.put(set.getName(), set.getValue());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return settings;
+	}
+
+	public ServerResponse getPlanDates(HttpSession session) throws OptimaException {
+		try {
+			Map<String, String> settings = getSettingsMap(session);
+			Map<String,String> result = new HashMap<String,String>();
+			String sds = settings.get(PLAN_START);
+			Date date = null;
+			if (sds == null) {
+				Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.YEAR, -1); // to get previous year add -1
+				date = cal.getTime();
+				sds = planDateFormatter.format(date);
+				addSetting(session,PLAN_START, sds);
+			} 
+			result.put(PLAN_START,sds);
+
+			sds = settings.get(PLAN_END);
+			if (sds == null) {
+				Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.YEAR, 1); // to get previous year add -1
+				date = cal.getTime();
+				sds = planDateFormatter.format(date);
+				addSetting(session,PLAN_END, sds);
+			} 
+			result.put(PLAN_END,sds);
+			
+			return new ServerResponse("0", "Success", result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ServerResponse("PORT0008", "Failed to get plan dates .. ", e);
+		}
+	}
+
+	public ServerResponse savePlanDates(HttpSession session,String start, String end) throws OptimaException {
+		try {
+			addSetting(session, PLAN_START, start);
+			addSetting(session, PLAN_END, end);
+			return new ServerResponse("0", "Success", "");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ServerResponse("PORT0008", "Failed to get plan dates .. ", e);
+		}
+	}
+
+	public void addSetting(HttpSession session, String name, String value) {
+		try {
+			EntityController<Settings> controller = new EntityController<Settings>(session.getServletContext());
+			List<Settings> allSettings = controller.findAll(Settings.class);
+			Settings settings = null;
+			for (Settings set : allSettings) {
+				if (set.getName().equals(name)) {
+					settings = set;
+					break;
+				}
+			}
+			if (settings == null) {
+				settings = new Settings();
+				settings.setName(name);
+			}
+
+			settings.setValue(value);
+			controller.merge(settings);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
