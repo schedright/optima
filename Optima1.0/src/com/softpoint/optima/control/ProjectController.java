@@ -1121,6 +1121,8 @@ public class ProjectController {
 	SimpleDateFormat monthDF = new SimpleDateFormat("MMM");
 
 	static DateFormat planDateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+	static DateFormat dmyFormatter = new SimpleDateFormat("dd/MM/yyyy");
+	
 
 	public ServerResponse getPlan(HttpSession session) throws OptimaException {
 		// PortfolioCashFlow cashFlow = new PortfolioCashFlow();
@@ -1168,7 +1170,10 @@ public class ProjectController {
 						for (String dateString : details.getResults().keySet()) {
 							DailyCashFlowMapEntity det = details.getResults().get(dateString);
 							if (det.getPayments() != 0) {
-								Date date = planDateFormatter.parse(dateString);
+								if (dateString.indexOf(",") !=-1 ) {
+									dateString = dateString.substring(0,dateString.indexOf(","));
+								}
+								Date date = dmyFormatter.parse(dateString);
 								addPayment(projDetails, date, det.getPayments());
 							}
 						}
