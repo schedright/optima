@@ -149,6 +149,10 @@ function solveIt(portfolioId) {
 								} else if (jsn.STATUS=='Success') {
 									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Portfolio fixed successfully";
 									window.clearInterval(window.intervalId);
+								} else if (jsn.STATUS=='FAILED') {
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Failed to solve portfolio";
+									window.clearInterval(window.intervalId);
+									bar.style.background = 'red';
 								}
 							} catch(e) {
 								try {
