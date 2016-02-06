@@ -76,8 +76,8 @@ $(document).ready( function() {
 		$("#cashflowNavBar").addClass("active");
 	else if(currentPage == 6)
 		$("#financialNavBar").addClass("active");	
-//	else if(currentPage == 7)
-//		$("#exportNavBar").addClass("active");	
+	else if(currentPage == 7)
+		$("#projectsRoadMapNavBar").addClass("active");	
 	
 	
 	

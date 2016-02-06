@@ -20,7 +20,7 @@ function getGanttSource() {
 
 				to : "/Date(" + endDate.time + ")/",
 
-				label : proj.Project.projectDescription,
+				label : proj.Project.projectCode,
 
 				customClass : "ganttRed",
 

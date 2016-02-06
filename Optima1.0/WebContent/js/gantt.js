@@ -38,6 +38,11 @@ function getGanttSource() {
 				var endDate = startDate.time + (duration - 1) * 86400000;
 
 				var actualStartDate = new Date(startDate.time);
+				var title  = taskData.list[i].taskName + '&#013;' + taskData.list[i].taskDescription + '&#013;' + fmt.format(new Date(startDate.time)) + " - " + fmt.format(new Date(endDate)) + '&#013;';
+				title += "Duration: " + taskData.list[i].duration + ' Days&#013;';
+				title += "Daily Cost: " + taskData.list[i].uniformDailyCost + '$&#013;';
+				title += "Daily Income: " + taskData.list[i].uniformDailyIncome + '$&#013;';
+					//proj.Project.projectName + '&#013;' + proj.Project.projectDescription + '&#013;' + fmt.format(new Date(startDate.time)) + " - " + fmt.format(new Date(endDate.time));
 				tasksSource.push({
 					name : taskData.list[i].taskName,
 
@@ -49,11 +54,13 @@ function getGanttSource() {
 
 						to : "/Date(" + endDate + ")/",
 
-						label : taskData.list[i].taskDescription,
+						label : taskData.list[i].taskName,
 
 						customClass : "ganttRed",
 
-						dataObj : taskData.list[i].taskId
+						dataObj : taskData.list[i].taskId,
+						
+						title : title
 
 					} ]
 				});

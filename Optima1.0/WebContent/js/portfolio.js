@@ -202,7 +202,7 @@ $(document).ready( function() {
 	          allFields.removeClass( "ui-state-error" );
 	 
 	          bValid = bValid && checkLength( portName, "portName", 3, 32 );
-	          bValid = bValid && checkLength( portDescription, "portDescription", 1, 1024 );
+	          bValid = bValid && checkLength( portDescription, "portDescription", 0, 1024 );
 	       
 	          if ( bValid ) {
 	            var createPortResult = rpcClient.portfolioService.create(portName.val() , portDescription.val()); 
@@ -291,7 +291,7 @@ $(document).ready( function() {
 						 projectsHtml += "<div class=\"clear\"></div>";
 						 if (projects.list.length != 0 ) {
 						for (var j = 0; j < projects.list.length; j++) {
-							var contents = projects.list[j].projectName + "[" + projects.list[j].projectDescription + "]" ;
+							var contents = projects.list[j].projectName;
 							projectsHtml += " <div class=\"prod-box shadow\"> "
 							+ " <button id=\"deleteProject_" + projects.list[j].projectId  + "\" class=\"projbuttonDelete\" onClick=\"deleteProject(" + projects.list[j].projectId + ")\"></button>" 
 							+ " <button id=\"editProject_" + projects.list[j].projectId  + "\" class=\"projbuttonEdit\" onClick=\"editProject(" + projects.list[j].projectId + " , " + data.list[i].portfolioId  + ")\"></button>" 
@@ -347,7 +347,7 @@ $(document).ready( function() {
 						    			+ " <label for=\"portName\">Name</label>"
 						    			+ " <input type=\"text\" name=\"ePortName\" id=\"ePortName\" class=\"text ui-widget-content ui-corner-all\"  placeholder=\"Enter Portfolio Name, from 3 to 32 characters\" />"
 						    			+ " <label for=\"portDescription\">Description</label>"
-						    			+ " <input type=\"text\" name=\"ePortDescription\" id=\"ePortDescription\" value=\"\" class=\"text ui-widget-content ui-corner-all\" placeholder=\"Enter Description, from 1 to 1024 characters\"/>"
+						    			+ " <input type=\"text\" name=\"ePortDescription\" id=\"ePortDescription\" value=\"\" class=\"text ui-widget-content ui-corner-all\" placeholder=\"Enter Description, up to 1024 characters\"/>"
 						    			+ " </fieldset>"
 						    			+ " </form>"
 						    			+ " </div>");

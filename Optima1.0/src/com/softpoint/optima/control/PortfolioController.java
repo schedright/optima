@@ -207,19 +207,15 @@ public class PortfolioController {
 			// already been solved before
 			SimpleDateFormat format = new SimpleDateFormat("dd MMM, yyyy");
 
-			StringBuilder sb = new StringBuilder();
-
+			List<Map<String,Object>> allSolution = new ArrayList<Map<String,Object>>(); 
 			List<Project> projects = portfolio.getProjects();
 			for (Project project : projects) {
-				sb.append("<table class=\"solutionTable\">");
-				StringBuilder projSB = new StringBuilder();
-				projSB.append("<table class=\"solutionTable\">\r")
-						.append("<tr><td>").append(project.getProjectCode()).append("</td>");
-				if (solved) {
-					projSB.append("<td>change</td><td>Original</td><td>Final</td></tr>");
-				} else {
-					projSB.append("<td>Original</td></tr>");
-				}
+				Map<String,Object> projDetails = new HashMap<String,Object>();
+				List<Map<String,String>> tasksList = new ArrayList<Map<String,String>>();
+				allSolution.add(projDetails);
+				projDetails.put("tasks", tasksList);
+				projDetails.put("name",project.getProjectCode());
+				
 				
 				double totalCost = 0;
 				double totalIncome = 0;
@@ -231,28 +227,19 @@ public class PortfolioController {
 				double penaltiesAfter = 0;
 				Date lastDate = null;
 
-				sb.append("<tr><td  colspan=\"5\"><b>").append(project.getProjectCode()).append("</b></td></tr>");
 				List<ProjectTask> tasks = project.getProjectTasks();
 				for (ProjectTask task : tasks) {
-
+					Map<String,String> taskDetails = new HashMap<String,String>();
+					tasksList.add(taskDetails);
+					
 					totalCost += task.getUniformDailyCost().doubleValue() * task.getDuration();
 					totalIncome += task.getUniformDailyIncome().doubleValue() * task.getDuration();
 
-					sb.append("<tr><td  width=\"30px\">");
+					taskDetails.put("name",task.getTaskName());
+					taskDetails.put("original",format.format(task.getTentativeStartDate()));
 					if (solved) {
-						sb.append("</td><td  width=\"10px\">");
-						if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
-							sb.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
-						} else {
-							sb.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
-						}
+						taskDetails.put("final",format.format(task.getScheduledStartDate()));
 					}
-					sb.append("</td><td>").append(task.getTaskDescription()).append("</td><td>");
-					sb.append(format.format(task.getTentativeStartDate())).append("</td>");
-					if (solved) {
-						sb.append("<td>").append(format.format(task.getScheduledStartDate())).append("</td>");
-					}
-					sb.append("</tr>\r");
 					
 					int oldDuration = TaskUtil.calculateTaskDuration(task);
 					if (lastDate == null) {
@@ -291,43 +278,16 @@ public class PortfolioController {
 				double profitBefore = totalIncome - totalCost - penaltiesBefore - overHeadBefore;
 				double profitAfter = totalIncome - totalCost - penaltiesAfter - overHeadAfter;
 
-				projSB.append("<tr><td>Profit</td><td>");
+				
+				projDetails.put("profit_original", profitBefore);
+				projDetails.put("end_original", format.format(lastDate));
 				
 				if (solved) {
-					if (profitBefore > profitAfter) {
-						projSB.append("<div style=\"width:16px;height:16px\" class=\"decreasetProjectProfitLogo\"></div>");
-					} else {
-						projSB.append("<div style=\"width:16px;height:16px\" class=\"sameProjectProfitLogo\"></div>");
-					}
-					projSB.append("</td><td>");
+					projDetails.put("profit_final",profitAfter);
+					projDetails.put("end_final",format.format(scheduledEnd));
 				}
-				projSB.append(profitBefore);
-				if (solved) {
-					projSB.append("</td><td>").append(profitAfter);
-				}
-				projSB.append("</td></tr>");
-
-				projSB.append("<tr><td>Finish Date</td><td>");
-				if (solved) {
-					if (scheduledEnd.after(lastDate)) {
-						projSB.append("<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>");
-					} else {
-						projSB.append("<div style=\"width:16px;height:16px\" class=\"notShiftedTaskLogo\"></div>");
-					}
-					projSB.append("</td><td>");
-				}
-				projSB.append(format.format(lastDate));
-				if (solved) {
-					projSB.append("</td><td>").append(format.format(scheduledEnd));
-				}
-				projSB.append("</td></tr>");
-				
-				projSB.append("</table>");
-
-				sb.append("</table>\r").append(projSB.toString());
-				
 			}
-			return new ServerResponse("0", solved?"Success":"Not Solved", sb.toString());
+			return new ServerResponse("0", solved?"Success":"Not Solved", allSolution);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
 			return new ServerResponse("PORT0002", String.format("Error updating Portfolio %s: %s",

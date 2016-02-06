@@ -876,7 +876,7 @@ public class PortfolioSolver {
 				if (!taskEnd.before(from)) {
 					if (logLevel.equals("detailed") || taskStart.before(to)) {
 						
-						String line = "<tr><td>" + task.getTask().getTaskDescription() + ((shiftedTask==task)?">>":"")+ "</td>";
+						String line = "<tr><td>" + task.getTask().getTaskName() + ((shiftedTask==task)?">>":"")+ "</td>";
 						Date index2 = start;
 						while (index2.before(end)) {
 							boolean offDay = TaskUtil.isWeekendDay(index2, projectW.getProjectWeekends()) || TaskUtil.isDayOff(index2, projectW.getProjectVacations());;
