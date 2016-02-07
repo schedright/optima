@@ -32,68 +32,20 @@ function getGanttSource() {
 		});
 
 	}
-	/*
-	if (!projectId) {
-		showMessage("Update Project","No valid project id","Error on page - a project ID must be provided!!",'error');
-	} else {
-		var result = rpcClient.taskService.findAllByProject(projectId);
-		if (result.result == 0) {
-			var taskData = result.data;
-			var fmt = new DateFmt("%d-%m-%y");
-			for (var i = 0; i < taskData.list.length; i++) {
-				
-				var startDate = taskData.list[i].calendarStartDate;
-				if (startDate == null) {
-					startDate =	taskData.list[i].actualStartDate;
-				}
-				if (startDate == null) {
-					startDate = taskData.list[i].scheduledStartDate;
-				}
-				if (startDate == null) {
-					startDate = taskData.list[i].tentativeStartDate;
-				}
-				if (startDate == null) {
-					startDate = new Date();
-				}
-				
-				var duration = taskData.list[i].calenderDuration;
-				if (duration == null) {
-					duration = taskData.list[i].duration;
-				}
-				
-				var endDate = startDate.time + (duration - 1) * 86400000;
-
-				var actualStartDate = new Date(startDate.time);
-				tasksSource.push({
-					name : taskData.list[i].taskName,
-
-					desc : taskData.list[i].taskDescription,
-
-					values : [ {
-
-						from : "/Date(" + actualStartDate.getTime() + ")/",
-
-						to : "/Date(" + endDate + ")/",
-
-						label : taskData.list[i].taskDescription,
-
-						customClass : "ganttRed",
-
-						dataObj : taskData.list[i].taskId
-
-					} ]
-				});
-
-			}
-		} else {
-			Message("Cannot load project","Unable to load project: " + result.message,'error');
-		}
-	}
-*/
+	
 	return tasksSource;
 
 }
 
+var toDate = function(strDate) {
+	var dateParts = strDate.split("/");
+	var date = new Date(dateParts[2], (dateParts[0] - 1), dateParts[1]);
+	return date;
+};
+var data = planDates.data.map;
+var sd = toDate(data.plan_start);
+var ed = toDate(data.plan_end);
+var dates = [sd,ed];
 
 $("#projectsGantt").gantt({
 
@@ -111,6 +63,8 @@ $("#projectsGantt").gantt({
 
 	scrollToToday : true,
 
+	includedDates : dates,
+	
 	onItemClick : function(data) {
 
 		// Open edit task dialog

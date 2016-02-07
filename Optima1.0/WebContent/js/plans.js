@@ -1,9 +1,10 @@
 var plansList = rpcClient.projectService.getPlan();
+var planDates = rpcClient.projectService.getPlanDates();
 
 $(function() {
 	var projects = plansList.data.list;
 	var allYears = [];
-	for (var i=0;i<projects.length;i++) {
+/*	for (var i=0;i<projects.length;i++) {
 		var proj = projects[i].map;
 		var yearsMap = proj.Details.map;
 		for (var k in yearsMap) {
@@ -13,7 +14,17 @@ $(function() {
 				}
 			}
 		}
+	}*/
+	
+	var dateParts = planDates.data.map.plan_start.split("/");
+	var yS = parseInt(dateParts[2]);
+	dateParts = planDates.data.map.plan_end.split("/");
+	var yE = parseInt(dateParts[2]);
+
+	for (var x=yS;x<yE+1;x++) {
+		allYears.push(x);
 	}
+
 	allYears.sort();
 	var pColumns = [ {
 	    id : "Year",
@@ -53,7 +64,7 @@ $(function() {
 		var proj = projects[i].map;
 		var yearsMap = proj.Details.map;
 		
-		var row = {"Year":proj.Project.projectDescription};
+		var row = {"Year":proj.Project.projectCode};
 		var t = 0;
 		for (var p=0;p<allYears.length;p++) {
 			var payment = getTotal(yearsMap[allYears[p]]);
@@ -90,7 +101,6 @@ $(function() {
     	active : $.cookie('plan-selected-tab')
         });
     
-    var planDates = rpcClient.projectService.getPlanDates();
     if (planDates.result == 0) {
     	var data = planDates.data.map;
     	var sd = data.plan_start;

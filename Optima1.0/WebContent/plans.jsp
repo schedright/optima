@@ -8,9 +8,9 @@
 	<div id="projectsGantt" class="gantt"></div>
 	<div id="planTabs" style="100%">
 	<ul>
-		<li><a href="#planDates">Plan Calendar</a></li>
-		<li><a href="#projectsList">Projects List</a></li>
-		<li><a href="#projectPayments">Payments</a></li>
+		<li><a href="#planDates">Specify Period</a></li>
+		<li><a href="#projectsList">Select Projects</a></li>
+		<li><a href="#projectPayments">Capital requirements</a></li>
 	</ul>
 
 	<div id="planDates">

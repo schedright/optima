@@ -23,7 +23,7 @@ $(function() {
 			&& solutionResponse.data.list && solutionResponse.data.list.length) {
 		for (var i = 0; i < solutionResponse.data.list.length; i++) {
 			var projDetails = solutionResponse.data.list[i].map;
-			$("#schedResults").append('<H1>' + projDetails.name + '</H1>');
+			$("#schedResults").append('<div style="font-size:2em">' + projDetails.name + '</div>');
 			$("#schedResults")
 					.append(
 							'<div id="TasksGrid_' + i
@@ -32,6 +32,7 @@ $(function() {
 			$("#schedResults").append(
 					'<div id="ProjectNumGrid_' + i
 							+ '" style="height:80px"></div>');
+			$("#schedResults").append('<br/>');// separator
 
 			var tasksColumns = [];
 			tasksColumns.push({

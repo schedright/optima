@@ -5,7 +5,7 @@ $(document).ready( function() {
 	$("#scheduleNavBar").append("<a href=\"#\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_Scheduling.png\" />Scheduling</a>");
 	$("#cashflowNavBar").append("<a href=\"#\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_cashflow.png\" />Cashflow</a>");
 	$("#financialNavBar").append("<a href=\"#\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_results2.png\" />Results</a>");
-	$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_results1.png\" />Plans</a>");
+	$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_results1.png\" />Capital Plan</a>");
 	
 	setTimeout(function() {
 	rpcClient.portfolioService.findAll(function(result , exception) {

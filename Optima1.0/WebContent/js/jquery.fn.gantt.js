@@ -245,7 +245,6 @@
                 element.dateStart = tools.getMinDate(element);
                 element.dateEnd = tools.getMaxDate(element);
 
-
                 /* core.render(element); */
                 core.waitToggle(element, true, function () { core.render(element); });
             },
@@ -1025,6 +1024,46 @@
                         return "";
                     }
                 };
+                
+
+				if (settings.includedDates && settings.includedDates.length == 2) {
+					var d = settings.includedDates[0];
+					var topEl = $(element).find("#rowheader0");
+					var top = tools.getCellSize() * 2 + 2
+							+ parseInt(topEl.attr("offset"), 10);
+
+					var from = $(element).find(
+							"#dh-" + tools.genId(d.getTime()));
+					var cFrom = from.attr("offset");
+					var startLine = core.createProgressBar(1, "", "", "", null,
+							"Plan Start");
+					startLine.css({
+						'top' : (top-6) + "px",
+						'height':'auto',
+						'bottom' : '0px',
+						'width' : '4px',
+						'background-color' : 'black',
+						'margin-left' : Math.floor(cFrom)-2
+					});
+					datapanel.append(startLine);
+
+					d = settings.includedDates[1];
+					from = $(element).find("#dh-" + tools.genId(d.getTime()));
+					cFrom = from.attr("offset");
+					var endLine = core.createProgressBar(1, "", "", "", null,
+							"Plan End");
+					endLine.css({
+						'top' : (top-6) + "px",
+						'height':'auto',
+						'bottom' : '0px',
+						'width' : '4px',
+						'background-color' : 'black',
+						'margin-left' : Math.floor(cFrom)-2
+					});
+					datapanel.append(endLine);
+
+				}
+
                 // Loop through the values of each data element and set a row
                 $.each(element.data, function (i, entry) {
                     if (i >= element.pageNum * settings.itemsPerPage && i < (element.pageNum * settings.itemsPerPage + settings.itemsPerPage)) {
@@ -1464,6 +1503,10 @@
             // Return the maximum available date in data depending on the scale
             getMaxDate: function (element) {
                 var maxDate = null;
+                if (settings.includedDates && settings.includedDates.length==2) {
+                	maxDate = settings.includedDates[1];
+                }
+
                 $.each(element.data, function (i, entry) {
                     $.each(entry.values, function (i, date) {
                         maxDate = maxDate < tools.dateDeserialize(date.to) ? tools.dateDeserialize(date.to) : maxDate;
@@ -1497,6 +1540,10 @@
             // Return the minimum available date in data depending on the scale
             getMinDate: function (element) {
                 var minDate = null;
+                if (settings.includedDates && settings.includedDates.length==2) {
+                	minDate = settings.includedDates[0];
+                }
+                
                 $.each(element.data, function (i, entry) {
                     $.each(entry.values, function (i, date) {
                         minDate = minDate > tools.dateDeserialize(date.from) || minDate === null ? tools.dateDeserialize(date.from) : minDate;

@@ -20,7 +20,7 @@ $(function() {
 	    id : "day",
 	    name : "Day",
 	    field : "day",
-	    minWidth : 120
+	    minWidth : 160
 	} ];
 	var pData = [];
 	var rowCount = 0;
@@ -34,7 +34,7 @@ $(function() {
 		id : formattedDate,
 		name : formattedDate,
 		field : formattedDate,
-		minWidth : 120,
+		minWidth : 160,
 		formatter : Slick.Formatters.Currency
 	    });
 
