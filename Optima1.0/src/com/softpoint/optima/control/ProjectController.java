@@ -10,20 +10,24 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.http.HttpSession;
 
+import com.ibm.xtq.ast.nodes.Include;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Client;
 import com.softpoint.optima.db.LocationInfo;
+import com.softpoint.optima.db.PlanProject;
 import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectPayment;
@@ -1150,6 +1154,13 @@ public class ProjectController {
 				planEnd = planDateFormatter.parse(sds);
 			}
 
+			EntityController<PlanProject> ppController = new EntityController<PlanProject>(session.getServletContext());
+			List<PlanProject> includedProjects = ppController.findAll(PlanProject.class);
+			Set<Integer> includedProjectsSet = new HashSet<Integer>();
+			for (PlanProject pp: includedProjects) {
+				includedProjectsSet.add(pp.getProjectId());
+			}
+
 			List<String> years = new ArrayList<String>();
 
 			EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
@@ -1157,7 +1168,7 @@ public class ProjectController {
 			List<Map<String, Object>> selectProjectDetails = new ArrayList<Map<String, Object>>();
 
 			for (Project proj : allProjects) {
-				if (proj.getPropusedStartDate() != null) {
+				if (includedProjectsSet.contains(proj.getProjectId()) && proj.getPropusedStartDate() != null) {
 					Date[] dates = PaymentUtil.getProjectExtendedDateRanges(controller, proj.getProjectId());
 					if (!(dates[0].after(planEnd) || planStart.after(dates[1]))) {
 						ProjectSolutionDetails details = new ProjectSolutionDetails(false, proj);
@@ -1289,4 +1300,37 @@ public class ProjectController {
 			e.printStackTrace();
 		}
 	}
+	
+	public ServerResponse findPlanProjectIds(HttpSession session) throws OptimaException {
+		EntityController<PlanProject> controller = new EntityController<PlanProject>(session.getServletContext());
+		try {
+			List<PlanProject> projects = controller.findAll(PlanProject.class);
+			return new ServerResponse("0", PortfolioSolver.SUCCESS, projects);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PROJ0005", String.format("Error loading plan projects : %s", e.getMessage()), e);
+		}
+	}
+
+	
+	public ServerResponse changePlanProject(HttpSession session, int projectId, boolean include) throws OptimaException {
+		EntityController<PlanProject> controller = new EntityController<PlanProject>(session.getServletContext());
+		try {
+			List<PlanProject> projects = controller.findAllQuery(PlanProject.class, String.format("SELECT o FROM %s o where o.projectId=%d" , PlanProject.class.getName(),projectId));
+			if (include && projects.size()==0) {
+				PlanProject pp = new PlanProject();
+				pp.setProjectId(projectId);
+				controller.merge(pp);
+			} else if(!include && projects.size()>0) {
+				for (PlanProject pp:projects) {
+					controller.remove(PlanProject.class , pp.getPlanId());
+				}
+			}
+			return new ServerResponse("0", PortfolioSolver.SUCCESS, projects);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PROJ0005", String.format("Error loading plan projects : %s", e.getMessage()), e);
+		}
+	}
+
 }

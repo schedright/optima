@@ -16,6 +16,7 @@
 		<class>com.softpoint.optima.db.TaskDependency</class>
 		<class>com.softpoint.optima.db.WeekendDay</class>
 		<class>com.softpoint.optima.db.Settings</class>
+		<class>com.softpoint.optima.db.PlanProject</class>
 		<properties>
 	      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
 	      <property name="javax.persistence.jdbc.url"

@@ -601,8 +601,8 @@ width: 200px;
 margin: 5px 0;
 }
 
-.draggable , #allTasks, #dependencies { list-style-type: none; margin: 0; padding: 0 0 2.5em; float: left; margin-right: 10px; }
-.draggable li, #allTasks li, #dependencies li { margin: 0 5px 5px 5px; padding: 2px; font-size: 1em; width: 95%; cursor: move;}
+.draggable , #allTasks, #dependencies, #allProjects, #includedProjects { list-style-type: none; margin: 0; padding: 0 0 2.5em; float: left; margin-right: 10px; }
+.draggable li, #allTasks li, #dependencies li, #allProjects li, #includedProjects li { margin: 0 5px 5px 5px; padding: 2px; font-size: 1em; width: 95%; cursor: move;}
 
 #projectButtons{
 	float:right;

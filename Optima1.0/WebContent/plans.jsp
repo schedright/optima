@@ -32,7 +32,24 @@
 	</div>
 		
 	</div>
-	<div id="projectsList"></div>
+	<div id="projectsList">
+		<div id="divTasksDepends" class="form-section">
+			<div class="two-columns">
+				<label>All Projects</label>
+				<ul id="allProjects" class="sortable">
+				
+				</ul>
+			</div>
+			<div id="listConnect"></div>
+			<div class="two-columns">
+				<label>Included Projects</label>
+				<ul id="includedProjects" class="sortable">
+	
+				</ul>
+			</div>
+	
+		</div>
+	</div>
 	<div id="projectPayments" style="width: 100%; height: 500px;"></div>
 	</div>
 </div>
