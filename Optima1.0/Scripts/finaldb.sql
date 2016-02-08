@@ -159,9 +159,6 @@ ALTER TABLE project_task ADD
 FOREIGN KEY (project_id) REFERENCES project(project_id) 
 ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE project_task
-ADD CONSTRAINT uc_project_task_name UNIQUE (project_id, task_name);
-
 create table task_dependency (
 dependency_id INT NOT null AUTO_INCREMENT primary key, 
 dependant_task_id INT, 
