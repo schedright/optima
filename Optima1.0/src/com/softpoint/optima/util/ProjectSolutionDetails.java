@@ -63,8 +63,9 @@ public class ProjectSolutionDetails {
 			double currentRequestTotal = 0d;
 			int numberOfDaysSinceLastRequest = 0;
 			Map<Date, Double> paymentsCalendar = new HashMap<Date, Double>();
-			if (project.getAdvancedPaymentAmount().doubleValue() != 0) {
-				paymentsCalendar.put(projectStart, project.getAdvancedPaymentAmount().doubleValue());
+			double ammount = getAdvancedPaymentAmmount(project);
+			if (ammount != 0) {
+				paymentsCalendar.put(projectStart, ammount);
 			}
 			List<DaysOff> daysOff = project.getDaysOffs();
 			WeekendDay weekEnds = project.getWeekendDays();
@@ -138,6 +139,18 @@ public class ProjectSolutionDetails {
 				lastDayEntity = entity;
 			}
 		}
+	}
+
+	public static double getAdvancedPaymentAmmount(Project project) {
+		double res = 0;
+		if (project.getAdvancedPaymentPercentage().doubleValue()!=0) {
+			double totalIncome = 0;
+			for (ProjectTask task : project.getProjectTasks()) {
+				totalIncome += (task.getDuration() * task.getUniformDailyIncome().doubleValue());
+			}
+			res = totalIncome * project.getAdvancedPaymentPercentage().doubleValue();
+		}
+		return res;
 	}
 
 	private Date getTaskStart(ProjectTask currentTask, boolean originalOrFinal2) {

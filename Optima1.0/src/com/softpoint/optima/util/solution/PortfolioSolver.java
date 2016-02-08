@@ -18,12 +18,14 @@ import javax.servlet.http.HttpSession;
 
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
+import com.softpoint.optima.control.ProjectController;
 import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.PortfolioFinance;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.util.PaymentUtil;
 import com.softpoint.optima.util.PeriodLogGeneratorNew;
+import com.softpoint.optima.util.ProjectSolutionDetails;
 import com.softpoint.optima.util.TaskUtil;
 
 public class PortfolioSolver {
@@ -41,7 +43,20 @@ public class PortfolioSolver {
 	private static final String P1_PRE_START = "P1_PRE_START";
 	private static final String P1_END = "P1_END";
 	
-	private static String logLevel = "detailed"; //off , short, detailed
+	private String logLevel = null; //off , short, detailed
+	private String getLogLevel() {
+		if (logLevel==null) {
+			logLevel = "off";
+			Map<String, String> map = ProjectController.getSettingsMap(session);
+			if (map!=null && map.containsKey("loglevel")) {
+				String l = map.get("loglevel");
+				if (l.equals("off") || l.equals("short") || l.equals("detailed")) {
+					logLevel = l;
+				}
+			}
+		} 
+		return logLevel;
+	}
 	SimpleDateFormat fileNameDateFormatter = new SimpleDateFormat("yyyyMMdd_Hm");
 	SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM, yyyy");
 	
@@ -127,8 +142,8 @@ public class PortfolioSolver {
 		// get advanced payments
 		for (ProjectWrapper projectW : projects) {
 			Project proj = projectW.getProject();
-			BigDecimal advancedPayment = proj.getAdvancedPaymentAmount();
-			addPayment(proj.getPropusedStartDate(), advancedPayment.doubleValue());
+			double advancedPayment = ProjectSolutionDetails.getAdvancedPaymentAmmount(proj);
+			addPayment(proj.getPropusedStartDate(), advancedPayment);
 		}
 		
 		projectLeftovers = new HashMap<ProjectWrapper,List<TaskTreeNode>>();
@@ -256,6 +271,23 @@ public class PortfolioSolver {
 					// previous cause they are already calculated
 					double totalCashoutOther = 0;
 					double totalCashoutOtherNext = 0;
+					for (int i=0;i<projectIndex;i++) {
+						ProjectWrapper next = projects.get(i);
+						
+						DayDetails tmp = new DayDetails();
+						Map<Date, Double> pamymentClone = cloneMap(payments);
+						//fake call just to find the cash out
+						List<TaskTreeNode> LO = projectLeftovers.get(next);
+						List<TaskTreeNode> tmpLO = new ArrayList<TaskTreeNode>();
+						if (LO!=null) {
+							tmpLO.addAll(LO);
+						}
+						Map<String, Object> tmpResult = isValidPeriod(next, tmpLO, tmpLO, tmp,p1Start,p1End,p2End,0);
+						payments = cloneMap(pamymentClone);
+						
+						tmp = (DayDetails) tmpResult.get(P2_END);
+						totalCashoutOtherNext += tmp.getOverhead() + (Double)tmpResult.get(LEFTOVER_COST);
+					}
 					for (int i = projectIndex + 1; i < projects.size(); i++) {
 						ProjectWrapper next = projects.get(i);
 						
@@ -392,7 +424,7 @@ public class PortfolioSolver {
 		PeriodLogGeneratorNew logGenerator = null;
 		String shortVersion = "";
 		int iterationIndex = 0;
-		if (logLevel.equals("short") || logLevel.equals("detailed")) {
+		if (getLogLevel().equals("short") || getLogLevel().equals("detailed")) {
 			logGenerator = new PeriodLogGeneratorNew(session.getServletContext(), projectW.getProject().getProjectCode() + "_" + timestamp, dateFormatter.format(p1Start), dateFormatter.format(p1End));
 			logGenerator.setProject(portfolio.getPortfolioName(),
 					projectW.getProject().getProjectCode() + "-" + projectW.getProject().getProjectName());
@@ -847,7 +879,7 @@ public class PortfolioSolver {
 		try {
 			Date start = from;
 			Date end = to;
-			if (logLevel.equals("detailed")) {
+			if (getLogLevel().equals("detailed")) {
 				end = projectEnd;
 			}
 
@@ -874,7 +906,7 @@ public class PortfolioSolver {
 				Date taskStart = task.getCalculatedTaskStart();
 				Date taskEnd = task.getCalculatedTaskEnd();
 				if (!taskEnd.before(from)) {
-					if (logLevel.equals("detailed") || taskStart.before(to)) {
+					if (getLogLevel().equals("detailed") || taskStart.before(to)) {
 						
 						String line = "<tr><td>" + task.getTask().getTaskName() + ((shiftedTask==task)?">>":"")+ "</td>";
 						Date index2 = start;

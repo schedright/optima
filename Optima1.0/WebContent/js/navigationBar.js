@@ -1,11 +1,11 @@
 $(document).ready( function() {
-	$("#portfoliosNavBar").append("<a href=\"main.jsp\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_portfolio.png\" />Portfolios</a>");
-	$("#financingNavBar").append("<a href=\"#\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_financing.png\" />Financing</a>");
-	$("#projectsNavBar").append("<a href=\"#\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_projects.png\" />Projects</a>");
-	$("#scheduleNavBar").append("<a href=\"#\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_Scheduling.png\" />Scheduling</a>");
-	$("#cashflowNavBar").append("<a href=\"#\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_cashflow.png\" />Cashflow</a>");
-	$("#financialNavBar").append("<a href=\"#\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_results2.png\" />Results</a>");
-	$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_results1.png\" />Capital Plan</a>");
+	$("#portfoliosNavBar").append("<a href=\"main.jsp\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_portfolio.png\" />Portfolios</a>");
+	$("#financingNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_financing.png\" />Financing</a>");
+	$("#projectsNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_projects.png\" />Projects</a>");
+	$("#scheduleNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_Scheduling.png\" />Scheduling</a>");
+	$("#cashflowNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_cashflow.png\" />Cashflow</a>");
+	$("#financialNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results2.png\" />Results</a>");
+	$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results1.png\" />Capital Plan</a>");
 	
 	setTimeout(function() {
 	rpcClient.portfolioService.findAll(function(result , exception) {
@@ -32,16 +32,16 @@ $(document).ready( function() {
 						continue;
 					}
 					$("#financingNavBar").children().get(0).parentNode.removeChild($("#financingNavBar").children().get(0));
-					$("#financingNavBar").append("<a href=\"finData.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_financing.png\" />Financing</a>");
+					$("#financingNavBar").append("<a href=\"finData.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_financing.png\" />Financing</a>");
 
 					$("#scheduleNavBar").children().get(0).parentNode.removeChild($("#scheduleNavBar").children().get(0));
-					$("#scheduleNavBar").append("<a href=\"schedule.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_Scheduling.png\" />Scheduling</a>");
+					$("#scheduleNavBar").append("<a href=\"schedule.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_Scheduling.png\" />Scheduling</a>");
 
 					$("#cashflowNavBar").children().get(0).parentNode.removeChild($("#cashflowNavBar").children().get(0));
-					$("#cashflowNavBar").append("<a href=\"cashFlow.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_cashflow.png\" />Cashflow</a>");
+					$("#cashflowNavBar").append("<a href=\"cashFlow.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_cashflow.png\" />Cashflow</a>");
 
 					$("#financialNavBar").children().get(0).parentNode.removeChild($("#financialNavBar").children().get(0));
-					$("#financialNavBar").append("<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"32\" height=\"32\"  src=\"css/header/images/icon_results2.png\" />Results</a>");
+					$("#financialNavBar").append("<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results2.png\" />Results</a>");
 					
 					var result2 = rpcClient.projectService.findAllByPortfolio(data.list[i].portfolioId);
 					if (result2.result == 0) {

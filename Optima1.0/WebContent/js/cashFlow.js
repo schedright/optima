@@ -134,7 +134,7 @@ $(function() {
 	
 			    var currentBalanceRow = rowCount;
 			    pData[rowCount] = {};
-			    pData[rowCount]["day"] = "Balance ";
+			    pData[rowCount]["day"] = "Overdraft ";
 			    rowCount++;
 	
 			    var currentPaymentsRow = rowCount;
@@ -212,7 +212,7 @@ $(function() {
 
 	    currentBalanceRow = rowCount;
 	    pData[rowCount] = {};
-	    pData[rowCount]["day"] = "Balance ";
+	    pData[rowCount]["day"] = "Overdraft ";
 	    rowCount++;
 
 	    currentPaymentsRow = rowCount;

@@ -660,7 +660,7 @@ public class ProjectController {
 
 			Project project = projectController.find(Project.class, projectId);
 
-			double advancedPaymentAmount = project.getAdvancedPaymentAmount().doubleValue();
+			double advancedPaymentAmount = ProjectSolutionDetails.getAdvancedPaymentAmmount(project);
 			double advancedPaymentPercentage = project.getAdvancedPaymentPercentage().doubleValue();
 			double retainedPercentage = project.getRetainedPercentage().doubleValue();
 
@@ -1221,7 +1221,7 @@ public class ProjectController {
 		yearMap.put(month, d);
 	}
 
-	public Map<String, String> getSettingsMap(HttpSession session) {
+	public static Map<String, String> getSettingsMap(HttpSession session) {
 		Map<String, String> settings = new HashMap<String, String>();
 		try {
 			EntityController<Settings> controller = new EntityController<Settings>(session.getServletContext());

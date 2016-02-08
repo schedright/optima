@@ -23,7 +23,7 @@ html[xmlns] .clear{display:block;}
 
 a{outline:none; text-decoration:none;}
 
-.logoImg{float:left; padding:10px 0 0 10px;}
+.logoImg{float:left; padding:0px 0 10px 10px;}
 .fl_left, .imgl{float:left;}
 .fl_right, .imgr{float:right;}
 
