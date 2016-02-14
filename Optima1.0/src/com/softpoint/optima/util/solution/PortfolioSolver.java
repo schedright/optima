@@ -46,7 +46,7 @@ public class PortfolioSolver {
 	private String logLevel = null; //off , short, detailed
 	private String getLogLevel() {
 		if (logLevel==null) {
-			logLevel = "off";
+			logLevel = "detailed";
 			Map<String, String> map = ProjectController.getSettingsMap(session);
 			if (map!=null && map.containsKey("loglevel")) {
 				String l = map.get("loglevel");
@@ -424,16 +424,16 @@ public class PortfolioSolver {
 		PeriodLogGeneratorNew logGenerator = null;
 		String shortVersion = "";
 		int iterationIndex = 0;
-		if (getLogLevel().equals("short") || getLogLevel().equals("detailed")) {
+		if (getLogLevel().equals("short") || getLogLevel().equals("detailed") ) {
 			logGenerator = new PeriodLogGeneratorNew(session.getServletContext(), projectW.getProject().getProjectCode() + "_" + timestamp, dateFormatter.format(p1Start), dateFormatter.format(p1End));
 			logGenerator.setProject(portfolio.getPortfolioName(),
 					projectW.getProject().getProjectCode() + "-" + projectW.getProject().getProjectName());
-			shortVersion = getShortVersion(result,projectW,eligibleTasks,p1Start,p1End,iterationIndex,null);
-			Date psd = projectW.getProject().getPropusedStartDate();
-			Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
-			writeTrialToHTMLLogFile(logGenerator,iterationIndex,shortVersion,p1Start,p1End,projectW,ped,result,null);
-//			private void writeTrialToHTMLLogFile(PeriodLogGeneratorNew report, int iteration, String shortVersion, Date from,
-//					Date to, Project project, Date projectEnd, double totalCostCurrent, double payment, double extraPaymentNextPeriod, double financeLimit, double financeLimitNextPeriod, double leftOverCost, double leftOverNextCost,double openBalance, double cashOutOthers) {
+			if (result.get(FEASIBLE)==Boolean.TRUE) {
+				shortVersion = getShortVersion(result,projectW,eligibleTasks,p1Start,p1End,iterationIndex,null);
+				Date psd = projectW.getProject().getPropusedStartDate();
+				Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
+				writeTrialToHTMLLogFile(logGenerator,iterationIndex,shortVersion,p1Start,p1End,projectW,ped,result,null);
+			}
 		}
 		if (result.get(FEASIBLE)==Boolean.TRUE) {
 			numberOfDaysSinceLastRequest.put(projectW, (Integer) result.get(DAYSSINCELASTREQUEST2));
@@ -453,15 +453,17 @@ public class PortfolioSolver {
 
 		} else {
 			Map<String, Object> bestResult = null;
-			if (logGenerator != null) {
-				shortVersion = getShortVersion(result,projectW,eligibleTasks,p1Start,p1End,iterationIndex,null);
-				Date psd = projectW.getProject().getPropusedStartDate();
-				Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
-				writeTrialToHTMLLogFile(logGenerator,iterationIndex,shortVersion,p1Start,p1End,projectW,ped,result,null);
-			}
 
 			//do the shifting
 			while (result.get(FEASIBLE)!=Boolean.TRUE) {
+				if (logGenerator != null) {
+					shortVersion = getShortVersion(result,projectW,eligibleTasks,p1Start,p1End,iterationIndex,null);
+					shortVersion = shortVersion.substring(0,3) + "Selected: " + shortVersion.substring(3); 
+					Date psd = projectW.getProject().getPropusedStartDate();
+					Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
+					writeTrialToHTMLLogFile(logGenerator,iterationIndex,shortVersion,p1Start,p1End,projectW,ped,result,null);
+				}
+				
 				boolean bestIsFeasible = false;
 				
 				Boolean first = true;
@@ -594,10 +596,10 @@ public class PortfolioSolver {
 		DayDetails p1EndDetails = (DayDetails) result.get(P1_END);
 		DayDetails p2StartDetails = (DayDetails) result.get(P2_START);
 		DayDetails p2EndDetails = (DayDetails) result.get(P2_END);
-		double rc = (preStart.getBalance() + p1StartDetails.getFinance() + p1StartDetails.getPayments() -p1EndDetails.getOverhead() - p1EndDetails.getLeftOver()); 
-		double rn = (p1EndDetails.getBalance() + p2StartDetails.getFinance() + p2StartDetails.getPayments() -p2EndDetails.getOverhead() - (Double)result.get(LEFTOVER_COST));
+		double rc = (preStart.getBalance() + p1StartDetails.getFinance() + p1StartDetails.getPayments() -p1EndDetails.getOverhead() - p1EndDetails.getLeftOver() - p1EndDetails.getOtherProjectsCashOut()); 
+		double rn = (p1EndDetails.getBalance() + p2StartDetails.getFinance() + p2StartDetails.getPayments() -p2EndDetails.getOverhead() - (Double)result.get(LEFTOVER_COST) - p2EndDetails.getOtherProjectsCashOutNext() - p1EndDetails.getOtherProjectsCashOut());
 		double cc = p1EndDetails.getPeriodCost(); 
-		String SHORT_TEMPLATE = "<p>Iteration [%d] Activities:[%s] Start [%s] Project Duration: [%d] R[Current]=[%.2f] C[Current]=[%.2f] R[NEXT]=[%.2f] Available Cash=[%.2f] Feasible: %s</p>";
+		String SHORT_TEMPLATE = "<p>Iteration [%d] Activities:[%s] Start [%s] Project Duration: [%d] R[Current]=[%.2f] C[Current]=[%.2f] R[NEXT]=[%.2f] Remaining Cash=[%.2f] Feasible: %s</p>";
 		String f = (result.get(FEASIBLE)==Boolean.TRUE)?"YES":"NO";
 		return String.format(SHORT_TEMPLATE, iteration,tasks,dates,d,rc,cc,rn,rc-cc,f) ;
 	}
@@ -754,7 +756,9 @@ public class PortfolioSolver {
 
 			}
 			if (firstPeriod) {
-				daysSinceLastRequest ++;
+				if (!date.before(projectW.getProject().getPropusedStartDate())) {
+					daysSinceLastRequest ++;
+				}
 				if (daysSinceLastRequest==requestPeriod && firstPeriod) {
 					daysSinceLastRequest = 0;
 					Calendar tempCalendar = Calendar.getInstance();

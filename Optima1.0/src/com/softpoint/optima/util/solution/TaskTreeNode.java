@@ -123,6 +123,10 @@ public class TaskTreeNode {
 			// first move the task based on dependencies
 			for (TaskTreeNode pNode : parents) {
 				Date e = TaskUtil.addDays(pNode.getCalculatedTaskEnd(), 1);
+				while (PaymentUtil.isDayOff(e, projectW.getProjectVacations())
+						|| PaymentUtil.isWeekendDay(e, projectW.getProjectWeekends())) {
+					e = TaskUtil.addDays(e, 1);
+				}
 				if (e.after(taskStart)) {
 					taskStart = e;
 				}

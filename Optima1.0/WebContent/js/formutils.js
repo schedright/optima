@@ -1,4 +1,19 @@
  var rpcClient = new JSONRpcClient("./JSON-RPC");
+ JSONRpcClient.Exception = function(exp) {
+	 if (exp.code == 550 || exp.code == 401 || exp.code == 403 ) {
+		 //if permission denied, unautorized, forbidden, reload the page which will redirect to login
+		 location.reload();
+	 }
+	var x = 0; 
+ };
+ JSONRpcClient.default_ex_handler = function(exp) {
+	//ignore for now
+ };
+ JSONRpcClient.toplevel_ex_handler = function(exp) {
+	showMessage("Server error",'Unexpected error in the server.','error');
+};
+	  
+ 
     function checkLength( o, n, min, max ) {
       if ( o.val().length > max || o.val().length < min ) {
         o.addClass( "ui-state-error" );

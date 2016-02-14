@@ -49,12 +49,12 @@
    		
 	   <div class="form-section">
 					<div class="two-columns">
-						<label for="extraPaymentAmount">Extra Payment Amount</label> <input
+						<label for="extraPaymentAmount">Loan Amount</label> <input
 							type="text" id="extraPaymentAmount" name="extraPaymentAmount"
 							class="" />
 					</div>
 					<div class="two-columns right">
-						<label for="extraPaymentDate">Extra Payment Date</label> <input
+						<label for="extraPaymentDate">Loan Date</label> <input
 							type="text" id="extraPaymentDate" name="extraPaymentDate"
 							class="" />
 					</div>
@@ -62,7 +62,7 @@
 	
 	<div class="form-section">
 	<div class="two-columns">
-			<button id="addExtraPayment">Add Extra Payment</button>
+			<button id="addExtraPayment">Add Loan</button>
 	</div>
 	</div>
 	

@@ -15,6 +15,9 @@ $(function() {
 	dateParts = planDates.data.map.plan_end.split("/");
 	var yE = parseInt(dateParts[2]);
 
+	$('#refreshPlanBtn').prop('disabled', true);
+
+
 	for (var x = yS; x < yE + 1; x++) {
 		allYears.push(x);
 	}
@@ -112,7 +115,10 @@ $(function() {
 	$('#savePlanDatesBtn').on('click', function() {
 		var sd = $("#pStartDateTxt").val();
 		var ed = $("#pFinishDateTxt").val();
-		rpcClient.projectService.savePlanDates(sd, ed);
+		var ret = rpcClient.projectService.savePlanDates(sd, ed);
+		if (ret.result==0) {
+			location.reload();
+		}
 	});
 
 	var allProjectsCall = rpcClient.projectService.findAll();
@@ -154,6 +160,7 @@ $(function() {
 				hoverClass : "ui-state-hover",
 				drop : function(ev, ui) {
 				    var res = rpcClient.projectService.changePlanProject(ui.draggable.attr("id"),false);
+					$('#refreshPlanBtn').prop('disabled', false);
 				    return res.result==0;
 				}
 			    });
@@ -165,10 +172,16 @@ $(function() {
 				hoverClass : "ui-state-hover",
 				drop : function(ev, ui) {
 				    var res = rpcClient.projectService.changePlanProject(ui.draggable.attr("id"),true);
+					$('#refreshPlanBtn').prop('disabled', false);
 				    return res.result==0;
 				}
 			    });
 
 	}
+	
+	$('#refreshPlanBtn').on('click', function() {
+		location.reload();
+	});
+
 
 })

@@ -1048,6 +1048,8 @@
 					datapanel.append(startLine);
 
 					d = settings.includedDates[1];
+					d.setDate(1);
+					d.setMonth(d.getMonth()+1);
 					from = $(element).find("#dh-" + tools.genId(d.getTime()));
 					cFrom = from.attr("offset");
 					var endLine = core.createProgressBar(1, "", "", "", null,

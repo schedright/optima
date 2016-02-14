@@ -8,9 +8,9 @@
 	<div id="projectsGantt" class="gantt"></div>
 	<div id="planTabs" style="100%">
 	<ul>
-		<li><a href="#planDates">Specify Period</a></li>
+		<li><a href="#planDates">Finance Period</a></li>
 		<li><a href="#projectsList">Select Projects</a></li>
-		<li><a href="#projectPayments">Capital requirements</a></li>
+		<li><a href="#projectPayments">Contractors' Payments</a></li>
 	</ul>
 
 	<div id="planDates">
@@ -44,8 +44,8 @@
 			<div class="two-columns">
 				<label>Included Projects</label>
 				<ul id="includedProjects" class="sortable">
-	
 				</ul>
+				<button id="refreshPlanBtn">Refresh Plan</button>
 			</div>
 	
 		</div>

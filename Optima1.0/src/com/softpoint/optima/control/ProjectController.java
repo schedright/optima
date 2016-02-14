@@ -1185,7 +1185,9 @@ public class ProjectController {
 									dateString = dateString.substring(0,dateString.indexOf(","));
 								}
 								Date date = dmyFormatter.parse(dateString);
-								addPayment(projDetails, date, det.getPayments());
+								if (!date.before(planStart) && !date.after(planEnd)) {
+									addPayment(projDetails, date, det.getPayments());
+								}
 							}
 						}
 					}

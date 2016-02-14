@@ -290,7 +290,7 @@ public class PaymentUtil {
 
 		}
 		
-		
+/*		
 		query = "select min(payment_date) , max(payment_date)   from project_payment where project_id = ?1";
 		results = controller.nativeQuery(query, projectId);
 		Date[] paymentDates = new Date[2];
@@ -328,7 +328,7 @@ public class PaymentUtil {
 		}
 		if (null != projectDates[1] && dates[1].before(projectDates[1])) {
 			dates[1] = projectDates[1];
-		}
+		}*/
 		return dates;
 	}
 	
