@@ -1169,7 +1169,7 @@ public class ProjectController {
 
 			for (Project proj : allProjects) {
 				if (includedProjectsSet.contains(proj.getProjectId()) && proj.getPropusedStartDate() != null) {
-					Date[] dates = PaymentUtil.getProjectExtendedDateRanges(controller, proj.getProjectId());
+					Date[] dates = PaymentUtil.getProjectExtendedDateRanges(controller, proj);
 					if (!(dates[0].after(planEnd) || planStart.after(dates[1]))) {
 						ProjectSolutionDetails details = new ProjectSolutionDetails(false, proj);
 						Map<String, Object> projDetails = new HashMap<String, Object>();

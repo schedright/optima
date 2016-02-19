@@ -53,14 +53,15 @@ public class ProjectWrapper {
 			addTaskNodes(tsk);
 		}
 		
-		for (TaskTreeNode node : allTreeNodesMap.values()) {
+		for (ProjectTask tsk:allTasks) {
+			TaskTreeNode node = allTreeNodesMap.get(tsk);
 			this.allTasks.add(node);
 			if (node.parents.size()==0) {
 				tasks.add(node);
 				rootTasks.add(node);
 			}
 		}
-		
+
 		allTreeNodesMap.clear();
 		allTreeNodesMap=null;
 	}

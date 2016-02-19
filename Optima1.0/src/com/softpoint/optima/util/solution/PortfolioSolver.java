@@ -253,7 +253,8 @@ public class PortfolioSolver {
 				totalIncome.put(p, Double.valueOf(0));
 			}
 			int totalDone = 0;
-			while (finishedProjects < projects.size()) {
+			int totalNumberOfProjects = projects.size();
+			while (finishedProjects < totalNumberOfProjects) {
 				Date p1Start = currentPeriodStart;
 				Date p1End = getPeriodEnd(p1Start);
 				Date p2End = getPeriodEnd(TaskUtil.addDays(p1End, 1));

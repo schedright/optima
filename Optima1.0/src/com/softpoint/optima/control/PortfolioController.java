@@ -787,7 +787,7 @@ public class PortfolioController {
 			Calendar end = Calendar.getInstance();
 			end.setTime(portoflioDateRange[1]);
 
-			Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller, project.getProjectId());
+			Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller, project);
 			Date projectStartDate = projectDates[0];
 
 			Date[] tasksSpan = PaymentUtil.getProjectDateRanges(controller, projectId);
@@ -848,7 +848,7 @@ public class PortfolioController {
 			Calendar end = Calendar.getInstance();
 			end.setTime(portoflioDateRange[1]);
 
-			Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller, project.getProjectId());
+			Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller, project);
 			Date projectStartDate = projectDates[0];
 
 			Date[] tasksSpan = PaymentUtil.getProjectDateRanges(controller, projectId);
@@ -930,7 +930,7 @@ public class PortfolioController {
 				calendar.setTime(from);
 				calendar.add(Calendar.DATE, -1);
 				Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller,
-						currentProject.getProjectId());
+						currentProject);
 				Date projectStartDate = projectDates[0];
 				if (projectStartDate != null) { // Null means there are no tasks
 												// for that project
@@ -1033,7 +1033,7 @@ public class PortfolioController {
 				calendar.setTime(from);
 				calendar.add(Calendar.DATE, -1);
 				Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller,
-						currentProject.getProjectId());
+						currentProject);
 				Date projectStartDate = projectDates[0];
 				if (projectStartDate != null) { // Null means there are no tasks
 												// for that project

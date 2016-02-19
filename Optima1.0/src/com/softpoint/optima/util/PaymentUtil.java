@@ -26,6 +26,7 @@ import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.control.PaymentController;
+import com.softpoint.optima.control.PortfolioController;
 import com.softpoint.optima.db.DaysOff;
 import com.softpoint.optima.db.PaymentType;
 import com.softpoint.optima.db.Portfolio;
@@ -268,7 +269,8 @@ public class PaymentUtil {
 	
 
 	
-	public static Date[] getProjectExtendedDateRanges( EntityController<?> controller, int projectId) throws EntityControllerException {
+	public static Date[] getProjectExtendedDateRanges( EntityController<?> controller, Project project) throws EntityControllerException {
+		int projectId = project.getProjectId();
 		String query = "select min(calendar_start_date) , max(ADDDATE(calendar_start_date, calender_duration - 1))   from project_task where project_id  = ?1";
 		List<?> results = controller.nativeQuery(query, projectId);
 		Date[] dates = new Date[2];
@@ -287,7 +289,14 @@ public class PaymentUtil {
 				}
 				
 			}
-
+		}
+		
+		if (dates[1]!=null && project.getCollectPaymentPeriod()>0 && project.getPaymentRequestPeriod()>0) {
+			int nod = daysBetween(dates[0],dates[1]) + 1;
+			double periods = Math.ceil(((double)nod)/project.getPaymentRequestPeriod());
+			int days = (int) (periods * project.getPaymentRequestPeriod() + project.getCollectPaymentPeriod());
+			Date d2 = PortfolioController.addDayes(dates[0], days);
+			dates[1] = d2;
 		}
 		
 /*		
