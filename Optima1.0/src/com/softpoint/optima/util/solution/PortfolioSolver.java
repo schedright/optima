@@ -621,7 +621,7 @@ public class PortfolioSolver {
 	}
 	
 	Boolean isAfterProjectEnd(ProjectWrapper projectW,Date date) {
-		for (TaskTreeNode tsk:projectW.getTasks()) {
+		for (TaskTreeNode tsk:projectW.getRootTasks()) {
 			if (date.after(getMaxProjectEnd(tsk))) {
 				return true;
 			}
@@ -664,6 +664,14 @@ public class PortfolioSolver {
 			}
 			
 			Boolean projectDone = isAfterProjectEnd(projectW,date);
+			if (projectDone && !firstPeriod) {
+				for (TaskTreeNode tsk:projectW.getAllTasks()) {
+					if (!tsk.getCalculatedTaskStart().before(p1End)) {
+						projectDone = false;
+						break;
+					}
+				}
+			}
 			currentProjectDayDetails.setPayments(getPayment(date));
 			currentProjectDayDetails.addBalance(currentProjectDayDetails.getPayments());
 			if (firstPeriod) {

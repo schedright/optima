@@ -114,4 +114,8 @@ public class ProjectWrapper {
 		return allTasks;
 	}
 
+	public List<TaskTreeNode> getRootTasks() {
+		return rootTasks;
+	}
+
 }

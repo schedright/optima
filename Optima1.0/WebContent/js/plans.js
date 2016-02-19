@@ -12,15 +12,11 @@ $(function() {
 
 	var dateParts = planDates.data.map.plan_start.split("/");
 	var yS = parseInt(dateParts[2]);
-	dateParts = planDates.data.map.plan_end.split("/");
-	var yE = parseInt(dateParts[2]);
+	var dateParts2 = planDates.data.map.plan_end.split("/");
+	var yE = parseInt(dateParts2[2]);
 
 	$('#refreshPlanBtn').prop('disabled', true);
-
-
-	for (var x = yS; x < yE + 1; x++) {
-		allYears.push(x);
-	}
+	
 
 	allYears.sort();
 	var pColumns = [ {
@@ -29,7 +25,20 @@ $(function() {
 		field : "Year",
 		minWidth : 120
 	} ];
-
+	var month = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+	var sm = parseInt(dateParts[0]);
+	var em = parseInt(dateParts2[0]);
+	for (var i=yS;i<yE+1;i++) {
+		var E = 12;
+		if (i==yE) {
+			E=em;
+		}
+		for (var m=sm;m<E+1;m++) {
+			allYears.push(month[m] + ' ' + i);
+		}
+		sm = 1;
+	}
+	
 	for (var i = 0; i < allYears.length; i++) {
 		pColumns.push({
 			id : allYears[i],
@@ -45,16 +54,14 @@ $(function() {
 		minWidth : 120
 	});
 	var pData = [];
-	var getTotal = function(map) {
-		if (!map || !map.map) {
-			return 0;
-		} else {
-			var sum = 0;
-			for ( var key in map.map) {
-				sum += map.map[key];
-			}
-			return sum;
-		}
+	var getTotal = function(map,d) {
+		var parts = d.split(' ');
+		var y = parts[1];
+		var m = parts[0];
+		if (map && map[y] && map[y].map && map[y].map[m]) {
+			return map[y].map[m];
+		} 
+		return 0;
 	};
 	var allRowsTotal = 0;
 	for (var i = 0; i < projects.length; i++) {
@@ -66,7 +73,7 @@ $(function() {
 		};
 		var t = 0;
 		for (var p = 0; p < allYears.length; p++) {
-			var payment = getTotal(yearsMap[allYears[p]]);
+			var payment = getTotal(yearsMap,allYears[p]);
 			if (payment) {
 				t += payment;
 				row[allYears[p]] = parseFloat(payment).toFixed(2);

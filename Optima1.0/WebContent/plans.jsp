@@ -6,7 +6,7 @@
 
 <div class="mainContainer">
 	<div id="projectsGantt" class="gantt"></div>
-	<div id="planTabs" style="100%">
+	<div id="planTabs" style="width:100%">
 	<ul>
 		<li><a href="#planDates">Finance Period</a></li>
 		<li><a href="#projectsList">Select Projects</a></li>
@@ -50,7 +50,7 @@
 	
 		</div>
 	</div>
-	<div id="projectPayments" style="width: 100%; height: 500px;"></div>
+	<div id="projectPayments" style="width:95%;height:400px;"></div>
 	</div>
 </div>
 
