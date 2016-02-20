@@ -33,6 +33,7 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Portfolio;
+import com.softpoint.optima.db.PortfolioLight;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
@@ -466,6 +467,22 @@ public class PortfolioController {
 		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
 		try {
 			List<Portfolio> portfolios = controller.findAll(Portfolio.class);
+			return new ServerResponse("0", "Success", portfolios);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PORT0005", String.format("Error loading portfolios : %s", e.getMessage()), e);
+		}
+	}
+
+	/**
+	 * @param session
+	 * @return
+	 * @throws OptimaException
+	 */
+	public ServerResponse findAllLight(HttpSession session) throws OptimaException {
+		EntityController<PortfolioLight> controller = new EntityController<PortfolioLight>(session.getServletContext());
+		try {
+			List<PortfolioLight> portfolios = controller.findAll(PortfolioLight.class);
 			return new ServerResponse("0", "Success", portfolios);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();

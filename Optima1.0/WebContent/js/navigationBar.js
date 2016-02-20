@@ -12,7 +12,7 @@ $(document).ready( function() {
 		location.reload();
 		});
 	setTimeout(function() {
-	rpcClient.portfolioService.findAll(function(result , exception) {
+	rpcClient.portfolioService.findAllLight(function(result , exception) {
 		if (result.result == 0) {
 			var data = result.data;
 			
@@ -47,17 +47,13 @@ $(document).ready( function() {
 					$("#financialNavBar").children().get(0).parentNode.removeChild($("#financialNavBar").children().get(0));
 					$("#financialNavBar").append("<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results2.png\" />Results</a>");
 					
-					var result2 = rpcClient.projectService.findAllByPortfolio(data.list[i].portfolioId);
-					if (result2.result == 0) {
-						 var projects = result2.data;
-						 if (projects != null && projects.list.length != 0 ) {
-							for (var j = 0; j < projects.list.length; j++) {
-								projectsList += liFirstRowProjects + "<a href=\"projectDetails.jsp?projectId=" +  projects.list[j].projectId + "\">" + projects.list[j].projectCode + "</a></li>";
-								liFirstRowProjects = "<li>";
-							} 	
-						}	
-					} 
-
+					if (data.list[i].projects && data.list[i].projects.list && data.list[i].projects.list.length) {
+						var projects = data.list[i].projects;
+						for (var j = 0; j < projects.list.length; j++) {
+							projectsList += liFirstRowProjects + "<a href=\"projectDetails.jsp?projectId=" +  projects.list[j].projectId + "\">" + projects.list[j].projectCode + "</a></li>";
+							liFirstRowProjects = "<li>";
+						} 	
+					}
 					liFirstRow = "<li>";
 				}
 				

@@ -103,10 +103,18 @@ $(document).ready( function() {
 		        			 $("#projectCode").val(data.projectCode);
 		        			 $("#projectDescription").val(data.projectDescription);
 		        			 $("#projectStreetAddress").val(data.projectAddressStreet);
-		        			 $("#projectCity option[value=" + data.city.locationId + "]").attr('selected', 'selected');
-		        			 $("#projectProvince option[value=" + data.province.locationId + "]").attr('selected', 'selected');
-		        			 $("#projectCountry option[value=" + data.country.locationId + "]").attr('selected', 'selected');
-		        			 $("#projectPostalCode").val(data.projectAddressPostalCode);
+		        			 if (data.city) {
+		        				 $("#projectCity option[value=" + data.city.locationId + "]").attr('selected', 'selected');
+		        			 }
+		        			 if (data.province) {
+		        				 $("#projectProvince option[value=" + data.province.locationId + "]").attr('selected', 'selected');
+		        			 }
+		        			 if (data.country) {
+		        				 $("#projectCountry option[value=" + data.country.locationId + "]").attr('selected', 'selected');
+		        			 }
+		        			 if (data.projectAddressPostalCode) {
+		        				 $("#projectPostalCode").val(data.projectAddressPostalCode);		        				 
+		        			 }
 		        		 } else {
 		        			 showMessage("Find project",'Error:' + call.message,'error');
 		        		 }
@@ -255,7 +263,7 @@ $(document).ready( function() {
 	    	$('#main').load("views/clients.html").fadeIn('slow');
 	    });
 	
-	rpcClient.portfolioService.findAll(function(result , exception) {
+	rpcClient.portfolioService.findAllLight(function(result , exception) {
 		if (result.result == 0) {
 			var data = result.data;
 			if (data.list.length == 0) {
@@ -276,10 +284,10 @@ $(document).ready( function() {
 					continue;
 				}
 				
-				var result2 = rpcClient.projectService.findAllByPortfolio(data.list[i].portfolioId);
+//				var result2 = rpcClient.projectService.findAllByPortfolio(data.list[i].portfolioId);
 				
-				if (result2.result == 0) {
-					 var projects = result2.data;
+				if (data.list[i].projects) {
+					 var projects = data.list[i].projects;
 					 if (projects != null) {
 						 projectsHtml += " <div class=\"prods-cnt\">";
 						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "list\" class=\"listPortfolioBtn\" title=\"List View\"></div>";

@@ -17,6 +17,8 @@
 		<class>com.softpoint.optima.db.WeekendDay</class>
 		<class>com.softpoint.optima.db.Settings</class>
 		<class>com.softpoint.optima.db.PlanProject</class>
+		<class>com.softpoint.optima.db.ProjectLight</class>
+		<class>com.softpoint.optima.db.PortfolioLight</class>
 		<properties>
 	      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
 	      <property name="javax.persistence.jdbc.url"
