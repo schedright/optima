@@ -2415,4 +2415,8 @@ public class PortfolioController {
 
 	}
 
+	public synchronized void logout(HttpSession session) {
+		session.invalidate();
+	}
+
 }

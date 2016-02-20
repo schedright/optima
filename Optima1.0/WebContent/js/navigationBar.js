@@ -7,6 +7,10 @@ $(document).ready( function() {
 	$("#financialNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results2.png\" />Results</a>");
 	$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results1.png\" />Capital Plan</a>");
 	
+	$( "#menuLogout" ).click(function() {
+		rpcClient.portfolioService.logout();
+		location.reload();
+		});
 	setTimeout(function() {
 	rpcClient.portfolioService.findAll(function(result , exception) {
 		if (result.result == 0) {

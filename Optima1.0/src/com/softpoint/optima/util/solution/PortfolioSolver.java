@@ -29,15 +29,14 @@ import com.softpoint.optima.util.ProjectSolutionDetails;
 import com.softpoint.optima.util.TaskUtil;
 
 public class PortfolioSolver {
+	private static final String ERROR_MESSAGE = "ERROR_MESSAGE";
 	private static final String SAVING = "SAVING";
 	private static final String P2_START = "P2_START";
 	private static final String PAYMENTS = "PAYMENTS";
 	private static final String COMPLETED_TASKS = "COMPLETED_TASKS";
 	private static final String DAYSSINCELASTREQUEST2 = "DAYSSINCELASTREQUEST";
-//	private static final String LEFTOVERS = "LEFTOVERS";
 	private static final String FEASIBLE = "FEASIBLE";
 	private static final String P2_END = "P2_END";
-//	private static final String DAYS_COMPLETED_FIRSTPERIOD = "DAYS_COMPLETED_FIRSTPERIOD";
 	private static final String LEFTOVER_COST = "LEFTOVER_COST";
 	private static final String P1_START = "P1_START";
 	private static final String P1_PRE_START = "P1_PRE_START";
@@ -73,7 +72,7 @@ public class PortfolioSolver {
 	Map<Date, Double> payments;
 	List<TaskTreeNode> leftOverTasks;
 	Map<ProjectWrapper,Integer> numberOfDaysSinceLastRequest;
-	public static String STATUS_JSON = "{\"STATUS\":\"%s\",\"DONE\":%d,\"TOTAL\":%d,\"MESSAGE\":\"%s\"}";
+	public static String STATUS_JSON = "{\"STATUS\":\"%s\",\"DONE\":%d,\"TOTAL\":%d,\"MESSAGE\":\"%s\",\"ERROR_MESSAGE\":\"%s\"}";
 	public static final int MAX_RUNNING_SOLUTIONS = 1;
 	public static ConcurrentMap<Integer, ConcurrentMap<String,Object>> currentWorkingSolutions = new ConcurrentHashMap<Integer, ConcurrentMap<String,Object>>();
 	public static final String STARTING = "STARTING";
@@ -328,8 +327,9 @@ public class PortfolioSolver {
 					if (details.get(FEASIBLE)==Boolean.FALSE) {
 						solStatus.remove(SOLVER);
 						solStatus.put(STATUS,"FAILED");
+						solStatus.put(ERROR_MESSAGE,details.get(ERROR_MESSAGE));
 						solStatus.put(DONE,totalTask);
-	
+						
 						return "FAILED"; //check if we can add more details
 					}
 					
@@ -361,12 +361,12 @@ public class PortfolioSolver {
 	
 					List<TaskTreeNode> leftoverTasks = new ArrayList<TaskTreeNode>();
 					for (TaskTreeNode tsk:leftOverTasks) {
-						if (!tsk.getCalculatedTaskEnd().before(p1End) && !leftoverTasks.contains(tsk)) { // TODO verify if p1End is in the old or the new period
+						if (!tsk.getCalculatedTaskEnd().before(p1End) && !leftoverTasks.contains(tsk)) { 
 							leftoverTasks.add(tsk);
 						}
 					}
 					for (TaskTreeNode tsk:eligibleTasks) {
-						if (tsk.getCalculatedTaskStart().before(p1End) && !tsk.getCalculatedTaskEnd().before(p1End) && !leftoverTasks.contains(tsk)) { // TODO verify if p1End is in the old or the new period
+						if (tsk.getCalculatedTaskStart().before(p1End) && !tsk.getCalculatedTaskEnd().before(p1End) && !leftoverTasks.contains(tsk)) { 
 							leftoverTasks.add(tsk);
 						}
 					}
@@ -440,12 +440,12 @@ public class PortfolioSolver {
 			numberOfDaysSinceLastRequest.put(projectW, (Integer) result.get(DAYSSINCELASTREQUEST2));
 			List<TaskTreeNode> newLeftOvers = new ArrayList<TaskTreeNode>();
 			for (TaskTreeNode tsk:leftOverTasks) {
-				if (!tsk.getCalculatedTaskEnd().before(p1End) && !newLeftOvers.contains(tsk)) { // TODO verify if p1End is in the old or the new period
+				if (!tsk.getCalculatedTaskEnd().before(p1End) && !newLeftOvers.contains(tsk)) { 
 					newLeftOvers.add(tsk);
 				}
 			}
 			for (TaskTreeNode tsk:eligibleTasks) {
-				if (tsk.getCalculatedTaskStart().before(p1End) && !tsk.getCalculatedTaskEnd().before(p1End) && !newLeftOvers.contains(tsk)) { // TODO verify if p1End is in the old or the new period
+				if (tsk.getCalculatedTaskStart().before(p1End) && !tsk.getCalculatedTaskEnd().before(p1End) && !newLeftOvers.contains(tsk)) { 
 					newLeftOvers.add(tsk);
 				}
 			}
@@ -550,11 +550,15 @@ public class PortfolioSolver {
 
 					task.shift(-actualShift);
 				}
+				result = bestResult;
 				if (!shiftHappens) {
+					if (result.get(FEASIBLE)==Boolean.FALSE) {
+						
+					}
+					
 					break;
 				}
 				shiftedTask.shift(1);
-				result = bestResult;
 				numberOfDaysSinceLastRequest.put(projectW, (Integer) result.get(DAYSSINCELASTREQUEST2));
 				payments = cloneMap(bestPamymentClone);
 				iterationIndex++;
@@ -785,9 +789,20 @@ public class PortfolioSolver {
 		results.put(LEFTOVER_COST,leftOversForNextPeriod);
 		results.put(P2_END, new DayDetails(currentProjectDayDetails));
 		
-		Boolean p1Feasible = (end1Detailes.getBalance() + end1Detailes.getFinance() - currentProjectDayDetails.getOtherProjectsCashOut()) >0;
-		Boolean p2Feasible = ((currentProjectDayDetails.getBalance() + currentProjectDayDetails.getFinance() + totalCostForNextPeriod - currentProjectDayDetails.getOtherProjectsCashOut() - currentProjectDayDetails.getOtherProjectsCashOutNext())) >0;
+		double p1Diff = end1Detailes.getBalance() + end1Detailes.getFinance() - currentProjectDayDetails.getOtherProjectsCashOut();
+		Boolean p1Feasible = p1Diff >0;
+		double p2Diff = (currentProjectDayDetails.getBalance() + currentProjectDayDetails.getFinance() + totalCostForNextPeriod - currentProjectDayDetails.getOtherProjectsCashOut() - currentProjectDayDetails.getOtherProjectsCashOutNext());
+		Boolean p2Feasible = p2Diff >0;
 		Boolean feasible = p1Feasible && p2Feasible;
+		String msg1 = "Planning from %s to %s for project (%s), Short (%.2f)$ to cover the minimum required expenses.";
+		if (!p1Feasible) {
+			String error = String.format(msg1, dateFormatter.format(p1Start), dateFormatter.format(p1End),projectW.getProject().getProjectCode(), -p1Diff);
+			results.put(ERROR_MESSAGE, error);
+		} else if (!p2Feasible) {
+			String error = String.format(msg1, dateFormatter.format(p1End), dateFormatter.format(p2End), projectW.getProject().getProjectCode(), -p2Diff);
+			results.put(ERROR_MESSAGE, error);
+		}
+		
 		results.put(FEASIBLE, feasible);
 //		results.put(LEFTOVERS, completedDays);
 		results.put(DAYSSINCELASTREQUEST2,daysSinceLastRequest);
@@ -867,7 +882,11 @@ public class PortfolioSolver {
 		if (solStatus.containsKey(MESSAGE)) {
 			message = (String) solStatus.get(MESSAGE); 
 		}
-		return String.format(STATUS_JSON,status,done,total,message );
+		String errorMessage = "";
+		if (solStatus.containsKey(ERROR_MESSAGE)) {
+			errorMessage = (String) solStatus.get(ERROR_MESSAGE); 
+		}
+		return String.format(STATUS_JSON,status,done,total,message , errorMessage);
 	}
 	private void writeTrialToHTMLLogFile(PeriodLogGeneratorNew report, int iteration, String shortVersion, Date from,
 			Date to, ProjectWrapper projectW, Date projectEnd, Map<String, Object> result, TaskTreeNode shiftedTask) {

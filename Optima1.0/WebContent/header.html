@@ -6,8 +6,10 @@
 <meta http-equiv="Content-Type" content="text/html; UTF8">
 <title>SchedRight</title>
 
-<link rel="icon" href="images/logo_icon-Rev-32x20.png" type="image/x-icon">
-<link rel="shortcut icon" href="images/logo_icon-Rev-32x20.png" type="image/x-icon"> 
+<link rel="icon" href="images/logo_icon-Rev-32x20.png"
+	type="image/x-icon">
+<link rel="shortcut icon" href="images/logo_icon-Rev-32x20.png"
+	type="image/x-icon">
 
 <link rel="stylesheet"
 	href="ui/smoothness/css/smoothness/jquery-ui-1.10.3.custom.css" />
@@ -35,8 +37,9 @@
 
 
 <script src="js/navigationBar.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
-	
+<script
+	src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
+
 <style>
 #toolbar {
 	padding: 0px;
@@ -56,9 +59,17 @@
 	border-right-style: solid;
 }
 
+.no-js #loader {
+	display: none;
+}
 
-.no-js #loader { display: none;  }
-.js #loader { display: block; position: absolute; left: 100px; top: 0; }
+.js #loader {
+	display: block;
+	position: absolute;
+	left: 100px;
+	top: 0;
+}
+
 .se-pre-con {
 	position: fixed;
 	left: 0px;
@@ -68,8 +79,6 @@
 	z-index: 9999;
 	background: url(images/loading.gif) center no-repeat #fff;
 }
-
-
 </style>
 
 
@@ -81,7 +90,7 @@
 	});
 </script>
 <body>
-<div class="se-pre-con"></div>
+	<div class="se-pre-con"></div>
 	<div id="main-content">
 		<div id="header">
 			<div class="wrapper col1">
@@ -89,11 +98,11 @@
 					<div class="topRightMenu">
 						<a id="menuHelp" href=help.jsp>Help</a> | <a id="menuContactUs"
 							href=contactUs.jsp>Contact Us</a> | <a id="menuPrivacy"
-							href=privacy.jsp>Privacy Policy</a> | <a id="menuLogout"
-							href=logout.jsp>Logout</a>
+							href=privacy.jsp>Privacy Policy</a> | <a id="menuLogout" href="#">Logout</a>
 					</div>
 					<div class="logoImg">
-						<a href="#"><img src="images/LOGO-Schedright-text only.png" height="62" alt="" /></a>
+						<a href=""><img src="images/LOGO-Schedright-text only.png"
+							height="62" alt="" /></a>
 					</div>
 				</div>
 			</div>
@@ -113,3 +122,4 @@
 
 			</div>
 		</div>
+

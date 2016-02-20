@@ -151,6 +151,7 @@ function solveIt(portfolioId) {
 									window.clearInterval(window.intervalId);
 								} else if (jsn.STATUS=='FAILED') {
 									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Failed to solve portfolio";
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[1].innerHTML = jsn.ERROR_MESSAGE;
 									window.clearInterval(window.intervalId);
 									bar.style.background = 'red';
 								}
