@@ -22,7 +22,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.http.HttpSession;
 
-import com.ibm.xtq.ast.nodes.Include;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Client;
@@ -267,7 +266,7 @@ public class ProjectController {
 	 * @return
 	 * @throws OptimaException
 	 */
-	public ServerResponse findAllByClient(HttpSession session, int clientId) throws OptimaException {
+/*	public ServerResponse findAllByClient(HttpSession session, int clientId) throws OptimaException {
 		try {
 			EntityController<Client> cliController = new EntityController<Client>(session.getServletContext());
 			Client client = cliController.find(Client.class, clientId);
@@ -277,7 +276,7 @@ public class ProjectController {
 			return new ServerResponse("PROJ0007", String.format("Error loading projects : %s", e.getMessage()), e);
 		}
 	}
-
+*/
 	public ServerResponse getOtherProjectsCurrentPeriodCost(HttpSession session, int projectId, Date from, Date to) {
 
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());

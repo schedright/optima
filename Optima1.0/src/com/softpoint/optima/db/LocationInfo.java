@@ -3,10 +3,8 @@ package com.softpoint.optima.db;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -57,7 +55,7 @@ public class LocationInfo implements Serializable {
 	@OneToMany(mappedBy="parentLocation")
 	private List<LocationInfo> childrenLocations;
 
-	//bi-directional many-to-one association to Project
+/*	//bi-directional many-to-one association to Project
 	@OneToMany(mappedBy="city")
 	private List<Project> cityProjects;
 
@@ -68,7 +66,7 @@ public class LocationInfo implements Serializable {
 	//bi-directional many-to-one association to Project
 	@OneToMany(mappedBy="country")
 	private List<Project> countryProjects;
-
+*/
     public LocationInfo() {
     }
 
@@ -136,7 +134,7 @@ public class LocationInfo implements Serializable {
 		this.childrenLocations = childrenLocations;
 	}
 	
-	public List<Project> getCityProjects() {
+/*	public List<Project> getCityProjects() {
 		return this.cityProjects;
 	}
 
@@ -159,5 +157,5 @@ public class LocationInfo implements Serializable {
 	public void setCountryProjects(List<Project> countryProjects) {
 		this.countryProjects = countryProjects;
 	}
-	
+	*/
 }

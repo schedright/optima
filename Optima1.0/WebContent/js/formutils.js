@@ -143,7 +143,7 @@
     		icon = '<div class="warningIcon"></div>';
     	}
     	var xx = $('<div></div>').appendTo('body');
-    	var htmlElement = xx.html('<div><table style="border:0"><tr><td  style="border:0">' + icon + '</td><td style="vertical-align:middle;border:0"><h6>'+ text +'</h6><h6></h6></td></tr><tr><td colspan=2><div style="border:1px solid;width:100%;height:10px;"><div style="background:green;width:0px;height:100%"></div></div></td></tr></table></div>');
+    	var htmlElement = xx.html('<div><table style="border:0"><tr><td  style="border:0">' + icon + '</td><td style="vertical-align:middle;border:0"><h6>'+ text +'</h6><h6></h6></td></tr><tr><td colspan=2 style="border:1px solid transparent"><div style="border:1px solid;width:100%;height:10px;"><div style="background:green;width:0px;height:100%"></div></div></td></tr></table></div>');
     	var dlg = htmlElement.dialog({
 		      modal: true, title: title, zIndex: 10000, autoOpen: true,
 		      width: '400px', resizable: false,

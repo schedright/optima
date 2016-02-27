@@ -234,7 +234,6 @@ public class EntityController<E> {
 		}
 	}
 
-	
 	/**
 	 * @param cls
 	 * @return

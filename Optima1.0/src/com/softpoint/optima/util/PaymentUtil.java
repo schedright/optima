@@ -17,7 +17,6 @@ import java.util.PriorityQueue;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +24,6 @@ import org.json.JSONObject;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
-import com.softpoint.optima.control.PaymentController;
 import com.softpoint.optima.control.PortfolioController;
 import com.softpoint.optima.db.DaysOff;
 import com.softpoint.optima.db.PaymentType;
@@ -364,7 +362,9 @@ public class PaymentUtil {
 			
 			query = "select propused_start_date from project where project_id  = ?1";
 			results = controller.nativeQuery(query, projectId);
-			dates[0] = (Date) results.get(0);
+			if (results.get(0)!=null) {
+				dates[0] = (Date) results.get(0);
+			}
 
 		}
 //		Calendar calendar = Calendar.getInstance();

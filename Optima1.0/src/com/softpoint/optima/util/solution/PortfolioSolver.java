@@ -550,12 +550,10 @@ public class PortfolioSolver {
 
 					task.shift(-actualShift);
 				}
-				result = bestResult;
+				if (bestResult!=null) {
+					result = bestResult;
+				}
 				if (!shiftHappens) {
-					if (result.get(FEASIBLE)==Boolean.FALSE) {
-						
-					}
-					
 					break;
 				}
 				shiftedTask.shift(1);

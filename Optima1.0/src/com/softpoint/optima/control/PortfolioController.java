@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpSession;
 
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -30,11 +32,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tomcat.util.codec.binary.Base64;
 
+import com.softpoint.optima.JsonRpcInitializer;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.PortfolioLight;
 import com.softpoint.optima.db.Project;
+import com.softpoint.optima.db.ProjectLight;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
@@ -260,7 +264,7 @@ public class PortfolioController {
 				Date scheduledEnd = projectDates[1];
 				overHeadAfter += daysBetween(scheduledStart, scheduledEnd) * project.getOverheadPerDay().doubleValue();
 
-				Date d1 = project.getPropusedStartDate();
+				Date d1 = project.getPropusedStartDate()!=null?project.getPropusedStartDate():scheduledStart;
 				Date d2 = lastDate;
 				overHeadBefore += daysBetween(d1, d2) * project.getOverheadPerDay().doubleValue();
 
@@ -480,6 +484,14 @@ public class PortfolioController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse findAllLight(HttpSession session) throws OptimaException {
+		try {
+			EntityManagerFactory factory = (EntityManagerFactory)session.getServletContext().getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
+			EntityManager manager = factory.createEntityManager();
+			manager.getEntityManagerFactory().getCache().evict(PortfolioLight.class);
+			manager.getEntityManagerFactory().getCache().evict(ProjectLight.class);
+			manager.close();
+		} catch(Exception e) {
+		}
 		EntityController<PortfolioLight> controller = new EntityController<PortfolioLight>(session.getServletContext());
 		try {
 			List<PortfolioLight> portfolios = controller.findAll(PortfolioLight.class);

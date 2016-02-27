@@ -303,7 +303,7 @@ $(document).ready( function() {
 							projectsHtml += " <div class=\"prod-box shadow\"> "
 							+ " <button id=\"deleteProject_" + projects.list[j].projectId  + "\" class=\"projbuttonDelete\" onClick=\"deleteProject(" + projects.list[j].projectId + ")\"></button>" 
 							+ " <button id=\"editProject_" + projects.list[j].projectId  + "\" class=\"projbuttonEdit\" onClick=\"editProject(" + projects.list[j].projectId + " , " + data.list[i].portfolioId  + ")\"></button>" 
-							+ "<a id=\"project_"+projects.list[j].projectId+"\" class=\"projLink\"  href=\"projectDetails.jsp?projectId=" + projects.list[j].projectId + "\" target=\"_blank\">" 
+							+ "<a id=\"project_"+projects.list[j].projectId+"\" class=\"projLink\"  href=\"projectDetails.jsp?projectId=" + projects.list[j].projectId + "\">" 
 							+ projects.list[j].projectCode  + "</a> <br><br>" 						
 							+ "<div class=\"projectDescCls\">" + contents + "</div>"
 							+ "</div>";

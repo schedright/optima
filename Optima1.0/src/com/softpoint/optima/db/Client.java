@@ -1,8 +1,14 @@
 package com.softpoint.optima.db;
 
 import java.io.Serializable;
-import javax.persistence.*;
-import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 
 /**
@@ -42,10 +48,10 @@ public class Client implements Serializable {
 	@JoinColumn(name="client_address_province")
 	private LocationInfo province;
 
-	//bi-directional many-to-one association to Project
+/*	//bi-directional many-to-one association to Project
 	@OneToMany(mappedBy="client")
 	private List<Project> projects;
-
+*/
     public Client() {
     }
 
@@ -105,12 +111,12 @@ public class Client implements Serializable {
 		this.province = province;
 	}
 	
-	public List<Project> getProjects() {
+/*	public List<Project> getProjects() {
 		return this.projects;
 	}
 
 	public void setProjects(List<Project> projects) {
 		this.projects = projects;
 	}
-	
+	*/
 }

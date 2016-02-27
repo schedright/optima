@@ -18,3 +18,9 @@ plan_id INT NOT null AUTO_INCREMENT primary key,
 project_id INT unique, 
 CONSTRAINT FOREIGN KEY (project_id) REFERENCES project(project_id) 
 );
+
+alter table capicatl_plan_projects drop foreign key  capicatl_plan_projects_ibfk_1;
+
+alter table capicatl_plan_projects 
+add constraint  capicatl_plan_projects_ibfk_1 
+FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) on delete cascade ;

@@ -10,8 +10,6 @@ import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.PortfolioExtrapayment;
-import com.softpoint.optima.db.PortfolioFinance;
-import com.softpoint.optima.util.PaymentUtil;
 
 /**
  * @author user Bassem
