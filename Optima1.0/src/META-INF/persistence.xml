@@ -19,6 +19,7 @@
 		<class>com.softpoint.optima.db.PlanProject</class>
 		<class>com.softpoint.optima.db.ProjectLight</class>
 		<class>com.softpoint.optima.db.PortfolioLight</class>
+		<class>com.softpoint.optima.db.Payment</class>
 		<properties>
 	      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
 	      <property name="javax.persistence.jdbc.url"

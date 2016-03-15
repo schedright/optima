@@ -194,7 +194,7 @@ $(function() {
 			var svgGraphCall = rpcClient.portfolioService.getCashFlowSVGGraph(portfolioId)
 			if (svgGraphCall.result && svgGraphCall.data) {
 				$("#cashflowChartDiv").html('');
-				$("#cashflowChartDiv").append(svgGraphCall.data); 
+				$("#cashflowChartDiv").append(svgGraphCall.data);
 			}
 	    }
 	    

@@ -128,7 +128,7 @@ $(function() {
 		}
 	});
 
-	var allProjectsCall = rpcClient.projectService.findAll();
+	var allProjectsCall = rpcClient.projectService.findAllLight();
 	var includedProject = rpcClient.projectService.findPlanProjectIds();
 	if (allProjectsCall.result == 0 && includedProject.result == 0) {
 

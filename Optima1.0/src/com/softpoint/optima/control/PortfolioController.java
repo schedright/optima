@@ -706,6 +706,8 @@ public class PortfolioController {
 			Date end = null;
 			for (Project project: projects) {
 				ProjectSolutionDetails details = new ProjectSolutionDetails(false, project);
+				details.savePaymentToDB(session);
+
 				projectsCashFlow.put(String.valueOf(project.getProjectId()), details.getResults());
 				
 				if (start==null || start.after(details.getPortfolioStart())) {
@@ -732,64 +734,9 @@ public class PortfolioController {
 			Map<String, DailyCashFlowMapEntity> results = new HashMap<String, DailyCashFlowMapEntity>();
 
 			Project project = controller.find(Project.class, projectId);
-/*
-			int portfolioId = project.getPortfolio().getPortfolioId();
-			
-			long startTime = System.nanoTime();
-			Date[] portoflioDateRange = getPortfolioDateRangeWithLastPayment(session, portfolioId);
-
-			Calendar start = Calendar.getInstance();
-			start.setTime(portoflioDateRange[0]);
-			Calendar end = Calendar.getInstance();
-			end.setTime(portoflioDateRange[1]);
-
-			Date[] projectDates = PaymentUtil.getProjectExtendedDateRanges(controller, project.getProjectId());
-			Date projectStartDate = projectDates[0];
-
-			Date[] tasksSpan = PaymentUtil.getProjectDateRanges(controller, projectId);
-
-			Date lastTaskEndDate = tasksSpan[1];
-			double totalRetained = 0.0;
-			for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
-				DailyCashFlowMapEntity entity = new DailyCashFlowMapEntity();
-				entity.setPortfolioId(project.getPortfolio().getPortfolioId());
-				entity.setProjectId(project.getProjectId());
-				entity.setDay(date);
-				boolean includeOverhead = false;
-				if ((date.equals(projectStartDate) || date.after(projectStartDate))
-						&& (date.before(lastTaskEndDate) || date.equals(lastTaskEndDate))) {
-					includeOverhead = true;
-				}
-				entity.setCashout(PaymentUtil.getDateTasksCashout(project, date, includeOverhead));
-				entity.setFinanceCost(PaymentUtil.getDateFinanceCost(project, date, results));
-				double payment = PaymentUtil.getProjectPaymentstNew(session, project, date);
-				double originalPayment = payment / (1.0 - project.getRetainedPercentage().doubleValue()
-						- project.getAdvancedPaymentPercentage().doubleValue());
-
-				if (!start.equals(end)) {
-					double retainedAmount = originalPayment * project.getRetainedPercentage().doubleValue();
-					double advancedAmount = originalPayment * project.getAdvancedPaymentPercentage().doubleValue();
-					totalRetained = totalRetained + retainedAmount;
-					entity.setPayments(payment);
-				} else
-					entity.setPayments(payment + totalRetained);
-
-				entity.setBalance(PaymentUtil.getBalance(date, entity, results));
-				entity.setNetBalance(entity.getBalance() + entity.getFinanceCost());
-
-				results.put(PaymentUtil.dateOnlyFormat.format(date) + "," + project.getProjectId(), entity);
-			}
-			long endTime = System.nanoTime();
-
 			ProjectSolutionDetails details = new ProjectSolutionDetails(false, project);
-			long endTime2 = System.nanoTime();
-			
-			long duration1 = (endTime - startTime); 
-			long duration2 = (endTime2 - endTime);
+			details.savePaymentToDB(session);
 
-/*/			
-			ProjectSolutionDetails details = new ProjectSolutionDetails(false, project);
-//*/
 			
 			return new ServerResponse("0", "Success", details.getResults());
 		} catch (EntityControllerException e) {
@@ -1778,9 +1725,9 @@ public class PortfolioController {
 	private static final String FINANCE_HORIZONTAL_LINE = "<path d=\"M %d %d l %d 0\" stroke=\"lightgrey\" stroke-width=\"1\" fill=\"none\"></path><text x=\"10\" y=\"%d\" font-size=\"12\" stroke=\"black\">%.2f</text>\r";
 	private static final String DATE_VERTICAL = "<text transform=\"translate(%d %d) rotate(-90)\" font-size=\"12\" fill=\"gray\" fill-opacity=\"0.7\">%s</text>\r";
 	
-	private static final String FINANCE_PATH = "<path d=\"%s\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><path d=\"M 250 498 l 75 0\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><text x=\"250\" y=\"492\" font-size=\"18\" stroke=\"orange\">Finance</text>";
-	private static final String ORIGINAL_PATH = "<path d=\"%s\" stroke=\"red\" stroke-width=\"2\"  stroke-opacity=\"0.7\" fill=\"none\"></path><path d=\"M 400 498 l 75 0\" stroke=\"red\" stroke-width=\"2\" stroke-opacity=\"0.6\" fill=\"none\"></path><text x=\"400\" y=\"492\" font-size=\"18\" stroke=\"red\">Original</text>";
-	private static final String CURRENT_PATH = "<path d=\"%s\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><path d=\"M 550 498 l 75 0\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><text x=\"550\" y=\"492\" font-size=\"18\" stroke=\"green\">Final</text>";
+	private static final String FINANCE_PATH = "<path d=\"%s\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><path d=\"M 250 " + (SVG_HEIGHT-2) + " l 75 0\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><text x=\"250\" y=\"" + (SVG_HEIGHT-8) + "\" font-size=\"18\" stroke=\"orange\">Finance</text>";
+	private static final String ORIGINAL_PATH = "<path d=\"%s\" stroke=\"red\" stroke-width=\"2\"  stroke-opacity=\"0.7\" fill=\"none\"></path><path d=\"M 400 " + (SVG_HEIGHT-2) + " l 75 0\" stroke=\"red\" stroke-width=\"2\" stroke-opacity=\"0.6\" fill=\"none\"></path><text x=\"400\" y=\"" + (SVG_HEIGHT-8) + "\" font-size=\"18\" stroke=\"red\">Original</text>";
+	private static final String CURRENT_PATH = "<path d=\"%s\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><path d=\"M 550 " + (SVG_HEIGHT-2) + " l 75 0\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><text x=\"550\" y=\"" + (SVG_HEIGHT-8) + "\" font-size=\"18\" stroke=\"green\">Final</text>";
 	
 	/*
 	 * returns SVG for the flow chart
@@ -1804,6 +1751,8 @@ public class PortfolioController {
 			for (Project project: projects) {
 				projectIds.add(project.getProjectId());
 				ProjectSolutionDetails details = new ProjectSolutionDetails(false, project);
+				details.savePaymentToDB(session);
+
 				finalSolutions.put(project.getProjectId(),details.getResults());
 				if (solved) {
 					ProjectSolutionDetails details2 = new ProjectSolutionDetails(true, project);
@@ -1814,7 +1763,8 @@ public class PortfolioController {
 					if (endDate==null || endDate.before(details2.getPortfolioEnd())) {
 						endDate = details2.getPortfolioEnd();
 					}
-				}
+				} 
+				
 				if (startDate==null || startDate.after(details.getPortfolioStart())) {
 					startDate = details.getPortfolioStart();
 				}

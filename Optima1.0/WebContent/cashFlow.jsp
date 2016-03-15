@@ -13,7 +13,7 @@
 	</div>
 	<h3>Cash flow chart</h3>
 	<div style="overflow:hidden;height:100%">
-	<div id="cashflowChartDiv" style="height:540px;overflow-x:auto;overflow-y:hidden">
+	<div id="cashflowChartDiv" style="height:540px;overflow-x:auto;overflow-y:auto">
  	</div>
  	</div>
 </div>

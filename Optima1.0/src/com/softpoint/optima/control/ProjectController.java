@@ -25,10 +25,13 @@ import javax.servlet.http.HttpSession;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Client;
+import com.softpoint.optima.db.DaysOff;
 import com.softpoint.optima.db.LocationInfo;
+import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.PlanProject;
 import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.Project;
+import com.softpoint.optima.db.ProjectLight;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.Settings;
@@ -245,6 +248,37 @@ public class ProjectController {
 		}
 	}
 
+	
+	public List<Project> findAllInList(HttpSession session, Set<Integer> includedProjectsSet) throws OptimaException {
+		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		try {
+			String inClause = "";
+			for (Integer i:includedProjectsSet) {
+				if (!inClause.isEmpty()) {
+					inClause += ",";
+				}
+				inClause += i;
+			}
+			inClause = "(" + inClause + ")";
+			List<Project> dayOffs = controller.findAllQuery(Project.class , "Select d from Project d where d.projectId in  "  + inClause);
+			return dayOffs;
+		} catch (EntityControllerException e) {
+		}
+		return new ArrayList<Project>();
+	}
+
+	
+	public ServerResponse findAllLight(HttpSession session) throws OptimaException {
+		EntityController<ProjectLight> controller = new EntityController<ProjectLight>(session.getServletContext());
+		try {
+			List<ProjectLight> projects = controller.findAll(ProjectLight.class);
+			return new ServerResponse("0", PortfolioSolver.SUCCESS, projects);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PROJ0005", String.format("Error loading projects : %s", e.getMessage()), e);
+		}
+	}
+	
 	/**
 	 * @param session
 	 * @return
@@ -261,6 +295,16 @@ public class ProjectController {
 		}
 	}
 
+	public List<Payment> findAllPaymentsByProjectId(HttpSession session, int projectId) throws OptimaException {
+		try {
+			EntityController<Payment> paymentController = new EntityController<Payment>(session.getServletContext());
+			List<Payment> dayOffs = paymentController.findAll(Payment.class , "Select d from Payment d where d.projectId = ?1 " , projectId);
+			return dayOffs;
+		} catch (EntityControllerException e) {
+		}
+		return new ArrayList<Payment>();
+	}
+	
 	/**
 	 * @param session
 	 * @return
@@ -1163,33 +1207,50 @@ public class ProjectController {
 			List<String> years = new ArrayList<String>();
 
 			EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
-			List<Project> allProjects = controller.findAll(Project.class);
+			List<Project> allProjects = findAllInList(session,includedProjectsSet);
 			List<Map<String, Object>> selectProjectDetails = new ArrayList<Map<String, Object>>();
 
 			for (Project proj : allProjects) {
-				if (includedProjectsSet.contains(proj.getProjectId()) && proj.getPropusedStartDate() != null) {
-					Date[] dates = PaymentUtil.getProjectExtendedDateRanges(controller, proj);
-					if (!(dates[0].after(planEnd) || planStart.after(dates[1]))) {
-						ProjectSolutionDetails details = new ProjectSolutionDetails(false, proj);
-						Map<String, Object> projDetails = new HashMap<String, Object>();
-						selectProjectDetails.add(projDetails);
-						projDetails.put("Project", proj);
-						projDetails.put("Start", dates[0]);
-						projDetails.put("End", dates[1]);
-
-						for (String dateString : details.getResults().keySet()) {
-							DailyCashFlowMapEntity det = details.getResults().get(dateString);
-							if (det.getPayments() != 0) {
-								if (dateString.indexOf(",") !=-1 ) {
-									dateString = dateString.substring(0,dateString.indexOf(","));
+				try {
+					if (includedProjectsSet.contains(proj.getProjectId()) && proj.getPropusedStartDate() != null) {
+						Date[] dates = PaymentUtil.getProjectExtendedDateRanges(controller, proj);
+						if (!(dates[0].after(planEnd) || planStart.after(dates[1]))) {
+							List<Payment> paymentList = findAllPaymentsByProjectId(session, proj.getProjectId());
+							Map<String, Object> projDetails = new HashMap<String, Object>();
+	
+							selectProjectDetails.add(projDetails);
+							projDetails.put("Project", proj);
+							projDetails.put("Start", dates[0]);
+							projDetails.put("End", dates[1]);
+	
+							if (paymentList==null || paymentList.size()==0) {
+								ProjectSolutionDetails details = new ProjectSolutionDetails(false, proj);
+								details.savePaymentToDB(session);
+	
+								for (String dateString : details.getResults().keySet()) {
+									DailyCashFlowMapEntity det = details.getResults().get(dateString);
+									if (det.getPayments() != 0) {
+										if (dateString.indexOf(",") !=-1 ) {
+											dateString = dateString.substring(0,dateString.indexOf(","));
+										}
+										Date date = dmyFormatter.parse(dateString);
+										if (!date.before(planStart) && !date.after(planEnd)) {
+											addPayment(projDetails, date, det.getPayments());
+										}
+									}
 								}
-								Date date = dmyFormatter.parse(dateString);
-								if (!date.before(planStart) && !date.after(planEnd)) {
-									addPayment(projDetails, date, det.getPayments());
+							} else {
+								for (Payment payment:paymentList) {
+									Date date = payment.getPaymentDate();
+									if (!date.before(planStart) && !date.after(planEnd)) {
+										addPayment(projDetails, date, payment.getPaymentAmount().doubleValue());
+									}
 								}
 							}
 						}
 					}
+				} catch (Exception e) {
+					
 				}
 			}
 			return new ServerResponse("0", "Success", selectProjectDetails);
@@ -1333,5 +1394,5 @@ public class ProjectController {
 			return new ServerResponse("PROJ0005", String.format("Error loading plan projects : %s", e.getMessage()), e);
 		}
 	}
-
+	
 }

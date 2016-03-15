@@ -1,18 +1,31 @@
 package com.softpoint.optima.util;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.servlet.http.HttpSession;
+
+import com.softpoint.optima.OptimaException;
+import com.softpoint.optima.ServerResponse;
+import com.softpoint.optima.control.EntityController;
+import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.control.PortfolioController;
 import com.softpoint.optima.db.DaysOff;
+import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.Project;
+import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
+import com.softpoint.optima.db.Settings;
 import com.softpoint.optima.db.WeekendDay;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
+import com.softpoint.optima.util.solution.ProjectWrapper;
 
 public class ProjectSolutionDetails {
 	// if true then origianl, if false then final
@@ -32,15 +45,17 @@ public class ProjectSolutionDetails {
 	}
 
 	private Date portfolioEnd;
+	private int projectId;
 
 	private List<ProjectTask> projectTasks;
 	private Map<ProjectTask, Date> tasksEnd;
 	Map<String, DailyCashFlowMapEntity> results;
+	Map<Date, Double> allPayments = new HashMap<Date, Double>();
 
 	public ProjectSolutionDetails(boolean originalOrFinal, Project project) {
 		super();
 		this.originalOrFinal = originalOrFinal;
-
+		projectId = project.getProjectId();
 	//	projects = new ArrayList<Project>();
 		tasksEnd = new HashMap<ProjectTask, Date>();
 		results = new HashMap<String, DailyCashFlowMapEntity>();
@@ -66,6 +81,7 @@ public class ProjectSolutionDetails {
 			double ammount = getAdvancedPaymentAmmount(project);
 			if (ammount != 0) {
 				paymentsCalendar.put(projectStart, ammount);
+				allPayments.put(projectStart, ammount);
 			}
 			List<DaysOff> daysOff = project.getDaysOffs();
 			WeekendDay weekEnds = project.getWeekendDays();
@@ -108,6 +124,7 @@ public class ProjectSolutionDetails {
 							* (1 - project.getAdvancedPaymentPercentage().doubleValue()
 									- project.getRetainedPercentage().doubleValue());
 					paymentsCalendar.put(paymentCal.getTime(), paymentValue);
+					allPayments.put(paymentCal.getTime(), paymentValue);
 					numberOfDaysSinceLastRequest = 0;
 					currentRequestTotal = 0d;
 				}
@@ -129,6 +146,7 @@ public class ProjectSolutionDetails {
 				}
 				if (date.equals(projectEnd)) {
 					payment += totalRetained;
+					allPayments.put(date, payment);
 				}
 				entity.setPayments(payment);
 
@@ -271,5 +289,80 @@ public class ProjectSolutionDetails {
 			return theDate;
 		}
 	}
+	
+	public void savePaymentToDB(HttpSession session) {
+		List<Date> keys = new ArrayList<Date>(allPayments.keySet());
+		Collections.sort(keys);
+		try {
+			ProjectSolutionDetails.removePaymentsByProjectId(session, projectId);
+		} catch (OptimaException e1) {
+		}
+		EntityController<Payment> controller = new EntityController<Payment>(session.getServletContext());
+		try {
+			controller.mergeTransactionStart();
+			for (Date k:keys) {
+				Double val = allPayments.get(k);
+				if (val!=0) { 
+					Payment p = new Payment();
+					p.setPaymentAmount(BigDecimal.valueOf(val));
+					p.setPaymentDate(k);
+					p.setProjectId(projectId);
+					controller.merge(p);
+				}
+			}
+
+			controller.mergeTransactionClose();
+		} catch (EntityControllerException e) {
+		}
+	}
+	
+	public static ServerResponse removePaymentsByProjectId(HttpSession session , int projectId) throws OptimaException {
+		EntityController<ProjectPayment> controller = new EntityController<ProjectPayment>(session.getServletContext());
+		try {
+			controller.dml(ProjectPayment.class, "Delete from Payment p Where p.projectId = ?1" , projectId);
+			return new ServerResponse("0", "Success", null);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PAYM0010" , String.format("Error loading projectPayments : %s" , e.getMessage() ), e);
+		}
+	}
+	
+	/*
+	public void updateTask(EntityController<ProjectTask> taskController, TaskTreeNode task) throws EntityControllerException {
+		Date d1 = task.getCalculatedTaskStart();
+		Date d2 = task.getCalculatedTaskEnd();
+		
+		int diff = TaskUtil.daysBetween(d1, d2) + 1;
+		if (task.task.getScheduledStartDate()==null || task.task.getCalendarStartDate()==null ||
+				!task.task.getScheduledStartDate().equals(d1) || !task.task.getCalendarStartDate().equals(d1)) {
+			task.task.setScheduledStartDate(d1);
+			task.task.setCalendarStartDate(d1);
+			task.task.setCalenderDuration(diff);
+			taskController.mergeTransactionMerge(task.task);
+			
+		}
+		for (TaskTreeNode child:task.getChildren()) {
+			updateTask(taskController, child);
+		}
+	}
+	
+	public void commitSolution(EntityController<ProjectTask> taskController,ProjectWrapper project, ConcurrentMap<String, Object> solStatus) {
+		try {
+			Integer i = (Integer) solStatus.get(DONE);
+			if (i==null) {
+				i=0;
+			}
+			for (TaskTreeNode task:project.rootTasks) {
+				i++;
+				solStatus.put(DONE,i);
+				updateTask(taskController, task);
+			}
+
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+		}
+	}
+
+	 * */
 
 }

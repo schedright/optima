@@ -255,5 +255,14 @@ project_id INT unique,
 CONSTRAINT FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE 
 );
 
+create table Payment (
+Payment_id INT NOT null AUTO_INCREMENT primary key, 
+project_id INT, 
+payment_date DATE, 
+payment_amount numeric(19,3),
+UNIQUE KEY (project_id,payment_date),
+CONSTRAINT FOREIGN KEY (project_id) REFERENCES project(project_id) on delete cascade
+);
+
 commit;
 

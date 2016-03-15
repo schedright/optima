@@ -24,3 +24,13 @@ alter table capicatl_plan_projects drop foreign key  capicatl_plan_projects_ibfk
 alter table capicatl_plan_projects 
 add constraint  capicatl_plan_projects_ibfk_1 
 FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) on delete cascade ;
+
+
+create table Payment (
+Payment_id INT NOT null AUTO_INCREMENT primary key, 
+project_id INT, 
+payment_date DATE, 
+payment_amount numeric(19,3),
+UNIQUE KEY (project_id,payment_date),
+CONSTRAINT FOREIGN KEY (project_id) REFERENCES project(project_id) on delete cascade
+);
