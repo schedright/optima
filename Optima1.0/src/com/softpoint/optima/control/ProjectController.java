@@ -25,7 +25,6 @@ import javax.servlet.http.HttpSession;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Client;
-import com.softpoint.optima.db.DaysOff;
 import com.softpoint.optima.db.LocationInfo;
 import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.PlanProject;
@@ -1209,7 +1208,8 @@ public class ProjectController {
 			EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 			List<Project> allProjects = findAllInList(session,includedProjectsSet);
 			List<Map<String, Object>> selectProjectDetails = new ArrayList<Map<String, Object>>();
-
+			StringBuilder errorMessage = new StringBuilder();
+			
 			for (Project proj : allProjects) {
 				try {
 					if (includedProjectsSet.contains(proj.getProjectId()) && proj.getPropusedStartDate() != null) {
@@ -1247,13 +1247,19 @@ public class ProjectController {
 									}
 								}
 							}
+							if (!projDetails.containsKey("Details")) {
+								errorMessage.append("<p>Failed to get the solution details for project \"").append(proj.getProjectName()).append("\"</p>");
+							}
 						}
 					}
 				} catch (Exception e) {
-					
+					errorMessage.append("<p>Failed to get the solution details for project \"").append(proj.getProjectName()).append("\"</p>");
 				}
 			}
-			return new ServerResponse("0", "Success", selectProjectDetails);
+			Map<String,Object> ret = new HashMap<String,Object>();
+			ret.put("data", selectProjectDetails);
+			ret.put("errors", errorMessage.toString());
+			return new ServerResponse("0", "Success", ret);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ServerResponse("PORT0008", String.format("Error loading portfolios : %s", e.getMessage()), e);

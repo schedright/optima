@@ -1,8 +1,15 @@
-var plansList = rpcClient.projectService.getPlan();
+var planRet = rpcClient.projectService.getPlan();
 var planDates = rpcClient.projectService.getPlanDates();
+var plansList = planRet.data.map;
+var errorMessage = planRet.data.map.errors;
 
 $(function() {
 	var projects = plansList.data.list;
+	if (errorMessage) {
+		setTimeout(function() {
+			showMessage("Project Error",'<p>Error getting project details for</p>' + errorMessage,'error');
+		},0);
+	}
 	var allYears = [];
 	/*
 	 * for (var i=0;i<projects.length;i++) { var proj = projects[i].map; var
@@ -66,6 +73,9 @@ $(function() {
 	var allRowsTotal = 0;
 	for (var i = 0; i < projects.length; i++) {
 		var proj = projects[i].map;
+		if (!proj.Details) {
+			continue;
+		}
 		var yearsMap = proj.Details.map;
 
 		var row = {
