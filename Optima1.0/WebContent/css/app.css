@@ -227,6 +227,10 @@ text-align:center;
 margin:0 0 0 -1px;
 }
 
+.tasksgantt .year {
+	//height:0px !Important;
+}
+
 .fn-gantt-hint {
 border:5px solid #edc332;
 background-color:#fff5d4;

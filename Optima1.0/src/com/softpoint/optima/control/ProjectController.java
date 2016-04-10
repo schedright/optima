@@ -4,7 +4,6 @@
 package com.softpoint.optima.control;
 
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,13 +17,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
-import com.softpoint.optima.db.Client;
-import com.softpoint.optima.db.LocationInfo;
 import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.PlanProject;
 import com.softpoint.optima.db.Portfolio;
@@ -32,8 +28,6 @@ import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectLight;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.Settings;
-import com.softpoint.optima.db.User;
-import com.softpoint.optima.db.UserRole;
 import com.softpoint.optima.db.WeekendDay;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 import com.softpoint.optima.struct.Period;
@@ -67,8 +61,7 @@ public class ProjectController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse create(HttpSession session, String name, String code, String descritpion,
-			String streetAddress, int cityId, int provideId, int countryId, String postalCode, Date proposedStartDate,
-			Date proposedFinishDate, double interestRate, double overheadPerDay, int portfolioId, int clientId,
+			Date proposedStartDate, Date proposedFinishDate, double interestRate, double overheadPerDay, int portfolioId, 
 			int weekendDaysId, double retainedPercentage, double advancedPaymentPercentage,
 			double advancedPaymentAmount, double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod)
 					throws OptimaException {
@@ -79,16 +72,7 @@ public class ProjectController {
 			project.setProjectName(name);
 			project.setProjectCode(code);
 			project.setProjectDescription(descritpion);
-			project.setProjectAddressStreet(streetAddress);
-			project.setProjectAddressPostalCode(postalCode);
-			EntityController<LocationInfo> locInfoController = new EntityController<LocationInfo>(
-					session.getServletContext());
-			LocationInfo city = locInfoController.find(LocationInfo.class, cityId);
-			LocationInfo province = locInfoController.find(LocationInfo.class, provideId);
-			LocationInfo country = locInfoController.find(LocationInfo.class, countryId);
-			project.setCity(city);
-			project.setProvince(province);
-			project.setCountry(country);
+			
 			project.setPropusedStartDate(proposedStartDate);
 			project.setProposedFinishDate(proposedFinishDate);
 			project.setInterestRate(new BigDecimal(interestRate));
@@ -105,10 +89,6 @@ public class ProjectController {
 			EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
 			Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
 			project.setPortfolio(portfolio);
-
-			EntityController<Client> cliController = new EntityController<Client>(session.getServletContext());
-			Client client = cliController.find(Client.class, clientId);
-			project.setClient(client);
 
 			EntityController<WeekendDay> dayOffController = new EntityController<WeekendDay>(
 					session.getServletContext());
@@ -130,8 +110,7 @@ public class ProjectController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse update(HttpSession session, int key, String name, String code, String descritpion,
-			String streetAddress, int cityId, int provideId, int countryId, String postalCode, Date proposedStartDate,
-			Date proposedFinishDate, double interestRate, double overheadPerDay, int portfolioId, int clientId,
+			Date proposedStartDate,	Date proposedFinishDate, double interestRate, double overheadPerDay, int portfolioId,
 			int weekendDaysId, double retainedPercentage, double advancedPaymentPercentage,
 			double advancedPaymentAmount, double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod)
 					throws OptimaException {
@@ -142,16 +121,6 @@ public class ProjectController {
 			project.setProjectName(name);
 			project.setProjectCode(code);
 			project.setProjectDescription(descritpion);
-			project.setProjectAddressStreet(streetAddress);
-			project.setProjectAddressPostalCode(postalCode);
-			EntityController<LocationInfo> locInfoController = new EntityController<LocationInfo>(
-					session.getServletContext());
-			LocationInfo city = locInfoController.find(LocationInfo.class, cityId);
-			LocationInfo province = locInfoController.find(LocationInfo.class, provideId);
-			LocationInfo country = locInfoController.find(LocationInfo.class, countryId);
-			project.setCity(city);
-			project.setProvince(province);
-			project.setCountry(country);
 			project.setPropusedStartDate(proposedStartDate);
 			project.setProposedFinishDate(proposedFinishDate);
 			project.setInterestRate(new BigDecimal(interestRate));
@@ -168,10 +137,6 @@ public class ProjectController {
 			EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
 			Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
 			project.setPortfolio(portfolio);
-
-			EntityController<Client> cliController = new EntityController<Client>(session.getServletContext());
-			Client client = cliController.find(Client.class, clientId);
-			project.setClient(client);
 
 			EntityController<WeekendDay> dayOffController = new EntityController<WeekendDay>(
 					session.getServletContext());
@@ -305,17 +270,6 @@ public class ProjectController {
 	 * @return
 	 * @throws OptimaException
 	 */
-/*	public ServerResponse findAllByClient(HttpSession session, int clientId) throws OptimaException {
-		try {
-			EntityController<Client> cliController = new EntityController<Client>(session.getServletContext());
-			Client client = cliController.find(Client.class, clientId);
-			return new ServerResponse("0", PortfolioSolver.SUCCESS, client.getProjects());
-		} catch (EntityControllerException e) {
-			e.printStackTrace();
-			return new ServerResponse("PROJ0007", String.format("Error loading projects : %s", e.getMessage()), e);
-		}
-	}
-*/
 	public ServerResponse getOtherProjectsCurrentPeriodCost(HttpSession session, int projectId, Date from, Date to) {
 
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());

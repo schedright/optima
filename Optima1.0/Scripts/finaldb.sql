@@ -2,40 +2,6 @@ drop schema optima;
 create schema optima;
 use optima;
 
-create  table location_info (
-location_id INT NOT null AUTO_INCREMENT primary key, 
-location_name varchar(50) not null, 
-location_type varchar(10), 
-parent_id INT, 
-CONSTRAINT location_paret_id FOREIGN KEY (parent_id) REFERENCES location_info (location_id) ON DELETE SET NULL ON UPDATE CASCADE
-);
-
-Create Index location_name_idx on location_info(location_name);
-
-create table client (
-client_id INT NOT null AUTO_INCREMENT primary key, 
-client_name varchar(100) not null, 
-client_address_street varchar(100), 
-client_address_city INT, 
-client_address_province INT, 
-client_address_country INT, 
-client_address_postal_code varchar(50)
-); 
-
-create index client_name_idx on client(client_name);
-
-ALTER TABLE client ADD 
-FOREIGN KEY (client_address_city) REFERENCES location_info(location_id) 
-ON UPDATE CASCADE ON DELETE SET NULL;
-
-ALTER TABLE client ADD 
-FOREIGN KEY (client_address_province) REFERENCES location_info(location_id) 
-ON UPDATE CASCADE ON DELETE SET NULL;
-
-ALTER TABLE client ADD 
-FOREIGN KEY (client_address_country) REFERENCES location_info(location_id) 
-ON UPDATE CASCADE ON DELETE SET NULL;
-
 create table portfolio (
 portfolio_id INT NOT null AUTO_INCREMENT primary key, 
 portfolio_name varchar(32),
@@ -64,16 +30,10 @@ create index weekend_days_idx on weekend_days(weekend_days);
 
 create table project (
 project_id INT NOT null AUTO_INCREMENT primary key, 
-client_id INT, 
 portfolio_id INT, 
 project_name varchar(128) not null, 
 project_code varchar(32) not null, 
 project_description varchar(1024),
-project_address_street varchar(100), 
-project_address_city INT, 
-project_address_province INT,
-project_address_country INT, 
-project_address_postal_code varchar(50), 
 propused_start_date DATE, 
 proposed_finish_date DATE, 
 Weekend_days_id INT, 
@@ -91,22 +51,6 @@ create index project_name_idx on project(project_name);
 create index project_code_idx on project(project_code);
 
 ALTER TABLE project ADD  UNIQUE (project_code);
-
-ALTER TABLE project ADD 
-FOREIGN KEY (project_address_city) REFERENCES location_info(location_id) 
-ON UPDATE CASCADE ON DELETE SET NULL;
-
-ALTER TABLE project ADD 
-FOREIGN KEY (project_address_province) REFERENCES location_info(location_id) 
-ON UPDATE CASCADE ON DELETE SET NULL;
-
-ALTER TABLE project ADD 
-FOREIGN KEY (project_address_country) REFERENCES location_info(location_id) 
-ON UPDATE CASCADE ON DELETE SET NULL;
-
-ALTER TABLE project ADD 
-FOREIGN KEY (client_id) REFERENCES client(client_id) 
-ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 ALTER TABLE project ADD 

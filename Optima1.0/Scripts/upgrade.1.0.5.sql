@@ -48,9 +48,26 @@ create table user_role (
   FOREIGN KEY (user_name) REFERENCES user(user_name) ON UPDATE CASCADE ON DELETE CASCADE;
 );
 
+alter table portfolio add column solve_timestamp timestamp;
+
 alter table Project add column last_updated timestamp default now() on update now() ;
 alter table project_task add column last_updated timestamp default now() on update now() ;
 alter table portfolio_finance add column last_updated timestamp default now() on update now() ;
-alter table portfolio_finance add column last_updated timestamp default now() on update now() ;
 alter table capicatl_plan_projects add column last_updated timestamp default now() on update now() ;
 alter table payment add column last_updated timestamp default now() on update now() ;
+
+alter table project drop foreign key project_ibfk_1;
+alter table project drop foreign key project_ibfk_2;
+alter table project drop foreign key project_ibfk_3;
+alter table project drop foreign key project_ibfk_4;
+
+
+alter table project drop column project_address_city;
+alter table project drop column project_address_country;
+alter table project drop column project_address_postal_code;
+alter table project drop column project_address_street;
+alter table project drop column project_address_province;
+alter table project drop column client_id;
+
+drop table client;
+drop table location_info;

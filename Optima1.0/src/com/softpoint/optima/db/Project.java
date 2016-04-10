@@ -42,12 +42,6 @@ public class Project implements Serializable {
 	@Column(name = "overhead_per_day")
 	private BigDecimal overheadPerDay;
 
-	@Column(name = "project_address_postal_code")
-	private String projectAddressPostalCode;
-
-	@Column(name = "project_address_street")
-	private String projectAddressStreet;
-
 	@Column(name = "project_code")
 	private String projectCode;
 
@@ -71,26 +65,6 @@ public class Project implements Serializable {
 	// bi-directional many-to-one association to DaysOff
 	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
 	private List<DaysOff> daysOffs;
-
-	// bi-directional many-to-one association to Client
-	@ManyToOne
-	@JoinColumn(name = "client_id")
-	private Client client;
-
-	// bi-directional many-to-one association to LocationInfo
-	@ManyToOne
-	@JoinColumn(name = "project_address_city")
-	private LocationInfo city;
-
-	// bi-directional many-to-one association to LocationInfo
-	@ManyToOne
-	@JoinColumn(name = "project_address_province")
-	private LocationInfo province;
-
-	// bi-directional many-to-one association to LocationInfo
-	@ManyToOne
-	@JoinColumn(name = "project_address_country")
-	private LocationInfo country;
 
 	// bi-directional many-to-one association to Portfolio
 	@ManyToOne
@@ -178,22 +152,6 @@ public class Project implements Serializable {
 		this.overheadPerDay = overheadPerDay;
 	}
 
-	public String getProjectAddressPostalCode() {
-		return this.projectAddressPostalCode;
-	}
-
-	public void setProjectAddressPostalCode(String projectAddressPostalCode) {
-		this.projectAddressPostalCode = projectAddressPostalCode;
-	}
-
-	public String getProjectAddressStreet() {
-		return this.projectAddressStreet;
-	}
-
-	public void setProjectAddressStreet(String projectAddressStreet) {
-		this.projectAddressStreet = projectAddressStreet;
-	}
-
 	public String getProjectCode() {
 		return this.projectCode;
 	}
@@ -262,38 +220,6 @@ public class Project implements Serializable {
 		daysOff.setProject(null);
 
 		return daysOff;
-	}
-
-	public Client getClient() {
-		return this.client;
-	}
-
-	public void setClient(Client client) {
-		this.client = client;
-	}
-
-	public LocationInfo getCity() {
-		return this.city;
-	}
-
-	public void setCity(LocationInfo city) {
-		this.city = city;
-	}
-
-	public LocationInfo getProvince() {
-		return this.province;
-	}
-
-	public void setProvince(LocationInfo province) {
-		this.province = province;
-	}
-
-	public LocationInfo getCountry() {
-		return this.country;
-	}
-
-	public void setCountry(LocationInfo country) {
-		this.country = country;
 	}
 
 	public Portfolio getPortfolio() {

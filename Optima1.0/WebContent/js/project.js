@@ -608,9 +608,8 @@ $(function() {
 			var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
 			var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
 		
-		    var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt").val(), $("#projectDescTxt").val(), $("#projStreet").val(),
-		    		$("#projectCity option:selected").val(), $("#projectProv option:selected").val(), $("#projectCountry option:selected").val(), $("#projPostCode").val(), pStartDateTxt,
-			    pFinishDateTxt, interestRateValue, overHeadPerDayTxt, $("#portfolioId").val(), $("#projectClient").val(), $("#weDays option:selected").val(),
+		    var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt").val(), $("#projectDescTxt").val(), 
+		    		pStartDateTxt, pFinishDateTxt, interestRateValue, overHeadPerDayTxt, $("#portfolioId").val(), $("#weDays option:selected").val(),
 			    retainedPercentageValue, advancedPaymentPercentageValue, advPaymentAmountTxt, delayPenaltyTxt, collectPaymentPeriodTxt, payRequestsPeriodTxt);
 		    if (call.result == 0) {
 				showMessage("Update Project","Project updated successfully",'success',{Close:function(){
@@ -635,52 +634,10 @@ $(function() {
 
     if (projectId != null) {
 
-	var locationsCall = rpcClient.locationService.findAll();
-	$('#projectCountry').append($("<option></option>").val(-1).text(""));
-	$('#projectProv').append($("<option></option>").val(-1).text(""));
-	$('#projectCity').append($("<option></option>").val(-1).text(""));
-	if (locationsCall.result == 0) {
-	    var lData = locationsCall.data.list;
-
-	    for (var i = 0; i < lData.length; i++) {
-		var e = lData[i];
-
-		if (e.locationType == 'COUNTRY')
-		    $('#projectCountry').append($("<option></option>").val(e.locationId).text(e.locationName));
-
-		if (e.locationType == 'PROVINCE')
-		    $('#projectProv').append($("<option></option>").val(e.locationId).text(e.locationName));
-
-		if (e.locationType == 'CITY')
-		    $('#projectCity').append($("<option></option>").val(e.locationId).text(e.locationName));
-
-	    }
-
-	} else {
-		showMessage("Find locations","Error:" + locationsCall.message,'error');
-	}
-
-	var clientInfoCall = rpcClient.clientService.findAll();
-	$('#projectClient').append($("<option></option>").val(-1).text(""));
-	if (clientInfoCall.result == 0) {
-	    var cData = clientInfoCall.data.list;
-
-	    for (var i = 0; i < cData.length; i++) {
-		var e = cData[i];
-
-		$('#projectClient').append($("<option></option>").val(e.clientId).text(e.clientName));
-
-	    }
-
-	} else {
-		showMessage("Get client information","Error:" + clientInfoCall.message,'error');
-	}
-
 	var projCall = rpcClient.projectService.find(projectId);
 
 	var pData;
 
-	// var projectClientId;
 	if (projCall.result == 0) {
 	    pData = projCall.data;
 	    
@@ -690,27 +647,6 @@ $(function() {
 	    document.title = "SchedRight - " + pData.projectCode;
 	    $("#projectDescTxt").val(pData.projectDescription);
 
-	    $("#projStreet").val(pData.projectAddressStreet);
-	    if (pData.country != null) {
-		$("#projectCountry").val(pData.country.locationId).prop('selected', true);
-	    } else {
-		$("#projectCountry").val(-1).prop('selected', true);
-	    }
-
-	    if (pData.province != null) {
-		$("#projectProv").val(pData.province.locationId).prop('selected', true);
-	    } else {
-		$("#projectProv").val(-1).prop('selected', true);
-	    }
-	    if (pData.city != null) {
-		$("#projectCity").val(pData.city.locationId).prop('selected', true);
-	    } else {
-		$("#projectCity").val(-1).prop('selected', true);
-	    }
-	    if (pData.client != null) {
-		$("#projectClient").val(pData.client.clientId).prop('selected', true);
-		loadClientInfo(pData.client.clientId);
-	    }
 	    var fmt2 = new DateFmt("%m/%d/%y");
 	    if (pData.propusedStartDate != null) {
 		$("#pStartDateTxt").val(fmt2.format(new Date(pData.propusedStartDate.time)));
@@ -723,11 +659,6 @@ $(function() {
 	    } else {
 		$("#weDays").val(-1).prop('selected', true);
 	    }
-	    // setSelectedOption("#projectCountry", pData.country.locationId);
-	    // setSelectedOption("#projectProv", pData.province.locationId);
-	    // setSelectedOption("#projectCity", pData.city.locationId);
-
-	    $("#projPostCode").val(pData.projectAddressPostalCode);
 
 	    $("#interestRateTxt").val(roundToThreePlaces( parseFloat(pData.interestRate) * 100 * 360));
 
@@ -745,45 +676,10 @@ $(function() {
 		showMessage("Find Project","Error:" + projCall.message,'error');
 	}
 
-	// /Load Locations
-
-	// /Load clients
-
-	$("#projectClient").change(function() {
-
-	    var selectedClient = $('#projectClient option:selected').attr("value");
-
-	    loadClientInfo(selectedClient);
-
-	});
-
     }
 
 });
 
-
-function loadClientInfo(selectedClient){
-	 if (selectedClient != null && selectedClient != -1) {
-			var clientCall = rpcClient.clientService.find(selectedClient);
-
-			if (clientCall.result == 0) {
-			    var cData = clientCall.data;
-			    $("#clientStreet").val(cData.clientAddressStreet);
-			    $("#clientCountry").val(cData.country.locationName);
-			    $("#clientProv").val(cData.province.locationName);
-			    $("#clientCity").val(cData.city.locationName);
-			    $("#clientPostCode").val(cData.clientAddressPostalCode);
-			} else {
-				showMessage("Find Client","Error:" + clientCall.message,'error');
-			}
-		}else{
-			$("#clientStreet").val('');
-		    $("#clientCountry").val('');
-		    $("#clientProv").val('');
-		    $("#clientCity").val('');
-		    $("#clientPostCode").val('');
-		}
-}
 
 /*
  * $(document).ready(function(){

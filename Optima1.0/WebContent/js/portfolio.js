@@ -45,7 +45,7 @@ $(document).ready( function() {
 	);
 	$( "#createOrEditProjectDialog" ).dialog({
 	      autoOpen: false,
-	      height: 500,
+	      height: 300,
 	      width: 720,
 	      modal: true,
 	      show: {
@@ -63,36 +63,7 @@ $(document).ready( function() {
 	        	$("#projectProvince").append("<option value=\"0\"></option>");
 	        	$("#projectCountry").empty();
 	        	$("#projectCountry").append("<option value=\"0\"></option>");
-	        	rpcClient.locationService.findAllByType(function(result , exception) {
-	        		 var cities = result.data;
-		        	 if (result.result ==  0 && cities != null ) {
-		        		for (var index = 0 ; index < cities.list.length ; index++ ) {
-		        			$("#projectCity").append("<option value=\"" + cities.list[index].locationId + "\">" + cities.list[index].locationName + "</option>");
-		        		}
-		        	 }
-	        	 } ,"CITY");
-	        	
-	        	 
-	        	rpcClient.locationService.findAllByType(function(result , exception) {
-	        		 var provinces = result.data;
-		        	 if (result.result ==  0 && provinces != null ) {
-		        		for (var index = 0 ; index < provinces.list.length ; index++ ) {
-		        			$("#projectProvince").append("<option value=\"" + provinces.list[index].locationId + "\">" + provinces.list[index].locationName + "</option>");
-		        		}
-		        	 }
-	        	 } , "PROVINCE");
-	        	 
-	        	 
-	        	rpcClient.locationService.findAllByType(function(result , exception) {
-	        		 var countries = result.data;
-		        	 if (result.result ==  0 && countries != null ) {
-		        		for (var index = 0 ; index < countries.list.length ; index++ ) {
-		        			$("#projectCountry").append("<option value=\"" + countries.list[index].locationId + "\">" + countries.list[index].locationName + "</option>");
-		        		}
-		        	 }
-	        	 }, "COUNTRY");
-	        	 
-	        	 
+
 	        	 
 	        	 var projectId = $(this).data("projectId");
 	        	 if (projectId != null) {
@@ -155,24 +126,14 @@ $(document).ready( function() {
 	        					 $("#projectName").val(),
 	        					 $("#projectCode").val(),
 	        					 $("#projectDescription").val(),
-	        					 $("#projectStreetAddress").val(),
-	        					 $('#projectCity option:selected').val(),
-	        					 $('#projectProvince option:selected').val(),
-	        					 $('#projectCountry option:selected').val(),
-	        					 $("#projectPostalCode").val(), 
-	        					 null , null , 0.0 , 0.0 , portfolioId , -1, -1, 0, 0, 0, 0, 0, 0);
+	        					 null , null , 0.0 , 0.0 , portfolioId , -1, 0, 0, 0, 0, 0, 0);
 	        					
 	        		 } else {
 	        			 call =  rpcClient.projectService.update( projectId , 
 	        					 $("#projectName").val(),
 	        					 $("#projectCode").val(),
 	        					 $("#projectDescription").val(),
-	        					 $("#projectStreetAddress").val(),
-	        					 $('#projectCity option:selected').val(),
-	        					 $('#projectProvince option:selected').val(),
-	        					 $('#projectCountry option:selected').val(),
-	        					 $("#projectPostalCode").val(), 
-	        					 null , null , 0.0 , 0.0 , portfolioId , -1, -1, 0, 0, 0, 0, 0, 0);
+	        					 null , null , 0.0 , 0.0 , portfolioId , -1, 0, 0, 0, 0, 0, 0);
 	        		 }
 	        		  if (call.result == 0) {
 	        			 $( this ).dialog( "close" );
