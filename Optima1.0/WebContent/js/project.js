@@ -640,8 +640,11 @@ $(function() {
 
 	if (projCall.result == 0) {
 	    pData = projCall.data;
-	    
-	    $("#portfolioId").val(pData.portfolio.portfolioId);
+	    var portId=-1;
+	    if (pData.portfolio && pData.portfolio.portfolioId) {
+	    	portId = pData.portfolio.portfolioId;
+	    }
+	    $("#portfolioId").val(portId);
 	    $("#projnameTxt").val(pData.projectName);
 	    $("#projCodeTxt").val(pData.projectCode);
 	    document.title = "SchedRight - " + pData.projectCode;

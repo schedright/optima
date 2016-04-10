@@ -57,13 +57,6 @@ $(document).ready( function() {
 	          duration: 1000
 	        },
 	        open : function() {
-	        	$("#projectCity").empty();
-	        	$("#projectCity").append("<option value=\"0\"></option>");
-	        	$("#projectProvince").empty();
-	        	$("#projectProvince").append("<option value=\"0\"></option>");
-	        	$("#projectCountry").empty();
-	        	$("#projectCountry").append("<option value=\"0\"></option>");
-
 	        	 
 	        	 var projectId = $(this).data("projectId");
 	        	 if (projectId != null) {
@@ -73,19 +66,6 @@ $(document).ready( function() {
 		        			 $("#projectName").val(data.projectName);
 		        			 $("#projectCode").val(data.projectCode);
 		        			 $("#projectDescription").val(data.projectDescription);
-		        			 $("#projectStreetAddress").val(data.projectAddressStreet);
-		        			 if (data.city) {
-		        				 $("#projectCity option[value=" + data.city.locationId + "]").attr('selected', 'selected');
-		        			 }
-		        			 if (data.province) {
-		        				 $("#projectProvince option[value=" + data.province.locationId + "]").attr('selected', 'selected');
-		        			 }
-		        			 if (data.country) {
-		        				 $("#projectCountry option[value=" + data.country.locationId + "]").attr('selected', 'selected');
-		        			 }
-		        			 if (data.projectAddressPostalCode) {
-		        				 $("#projectPostalCode").val(data.projectAddressPostalCode);		        				 
-		        			 }
 		        		 } else {
 		        			 showMessage("Find project",'Error:' + call.message,'error');
 		        		 }
@@ -95,11 +75,6 @@ $(document).ready( function() {
 	        		 $("#projectName").val("");
         			 $("#projectCode").val("");
         			 $("#projectDescription").val("");
-        			 $("#projectStreetAddress").val("");
-        			 $("#projectCity option[value=\"0\"]").attr('selected', 'selected');
-        			 $("#projectProvince option[value=\"0\"]").attr('selected', 'selected');
-        			 $("#projectCountry option[value=\"0\"]").attr('selected', 'selected');
-        			 $("#projectPostalCode").val("");
 	        	 }
 	        },
 	      buttons: {
@@ -107,11 +82,6 @@ $(document).ready( function() {
 	    		 $("#projectName").removeClass( "ui-state-error" );
      			 $("#projectCode").removeClass( "ui-state-error" );
      			 $("#projectDescription").removeClass( "ui-state-error" );
-     			 $("#projectStreetAddress").removeClass( "ui-state-error" );
-     			 $("#projectCity").removeClass( "ui-state-error" );
-     			 $("#projectProvince").removeClass( "ui-state-error" ); 
-     			 $("#projectCountry").removeClass( "ui-state-error" );
-     			 $("#projectPostalCode").removeClass( "ui-state-error" );
      			 var bValid = true;
      			 bValid = bValid && checkLength( $("#projectName") , "locationName", 3, 32 );
      			 bValid = bValid && checkLength( $("#projectCode") , "locationName", 3, 32 );

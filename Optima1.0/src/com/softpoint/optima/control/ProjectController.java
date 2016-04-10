@@ -86,10 +86,11 @@ public class ProjectController {
 			project.setPaymentRequestPeriod(paymentRequestPeriod);
 			project.setCollectPaymentPeriod(collectPaymentPeriod);
 
-			EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
-			Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
-			project.setPortfolio(portfolio);
-
+			if (portfolioId!=-1) {
+				EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
+				Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
+				project.setPortfolio(portfolio);
+			}
 			EntityController<WeekendDay> dayOffController = new EntityController<WeekendDay>(
 					session.getServletContext());
 			WeekendDay weekendDay = dayOffController.find(WeekendDay.class, weekendDaysId);
@@ -134,10 +135,12 @@ public class ProjectController {
 			project.setPaymentRequestPeriod(paymentRequestPeriod);
 			project.setCollectPaymentPeriod(collectPaymentPeriod);
 
-			EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
-			Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
-			project.setPortfolio(portfolio);
-
+			if (portfolioId!=-1) {
+				EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
+				Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
+				project.setPortfolio(portfolio);
+			}
+			
 			EntityController<WeekendDay> dayOffController = new EntityController<WeekendDay>(
 					session.getServletContext());
 			WeekendDay weekendDay = dayOffController.find(WeekendDay.class, weekendDaysId);
@@ -146,6 +149,32 @@ public class ProjectController {
 			// because we might have changed the weekend or the days off
 			// Bug#1 Shifting is not working correctly when changing weekends!
 			// -- BassemVic
+			TaskController taskController = new TaskController();
+			taskController.adjustStartDateBasedOnTaskDependency(session, key, false);
+			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PROJ0002", String.format("Error updating project %s: %s",
+					project != null ? project.getProjectName() : "", e.getMessage()), e);
+		}
+	}
+	
+	public ServerResponse updateShort(HttpSession session, int key, String name, String code, String descritpion, int portfolioId)
+					throws OptimaException {
+		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		Project project = null;
+		try {
+			project = controller.find(Project.class, key);
+			project.setProjectName(name);
+			project.setProjectCode(code);
+			project.setProjectDescription(descritpion);
+
+			if (portfolioId!=-1) {
+				EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
+				Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
+				project.setPortfolio(portfolio);
+			}
+			controller.merge(project);
 			TaskController taskController = new TaskController();
 			taskController.adjustStartDateBasedOnTaskDependency(session, key, false);
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);

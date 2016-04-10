@@ -18,7 +18,12 @@
 
 	</div>
 
+	<div id="createOrEditProjectDialog" title="Project">
+		<%@ include file="views/addEditProjectForm.html"%>
+	</div>
+
 </div>
+
 <script src="js/formutils.js"></script>
 <script src="js/allprojects.js"></script>
 

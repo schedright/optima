@@ -11,9 +11,6 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.servlet.ServletContext;
 
-import org.eclipse.persistence.config.CacheUsage;
-import org.eclipse.persistence.config.QueryHints;
-
 import com.softpoint.optima.JsonRpcInitializer;
 
 /**
