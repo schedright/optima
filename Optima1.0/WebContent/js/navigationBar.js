@@ -5,9 +5,10 @@ $(document).ready( function() {
 	}
 	var currentUser = rpcClient.usersService.getCurrentUser();
 	
+	$("#allProjectsNavBar").append("<a href=\"allprojects.jsp\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_projects.png\" />Projects</a>");
 	$("#portfoliosNavBar").append("<a href=\"main.jsp\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_portfolio.png\" />Portfolios</a>");
 	$("#financingNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_financing.png\" />Financing</a>");
-	$("#projectsNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_projects.png\" />Projects</a>");
+	$("#projectsNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_projects.png\" />Project</a>");
 	$("#scheduleNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_Scheduling.png\" />Scheduling</a>");
 	$("#cashflowNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_cashflow.png\" />Cashflow</a>");
 	$("#financialNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results2.png\" />Results</a>");
@@ -156,6 +157,8 @@ $(document).ready( function() {
 		$("#projectsRoadMapNavBar").addClass("active");	
 	else if(currentPage == 8 && isAdminCheck)
 		$("#usersNavBar").addClass("active");	
+	else if(currentPage == 9 && isAdminCheck)
+		$("#allProjectsNavBar").addClass("active");	
 
 	
 	

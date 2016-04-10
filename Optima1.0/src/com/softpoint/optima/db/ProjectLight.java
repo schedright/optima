@@ -1,6 +1,7 @@
 package com.softpoint.optima.db;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  * The persistent class for the project database table.
@@ -40,6 +43,10 @@ public class ProjectLight implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "portfolio_id")
 	private PortfolioLight portfolio;
+
+	@Temporal(TemporalType.DATE)
+	@Column(name = "propused_start_date")
+	private Date propusedStartDate;
 
 	public ProjectLight() {
 	}
@@ -74,6 +81,22 @@ public class ProjectLight implements Serializable {
 
 	public void setProjectName(String projectName) {
 		this.projectName = projectName;
+	}
+
+	public PortfolioLight getPortfolio() {
+		return portfolio;
+	}
+
+	public void setPortfolio(PortfolioLight portfolio) {
+		this.portfolio = portfolio;
+	}
+
+	public Date getPropusedStartDate() {
+		return propusedStartDate;
+	}
+
+	public void setPropusedStartDate(Date propusedStartDate) {
+		this.propusedStartDate = propusedStartDate;
 	}
 
 }
