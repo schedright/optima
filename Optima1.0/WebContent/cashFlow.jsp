@@ -7,7 +7,6 @@
 	<div style="overflow:hidden;height:100%">
 	<div class="form-section" style="margin:5px">
 		<button id="exportToExel">Export to Excel</button>
-		<button id="exportToExelGraph">Export Graph</button>
 		<div id="cashFlowGrid" style="width:100%; height:500px;"></div>
 	</div>
 	</div>

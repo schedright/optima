@@ -78,34 +78,6 @@ $(function() {
 		     
 		});
 	
-	$("#exportToExelGraph").button({
-		icons : {
-		    primary : "ui-icon-calculator"
-		},
-		text : true
-	    }).click(
-		    function() {
-		    	var excelFile = rpcClient.portfolioService.downloadCashflowGraphNew(portfolioId);
-		    	// Convert the Base64 string back to text.
-		    	var byteString = atob(excelFile.data);
-
-		    	// Convert that text into a byte array.
-		    	var ab = new ArrayBuffer(byteString.length);
-		    	var ia = new Uint8Array(ab);
-		    	for (var i = 0; i < byteString.length; i++) {
-		    	    ia[i] = byteString.charCodeAt(i);
-		    	}
-
-		    	// Blob for saving.
-		    	var blob = new Blob([ia], { type: "application/xlsx" });
-
-		    	// Tell the browser to save as report.pdf.
-		    	var date = new Date();
-		    	saveAs(blob, "Report_Portfolio(" + portfolioId + ")_" + date + ".xlsx");
-		    	
-		     
-		});
-	
 //	var portfolioCall = rpcClient.portfolioService.find(portfolioId);
 	if (allResults.result == 0) {
 	    var projects = allResults.data.map.projects.list;

@@ -3,11 +3,7 @@
 <div class="mainContainer">
 
 	<div id="main" style="width: 100%;">
-		<ul>
-			<li><a href="#portfolios">Manage Portfolios</a></li>
-			<li><a href="#locations">Manage Locations</a></li>
-			<li><a href="#clients">Manage Clients</a></li>
-		</ul>
+		<div style="height:40px"></div>
 
 		<div id="portfolios">
 			<button id="addNew" class="btnRight">Add New Portfolio</button>
@@ -15,12 +11,6 @@
 			<div id="accordion" class="accordionAfterBtn"></div>
 			<div id="dvexcel"></div>
 			<a id="dlink" style=""></a>
-		</div>
-		<div id="locations">
-			<%@ include file="views/locations.html"%>
-		</div>
-		<div id="clients">
-			<%@ include file="views/clients.html"%>
 		</div>
 	</div>
 	<div id="newPortfolioDialog" title="Portfolio">

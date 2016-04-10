@@ -244,25 +244,6 @@ $(document).ready( function() {
 	    	$( "#newPortfolioDialog" ).dialog( "open" );
 	    });
 	
-	$( "#locationsManagement" ).button({
-	      text: true,
-	      icons: {
-	        primary: "ui-icon-home"
-	      }
-	    }).click(function(){
-	    	window.location.href  = "locations.html";
-	    });
-	
-	$( "#clientManagement" ).button({
-	      text: true,
-	      icons: {
-	        primary: "ui-icon-person"
-	      }
-	    }).click(function(){
-	    	//window.location.href  = "clients.html";
-	    	$('#main').load("views/clients.html").fadeIn('slow');
-	    });
-	
 	rpcClient.portfolioService.findAllLight(function(result , exception) {
 		if (result.result == 0) {
 			var data = result.data;
