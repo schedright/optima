@@ -1133,3 +1133,11 @@ h2 {
 	position:absolute;
 	z-index:100;
 }
+
+.ui-selecting {
+	background: #ccc !important;
+}
+
+.ui-selected {
+	background: #999 !important
+}

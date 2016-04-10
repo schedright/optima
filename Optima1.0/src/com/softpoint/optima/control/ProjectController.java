@@ -4,6 +4,7 @@
 package com.softpoint.optima.control;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,15 +12,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.ReentrantLock;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.softpoint.optima.OptimaException;
@@ -31,19 +30,16 @@ import com.softpoint.optima.db.PlanProject;
 import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectLight;
-import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.Settings;
+import com.softpoint.optima.db.User;
+import com.softpoint.optima.db.UserRole;
 import com.softpoint.optima.db.WeekendDay;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 import com.softpoint.optima.struct.Period;
-import com.softpoint.optima.struct.ProjectPaymentDetail;
 import com.softpoint.optima.struct.SchedulePeriod;
 import com.softpoint.optima.struct.SolvedTask;
-import com.softpoint.optima.struct.TaskSolution;
-import com.softpoint.optima.struct.TaskState;
 import com.softpoint.optima.util.PaymentUtil;
-import com.softpoint.optima.util.PeriodLogGenerator;
 import com.softpoint.optima.util.ProjectSolutionDetails;
 import com.softpoint.optima.util.solution.PortfolioSolver;
 
@@ -389,8 +385,8 @@ public class ProjectController {
 		}
 	}
 
-	private ReentrantLock solutionLock = new ReentrantLock();
-	private static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM, yyyy");
+//	private ReentrantLock solutionLock = new ReentrantLock();
+//	private static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM, yyyy");
 
 	public class SolutionRunner implements Runnable {
 		public PortfolioSolver solver;
@@ -407,7 +403,7 @@ public class ProjectController {
 		public void run() {
 			long millis1 = System.currentTimeMillis();
 			PortfolioSolver solver = new PortfolioSolver(portfolio, projectsPriority);
-			String ret = solver.solveIt(session);
+			solver.solveIt(session);
 
 			long millis2 = System.currentTimeMillis();
 			System.out.println(millis2 - millis1);
@@ -487,7 +483,7 @@ public class ProjectController {
 
 	}
 
-	private Date getlastDayBeforeScheduling(Project project) {
+	/*private Date getlastDayBeforeScheduling(Project project) {
 		Date lastDay = new Date(0);
 		List<ProjectTask> tasks = project.getProjectTasks();
 		for (ProjectTask task : tasks) {
@@ -626,7 +622,7 @@ public class ProjectController {
 		}
 
 	}
-
+*/
 	public SchedulePeriod getCurrentPeriodBoundriesNew(HttpSession session, Date startDate, int portfolioId) {
 		SchedulePeriod schedulePeriod = new SchedulePeriod();
 		try {
@@ -684,7 +680,7 @@ public class ProjectController {
 
 	}
 
-	public ServerResponse getPeriodSolutionNew(HttpSession session, int projectId, Date from, Date to, Date next,
+/*	public ServerResponse getPeriodSolutionNew(HttpSession session, int projectId, Date from, Date to, Date next,
 			String solvedProjects, String outputFormat, Hashtable<Integer, Double> totalRetainedAmount,
 			Hashtable<Integer, Double> totalAdvancedPaymentAmount, HashMap<Integer, Integer> completedProjects,
 			Hashtable<Integer, String> solutionInformation, String timeStamp) {
@@ -992,17 +988,7 @@ public class ProjectController {
 			if (SHOW_COMING_TASKS) {
 				end = projectEnd;
 			}
-			/*
-			 * for (ProjectTask task : currentEligibleSet) { Date taskStart =
-			 * task.getCalendarStartDate(); Date taskEnd =
-			 * addDays(task.getCalendarStartDate(), task.getCalenderDuration() -
-			 * 1); if (start == null) { start = taskStart; } if (end == null) {
-			 * end = taskEnd; }
-			 * 
-			 * if (taskStart.before(start)) { start = taskStart; } if
-			 * (taskEnd.after(end)) { end = taskEnd; } } if (start == null ||
-			 * end == null) { return; }
-			 */
+	
 			long daysCount = PortfolioSolver.differenceInDays(start, end) + 1;
 
 			// write header
@@ -1058,21 +1044,7 @@ public class ProjectController {
 			}
 			report.setDetails(totalCostCurrent, payment, extraPaymentNextPeriod, financeLimit, financeLimitNextPeriod,
 					leftOverCost, leftOverNextCost, openBalance, cashOutOthers);
-			/*
-			 * for (ProjectTask task : currentEligibleSet) { Date taskStart =
-			 * task.getCalendarStartDate(); Date taskEnd =
-			 * addDays(task.getCalendarStartDate(), task.getCalenderDuration() -
-			 * 1);
-			 * 
-			 * String line = "<tr><td>" + task.getTaskDescription() + "</td>";
-			 * if (taskStart != null && taskEnd != null) { Date index2 = start;
-			 * while (differenceInDays(index2, end) > 0) { if
-			 * (index2.before(taskStart) || index2.after(taskEnd)) { line +=
-			 * "<td></td>"; } else { line += "<td bgcolor=\"gray\"></td>"; }
-			 * index2 = addDays(index2, 1); } line+="</td></tr>";
-			 * 
-			 * } report.addIterationTask(line); }
-			 */
+			
 			report.finishTask();
 			// solutionReport.info(",");
 		} catch (Exception ex) {
@@ -1096,10 +1068,7 @@ public class ProjectController {
 		return false;
 	}
 
-	/**
-	 * @param project
-	 * @return
-	 */
+	
 	private Map<Integer, TaskState> initTaskState(Project project) {
 		Map<Integer, TaskState> taskStates = new HashMap<Integer, TaskState>();
 		for (ProjectTask task : project.getProjectTasks()) {
@@ -1129,7 +1098,7 @@ public class ProjectController {
 		}
 
 	}
-
+	*/
 	public ServerResponse commitSolution(HttpSession session, int projectId, SolvedTask[] tasks) {
 
 		EntityController<Project> projectController = new EntityController<>(session.getServletContext());
@@ -1203,8 +1172,6 @@ public class ProjectController {
 				includedProjectsSet.add(pp.getProjectId());
 			}
 
-			List<String> years = new ArrayList<String>();
-
 			EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 			List<Project> allProjects = findAllInList(session,includedProjectsSet);
 			List<Map<String, Object>> selectProjectDetails = new ArrayList<Map<String, Object>>();
@@ -1267,6 +1234,7 @@ public class ProjectController {
 	}
 
 	private void addPayment(Map<String, Object> projDetails, Date date, double payments) {
+		@SuppressWarnings("unchecked")
 		Map<String, Map<String, Double>> yearMonthPayment = (Map<String, Map<String, Double>>) projDetails
 				.get("Details");
 		if (yearMonthPayment == null) {
@@ -1400,5 +1368,5 @@ public class ProjectController {
 			return new ServerResponse("PROJ0005", String.format("Error loading plan projects : %s", e.getMessage()), e);
 		}
 	}
-	
+
 }

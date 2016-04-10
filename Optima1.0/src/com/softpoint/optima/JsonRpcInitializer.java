@@ -17,6 +17,7 @@ import com.softpoint.optima.control.PaymentController;
 import com.softpoint.optima.control.PortfolioController;
 import com.softpoint.optima.control.ProjectController;
 import com.softpoint.optima.control.TaskController;
+import com.softpoint.optima.control.UsersController;
 
 
 public class JsonRpcInitializer implements ServletContextListener {
@@ -41,6 +42,7 @@ public class JsonRpcInitializer implements ServletContextListener {
 		globalBridge.registerObject("extraPaymentService" , new ExtraPaymentController());
 		globalBridge.registerObject("taskService" , new TaskController());
 		globalBridge.registerObject("paymentService" , new PaymentController());
+		globalBridge.registerObject("usersService" , new UsersController());
 		
 		EntityManagerFactory factory = Persistence.createEntityManagerFactory("Optima1.0");
 		event.getServletContext().setAttribute(__ENTITY_FACTORY, factory);

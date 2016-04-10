@@ -91,7 +91,7 @@ $(function() {
 		}
 		row["Total"] = parseFloat(t).toFixed(2);
 		allRowsTotal += t;
-		pData.push(row);
+		pData.push(row); 	
 	}
 	pData.push({
 		"Year" : "Total",

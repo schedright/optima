@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
@@ -22,10 +21,8 @@ import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
-import com.softpoint.optima.db.Settings;
 import com.softpoint.optima.db.WeekendDay;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
-import com.softpoint.optima.util.solution.ProjectWrapper;
 
 public class ProjectSolutionDetails {
 	// if true then origianl, if false then final

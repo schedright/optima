@@ -264,5 +264,19 @@ UNIQUE KEY (project_id,payment_date),
 CONSTRAINT FOREIGN KEY (project_id) REFERENCES project(project_id) on delete cascade
 );
 
+create table user (
+ user_id INT NOT null AUTO_INCREMENT primary key, 
+  user_name         varchar(50) not null unique,
+  user_pass         varchar(50) not null
+);
+
+create table user_role (
+  role_id INT NOT null AUTO_INCREMENT primary key, 
+  user_name         varchar(50) not null,
+  role_name         varchar(50) not null,
+  FOREIGN KEY (user_name) REFERENCES user(user_name)
+  ON UPDATE CASCADE ON DELETE CASCADE;
+
+);
 commit;
 

@@ -1,4 +1,10 @@
 $(document).ready( function() {
+	var isAdminCheck = rpcClient.usersService.isAdmin();
+	if (!isAdminCheck) {
+		$("#usersNavBar").hide();
+	}
+	var currentUser = rpcClient.usersService.getCurrentUser();
+	
 	$("#portfoliosNavBar").append("<a href=\"main.jsp\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_portfolio.png\" />Portfolios</a>");
 	$("#financingNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_financing.png\" />Financing</a>");
 	$("#projectsNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_projects.png\" />Projects</a>");
@@ -6,6 +12,9 @@ $(document).ready( function() {
 	$("#cashflowNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_cashflow.png\" />Cashflow</a>");
 	$("#financialNavBar").append("<a href=\"#\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results2.png\" />Results</a>");
 	$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results1.png\" />Capital Plan</a>");
+	if (isAdminCheck) {
+		$("#usersNavBar").append("<a href=\"users.jsp\"><img width=\"55\" height=\"55\" style=\"margin-top:-19\" src=\"css/header/images/icon_results1.png\" />Users</a>");
+	}
 	
 	$( "#menuLogout" ).click(function() {
 		rpcClient.portfolioService.logout();
@@ -63,6 +72,73 @@ $(document).ready( function() {
 		}
 	});
 	},0);
+
+	var editUserFormUserName = $("#editUserFormUserName");
+	var editUserFormPassword1 = $("#editUserFormPassword1");
+	var editUserFormPassword2 = $("#editUserFormPassword2");
+
+	$("#editUserDialog")
+	.dialog(
+			{
+				autoOpen : false,
+				height : 500,
+				width : 450,
+				modal : true,
+				show : {
+					effect : "blind",
+					duration : 1000
+				},
+				hide : {
+					effect : "fade",
+					duration : 1000
+				},
+				buttons : {
+					"Save" : function() {
+						var bValid = true;
+
+						bValid = bValid
+								&& checkLength(editUserFormUserName,
+										"editUserFormUserName", 6, 20);
+						bValid = bValid
+								&& checkLength(editUserFormPassword1,
+										"editUserFormPassword1", 6, 20);
+						if ((editUserFormPassword1.val() !== editUserFormPassword2
+								.val())) {
+							editUserFormPassword2
+									.addClass("ui-state-error");
+							bValid = false;
+						}
+
+						if (bValid) {
+							var makeAdmin = true;
+							var result = rpcClient.usersService
+									.updateUser(currentUser.userName,
+											editUserFormUserName.val(),
+											editUserFormPassword1.val(),
+											makeAdmin);
+							if (result && result.result == 0) {
+								location.reload();
+							} else {
+								showMessage("Update User", 'Error:'
+										+ result.message, 'error');
+							}
+						}
+					},
+					Cancel : function() {
+						$(this).dialog("close");
+					}
+				},
+				close : function() {
+					allFields.val("").removeClass("ui-state-error");
+				}
+			});	
+	$( "#editUserName" ).click(function() {
+//		currentUser
+		$("#editUserFormUserName").val(currentUser.userName);
+		$("#editUserFormPassword1").val(currentUser.userPass);
+		$("#editUserFormPassword2").val(currentUser.userPass);
+		$("#editUserDialog").dialog("open");
+	});
 	
 	if(currentPage == 1)
 		$("#portfoliosNavBar").addClass("active");
@@ -78,7 +154,9 @@ $(document).ready( function() {
 		$("#financialNavBar").addClass("active");	
 	else if(currentPage == 7)
 		$("#projectsRoadMapNavBar").addClass("active");	
-	
+	else if(currentPage == 8 && isAdminCheck)
+		$("#usersNavBar").addClass("active");	
+
 	
 	
 });
