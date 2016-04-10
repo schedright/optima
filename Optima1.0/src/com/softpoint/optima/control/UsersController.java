@@ -6,11 +6,15 @@ package com.softpoint.optima.control;
 import java.security.Principal;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.softpoint.optima.JsonRpcInitializer;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
+import com.softpoint.optima.db.PortfolioLight;
 import com.softpoint.optima.db.User;
 import com.softpoint.optima.db.UserRole;
 
@@ -190,7 +194,7 @@ public class UsersController {
 								if (!admin) {
 									user.getUserRoles().remove(role);
 									c2 = new EntityController<UserRole>(session.getServletContext());
-//									c2.remove(UserRole.class,role.getRoleId());
+									c2.remove(UserRole.class,role.getRoleId());
 								}
 								break;
 							}
@@ -207,6 +211,13 @@ public class UsersController {
 					
 					controller2.merge(user);
 					
+					try {
+						EntityManagerFactory factory = (EntityManagerFactory)session.getServletContext().getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
+						EntityManager manager = factory.createEntityManager();
+						manager.getEntityManagerFactory().getCache().evict(UserRole.class);
+						manager.getEntityManagerFactory().getCache().evict(User.class);
+					} catch (Exception e2) {
+					}
 				}
 				return new ServerResponse("0", "Success", "");
 			} catch (Exception e) {
