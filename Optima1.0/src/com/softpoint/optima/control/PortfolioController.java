@@ -1423,9 +1423,9 @@ public class PortfolioController {
 	private static final String FINANCE_HORIZONTAL_LINE = "<path d=\"M %d %d l %d 0\" stroke=\"lightgrey\" stroke-width=\"1\" fill=\"none\"></path><text x=\"10\" y=\"%d\" font-size=\"12\" stroke=\"black\">%.2f</text>\r";
 	private static final String DATE_VERTICAL = "<text transform=\"translate(%d %d) rotate(-90)\" font-size=\"12\" fill=\"gray\" fill-opacity=\"0.7\">%s</text>\r";
 	
-	private static final String FINANCE_PATH = "<path d=\"%s\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><path d=\"M 250 " + (SVG_HEIGHT-2) + " l 75 0\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><text x=\"250\" y=\"" + (SVG_HEIGHT-8) + "\" font-size=\"18\" stroke=\"orange\">Constraint</text>";
+	private static final String FINANCE_PATH = "<path d=\"%s\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><path d=\"M 250 " + (SVG_HEIGHT-2) + " l 100 0\" stroke=\"orange\" stroke-width=\"3\" fill=\"none\"></path><text x=\"250\" y=\"" + (SVG_HEIGHT-8) + "\" font-size=\"18\" stroke=\"orange\">Constraint</text>";
 	private static final String ORIGINAL_PATH = "<path d=\"%s\" stroke=\"red\" stroke-width=\"2\"  stroke-opacity=\"0.7\" fill=\"none\"></path><path d=\"M 400 " + (SVG_HEIGHT-2) + " l 75 0\" stroke=\"red\" stroke-width=\"2\" stroke-opacity=\"0.6\" fill=\"none\"></path><text x=\"400\" y=\"" + (SVG_HEIGHT-8) + "\" font-size=\"18\" stroke=\"red\">Original</text>";
-private static final String CURRENT_PATH = "<path d=\"%s\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><path d=\"M 550 " + (SVG_HEIGHT-2) + " l 45 0\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><text x=\"550\" y=\"" + (SVG_HEIGHT-8) + "\" font-size=\"18\" stroke=\"green\">Final</text>";
+	private static final String CURRENT_PATH = "<path d=\"%s\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><path d=\"M 550 " + (SVG_HEIGHT-2) + " l 45 0\" stroke=\"green\" stroke-width=\"2\" fill=\"none\"></path><text x=\"550\" y=\"" + (SVG_HEIGHT-8) + "\" font-size=\"18\" stroke=\"green\">Final</text>";
 	
 	/*
 	 * returns SVG for the flow chart
