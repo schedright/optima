@@ -3,7 +3,7 @@
 
 <div class="mainContainer">
 	<div id="projectTabs" style="100%">
-		<div id="tasksGantt" class="gantt"></div>
+		<div id="tasksGantt" class="gantt tasksgantt"></div>
 		<div id="loader-overlay"></div>
 
 		<ul>

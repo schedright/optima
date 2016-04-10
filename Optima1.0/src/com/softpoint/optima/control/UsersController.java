@@ -14,7 +14,6 @@ import javax.servlet.http.HttpSession;
 import com.softpoint.optima.JsonRpcInitializer;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
-import com.softpoint.optima.db.PortfolioLight;
 import com.softpoint.optima.db.User;
 import com.softpoint.optima.db.UserRole;
 
@@ -217,6 +216,11 @@ public class UsersController {
 						manager.getEntityManagerFactory().getCache().evict(UserRole.class);
 						manager.getEntityManagerFactory().getCache().evict(User.class);
 					} catch (Exception e2) {
+					}
+					
+					if (currentUser && !oldName.equals(newName)) {
+						req.logout();
+						req.login(newName, password);
 					}
 				}
 				return new ServerResponse("0", "Success", "");
