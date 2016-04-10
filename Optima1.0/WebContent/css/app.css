@@ -1141,3 +1141,7 @@ h2 {
 .ui-selected {
 	background: #999 !important
 }
+
+.slick-viewport .active {
+	background: lightblue;
+}
