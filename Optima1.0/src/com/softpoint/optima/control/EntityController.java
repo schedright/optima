@@ -11,6 +11,9 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.servlet.ServletContext;
 
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
+
 import com.softpoint.optima.JsonRpcInitializer;
 
 /**
@@ -383,7 +386,29 @@ public class EntityController<E> {
 		}
 		
 	}
-	
+
+	public void nativeUpdate( String sql , Object ...params) throws EntityControllerException {
+		try {
+			EntityManagerFactory factory = (EntityManagerFactory)servletContext.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
+			EntityManager manager = autoClose?factory.createEntityManager():localManager;
+			Query query = manager.createNativeQuery(sql);
+			for (int index = 0 ; index < params.length ; index++) {
+				query.setParameter(index + 1, params[index]);
+			}
+			manager.getTransaction().begin();
+			query.executeUpdate();
+			manager.getTransaction().commit();
+			if (autoClose) {
+				manager.close();
+			}
+			
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new EntityControllerException("DB009 Native - " + t.getMessage() , t);
+		}
+		
+	}
+
 	public List<E> nativeQuery( Class<E> cls , String sql , Object ...params) throws EntityControllerException {
 		try {
 			EntityManagerFactory factory = (EntityManagerFactory)servletContext.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);

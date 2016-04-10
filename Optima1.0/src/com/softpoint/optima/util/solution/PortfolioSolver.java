@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.control.ProjectController;
+import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.PortfolioFinance;
 import com.softpoint.optima.db.Project;
@@ -399,6 +400,14 @@ public class PortfolioSolver {
 				}
 				taskController.mergeTransactionClose();
 			} catch (EntityControllerException e) {
+			}
+			
+			try {
+				EntityController<Portfolio> paymentController = new EntityController<Portfolio>(session.getServletContext());
+				String query = "update portfolio set portfolio.solve_date=now() where portfolio.portfolio_id=?1";
+			    paymentController.nativeUpdate(query, portfolio.getPortfolioId());
+			} catch (Exception e) {
+				
 			}
 			solStatus.remove(SOLVER);
 			solStatus.put(STATUS,SUCCESS);

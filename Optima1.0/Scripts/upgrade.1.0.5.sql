@@ -47,6 +47,10 @@ create table user_role (
   role_name         varchar(50) not null,
   FOREIGN KEY (user_name) REFERENCES user(user_name) ON UPDATE CASCADE ON DELETE CASCADE;
 );
-/*
+
 alter table Project add column last_updated timestamp default now() on update now() ;
-*/
+alter table project_task add column last_updated timestamp default now() on update now() ;
+alter table portfolio_finance add column last_updated timestamp default now() on update now() ;
+alter table portfolio_finance add column last_updated timestamp default now() on update now() ;
+alter table capicatl_plan_projects add column last_updated timestamp default now() on update now() ;
+alter table payment add column last_updated timestamp default now() on update now() ;

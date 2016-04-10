@@ -35,12 +35,17 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import com.softpoint.optima.JsonRpcInitializer;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
+import com.softpoint.optima.db.DaysOff;
+import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.Portfolio;
+import com.softpoint.optima.db.PortfolioFinance;
 import com.softpoint.optima.db.PortfolioLight;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectLight;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
+import com.softpoint.optima.db.User;
+import com.softpoint.optima.db.UserRole;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 import com.softpoint.optima.struct.Period;
 import com.softpoint.optima.struct.PeriodCashout;
@@ -2398,4 +2403,72 @@ public class PortfolioController {
 		session.invalidate();
 	}
 
+	
+	public Boolean isInvalidSolution(HttpSession session, int portfolioId) {
+		Boolean ret = true;
+
+		try {
+			Date taskTimeStamp = null;
+			Date projectTimestamp = null;
+			Date portfolioFinanceTimestamp = null;
+			Date daysOffTimestamp = null;
+
+			Date solveTimestamp = null;
+			
+			EntityController<ProjectTask> taskController = new EntityController<ProjectTask>(session.getServletContext());
+			String query = "select max(project_task.last_updated) from project_task join project on project.project_id=project_task.project_id and project.portfolio_id=?1";
+			List<?> results = taskController.nativeQuery(query, portfolioId);
+			if (results.size()==1) {
+				taskTimeStamp = (Date) results.get(0);
+			}
+
+			EntityController<Project> projectController = new EntityController<Project>(session.getServletContext());
+			query = "select max(project.last_updated) from project where project.portfolio_id=?1";
+			results = projectController.nativeQuery(query, portfolioId);
+			if (results.size()==1) {
+				projectTimestamp = (Date) results.get(0);
+			}
+
+
+			EntityController<PortfolioFinance> portfolioFinanceController = new EntityController<PortfolioFinance>(session.getServletContext());
+			query = "select max(portfolio_finance.last_updated) from portfolio_finance where portfolio_finance.portfolio_id=?1";
+			results = portfolioFinanceController.nativeQuery(query, portfolioId);
+			if (results.size()==1) {
+				portfolioFinanceTimestamp = (Date) results.get(0);
+			}
+
+		/*	EntityController<Payment> paymentController = new EntityController<Payment>(session.getServletContext());
+			query = "select max(payment.last_updated) from payment  join project on project.project_id=payment.project_id and project.portfolio_id=?1";
+			results = paymentController.nativeQuery(query, portfolioId);
+			if (results.size()==1) {
+				solveTimestamp = (Date) results.get(0);
+			}*/
+
+			EntityController<DaysOff> daysOffController = new EntityController<DaysOff>(session.getServletContext());
+			query = "select max(days_off.last_updated) from days_off  join project on project.project_id=days_off.project_id and project.portfolio_id=?1";
+			results = daysOffController.nativeQuery(query, portfolioId);
+			if (results.size()==1) {
+				daysOffTimestamp = (Date) results.get(0);
+			}
+			
+			EntityController<Portfolio> portfolioController = new EntityController<Portfolio>(session.getServletContext());
+			query = "select portfolio.solve_date from portfolio where portfolio.portfolio_id=?1";
+			results = portfolioController.nativeQuery(query, portfolioId);
+			if (results.size()==1) {
+				solveTimestamp = (Date) results.get(0);
+			}
+
+			if (solveTimestamp!=null) {
+				if ((taskTimeStamp==null || !taskTimeStamp.after(solveTimestamp)) && 
+						(projectTimestamp==null || !projectTimestamp.after(solveTimestamp)) &&
+						(daysOffTimestamp==null || !daysOffTimestamp.after(solveTimestamp)) &&
+						(portfolioFinanceTimestamp==null || !portfolioFinanceTimestamp.after(solveTimestamp))) {
+					ret = false;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
 }

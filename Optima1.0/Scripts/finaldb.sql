@@ -278,5 +278,14 @@ create table user_role (
   ON UPDATE CASCADE ON DELETE CASCADE;
 
 );
+
+alter table portfolio add column solve_timestamp timestamp;
+
+alter table Project add column last_updated timestamp default now() on update now() ;
+alter table project_task add column last_updated timestamp default now() on update now() ;
+alter table portfolio_finance add column last_updated timestamp default now() on update now() ;
+alter table capicatl_plan_projects add column last_updated timestamp default now() on update now() ;
+alter table payment add column last_updated timestamp default now() on update now() ;
+alter table days_off add column last_updated timestamp default now() on update now() ;
 commit;
 

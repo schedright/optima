@@ -196,6 +196,20 @@ $(function() {
 
 			});
 
+    setTimeout(function() {
+    	var solutionResponse = rpcClient.portfolioService.hasSolution(portfolioId);
+    	if (solutionResponse.result==0 && solutionResponse.data && solutionResponse.data=='TRUE') {
+    		var result = rpcClient.portfolioService.isInvalidSolution(portfolioId);
+    		if (result) {
+    			showMessage(
+    					'Portfolio has changed',
+    					'The portfolio has changed after last solve, you might need to re-solve again',
+    					'info');
+
+    		}
+    	}
+    },0);
+
 });
 
 function getURLVariables() {
