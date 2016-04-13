@@ -1,3 +1,4 @@
+$('#titleDiv').html('Projects');
 var allProjects = rpcClient.projectService.findAllLight();
 var dateFormatter = new DateFmt("%d/%m/%y");
 
@@ -84,9 +85,15 @@ $(function() {
 		editable : true,
 		enableAddRow : true,
 		enableCellNavigation : true,
-		enableColumnReorder : true
+		enableColumnReorder : true,
+//		autoHeight:true,
+		forceFitColumns: true
 	});
 
+	$(window).resize(function(){
+	    pGrid.resizeCanvas();
+	});
+	
 	pGrid.setSelectionModel(new Slick.RowSelectionModel());
 	pGrid.onClick.subscribe(function(e) {
 		var cell = pGrid.getCellFromEvent(e);

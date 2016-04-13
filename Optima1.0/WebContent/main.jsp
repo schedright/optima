@@ -3,8 +3,6 @@
 <div class="mainContainer">
 
 	<div id="main" style="width: 100%;">
-		<div style="height:40px"></div>
-
 		<div id="portfolios">
 			<button id="addNew" class="btnRight">Add New Portfolio</button>
 			

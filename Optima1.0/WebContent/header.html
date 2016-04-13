@@ -91,51 +91,52 @@
 </script>
 <body>
 	<div class="se-pre-con"></div>
-	<div id="main-content">
 		<div id="header">
 			<div class="wrapper col1">
 				<div id="header" class="clear">
+					<div id="titleDiv" class="centerDev">
+					</div>
 					<div class="topRightMenu">
 						<a id="menuHelp" href=help.jsp>Help</a> | <a id="menuContactUs"
 							href=contactUs.jsp>Contact Us</a> | <a id="menuPrivacy"
 							href=privacy.jsp>Privacy Policy</a> | <a id="editUserName" href="#">Edit user</a> | <a id="menuLogout" href="#">Logout</a>
 					</div>
-					<div class="logoImg">
-						<a href=""><img src="images/LOGO-Schedright-text only.png"
-							height="62" alt="" /></a>
-					</div>
 				</div>
 			</div>
 		</div>
-		<div class="wrapper col1">
-
-			<div id="topbar" class="clear">
-				<ul id="topnav">
-					<li id="allProjectsNavBar"></li>
-					<li id="portfoliosNavBar"></li>
-					<li id="financingNavBar"></li>
-					<li id="projectsNavBar"></li>
-					<li id="scheduleNavBar"></li>
-					<li id="cashflowNavBar"></li>
-					<li id="financialNavBar"></li>
-					<li id="projectsRoadMapNavBar"></li>
-					<li id="usersNavBar"></li>
-				</ul>
-
-			</div>
-		</div>
-
+		
 		<div id="editUserDialog" title="Edit User">
 			<p class="validateTips">All form fields are required.</p>
 
-			<form id="editUserForm" autocomplete="off">
+			<form id="editUserForm">
 				<fieldset>
 					<label for="editUserFormUserName">Username</label> 
-					<input type="text" name="editUserFormUserName" id="editUserFormUserName" class="text ui-widget-content ui-corner-all" placeholder="Enter user name, from 6 to 20 characters" autocomplete="off"/> 
+					<input type="text" name="editUserFormUserName" id="editUserFormUserName" class="text ui-widget-content ui-corner-all" placeholder="Enter user name, from 6 to 20 characters"/> 
 					<label for="editUserFormPassword1">Password</label> 
-					<input type="password" name="editUserFormPassword1" id="editUserFormPassword1" value="" class="text ui-widget-content ui-corner-all" placeholder="Enter Password, from 6 to 20 characters" autocomplete="off"/>
+					<input type="password" name="editUserFormPassword1" id="editUserFormPassword1" value="" class="text ui-widget-content ui-corner-all" placeholder="Enter Password, from 6 to 20 characters"/>
 					<label for="editUserFormPassword2">Confirm Password</label> 
-					<input type="password" name="editUserFormPassword2" id="editUserFormPassword2" value="" class="text ui-widget-content ui-corner-all" placeholder="Enter Password, from 6 to 20 characters" autocomplete="off"/>
+					<input type="password" name="editUserFormPassword2" id="editUserFormPassword2" value="" class="text ui-widget-content ui-corner-all" placeholder="Enter Password, from 6 to 20 characters"/>
 				</fieldset>
 			</form>
 		</div>
+	<div id="sidebar">
+
+				<ul id="topnav">
+					<li id="allProjectsNavBar" class="sidebadMenuItem"></li>
+					<li id="portfoliosNavBar" class="sidebadMenuItem"></li>
+					<li id="financingNavBar" class="sidebadMenuItem"></li>
+					<li id="projectsNavBar" class="sidebadMenuItem"></li>
+					<li id="scheduleNavBar" class="sidebadMenuItem"></li>
+					<li id="cashflowNavBar" class="sidebadMenuItem"></li>
+					<li id="financialNavBar" class="sidebadMenuItem"></li>
+					<li id="projectsRoadMapNavBar" class="sidebadMenuItem"></li>
+					<li id="usersNavBar" class="sidebadMenuItem"></li>
+				</ul>
+
+		<div id="sidebar-btn">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+
+	</div>

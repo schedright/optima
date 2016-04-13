@@ -21,6 +21,17 @@ $(document).ready( function() {
 		rpcClient.portfolioService.logout();
 		location.reload();
 		});
+	$('#sidebar-btn').click(function(){
+		if (!$('#sidebar').hasClass('visible')) {
+			setTimeout(function(){
+					$('#sidebar').addClass('visible');
+			},0);
+		}
+	});
+	$('body,html').click(function(e){
+		   $('#sidebar').removeClass('visible');
+		});
+	
 	setTimeout(function() {
 	rpcClient.portfolioService.findAllLight(function(result , exception) {
 		if (result.result == 0) {
