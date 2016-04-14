@@ -37,7 +37,7 @@
 	</listener-class>
   </listener>
   <welcome-file-list>
-      <welcome-file>main.jsp</welcome-file>     
+      <welcome-file>allprojects.jsp</welcome-file>     
   </welcome-file-list>
 
 	<security-constraint>

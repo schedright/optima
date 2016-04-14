@@ -6,7 +6,7 @@ $(document).ready( function() {
 	var currentUser = rpcClient.usersService.getCurrentUser();
 	
 	$("#allProjectsNavBar").append("<a href=\"allprojects.jsp\">Projects<img class=\"menuIcon\" src=\"css/header/images/icon_projects.png\" /></a>");
-	$("#portfoliosNavBar").append("<a href=\"main.jsp\">Portfolios<img class=\"menuIcon\" src=\"css/header/images/icon_portfolio.png\" /></a>");
+	$("#portfoliosNavBar").append("<a href=\"enterprise.jsp\">Enterprise<img class=\"menuIcon\" src=\"css/header/images/icon_portfolio.png\" /></a>");
 	$("#financingNavBar").append("<a href=\"#\">Financing<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
 	$("#scheduleNavBar").append("<a href=\"#\">Scheduling<img class=\"menuIcon\" src=\"css/header/images/icon_Scheduling.png\" /></a>");
 	$("#cashflowNavBar").append("<a href=\"#\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
@@ -80,11 +80,11 @@ $(document).ready( function() {
 				modal : true,
 				show : {
 					effect : "blind",
-					duration : 1000
+					duration : 300
 				},
 				hide : {
 					effect : "fade",
-					duration : 1000
+					duration : 300
 				},
 				buttons : {
 					"Save" : function() {

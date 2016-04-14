@@ -772,6 +772,13 @@ allProjects_delete
 	padding-right: 8px;
 }
 
+.portfolioButtonsContainer {
+	height: 100%;
+	padding-top: 6px;
+	padding-right: 8px;
+	display:inline;
+}
+
 .allProjects_edit {
 	background-image: url(../../images/edit.png);
 	background-color: transparent; /* make the button transparent */

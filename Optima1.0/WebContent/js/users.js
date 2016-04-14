@@ -1,6 +1,6 @@
 var isAdminCheck = rpcClient.usersService.isAdmin();
 if (!isAdminCheck) {
-	window.location.href = "main.jsp";
+	window.location.href = "allprojects.jsp";
 }
 
 var allUsers = rpcClient.usersService.getAllUser();
@@ -155,11 +155,11 @@ $(function() {
 						modal : true,
 						show : {
 							effect : "blind",
-							duration : 1000
+							duration : 300
 						},
 						hide : {
 							effect : "fade",
-							duration : 1000
+							duration : 300
 						},
 						buttons : {
 							"Create User" : function() {

@@ -57,11 +57,11 @@ $(function() {
       modal: true,
       show : {
 	    effect : "blind",
-	    duration : 1000
+	    duration : 300
  		},
  	  hide : {
 	    effect : "fade",
-	    duration : 1000
+	    duration : 300
  		},
  		open : function() { 
  			$('#adjustmentProject').empty();
