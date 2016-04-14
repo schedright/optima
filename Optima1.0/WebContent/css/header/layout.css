@@ -744,9 +744,9 @@ allProjects_delete
 	/* make the cursor like hovering over an <a> element */
 	height: 30px;
 	width: 30px;
-	padding:3px;
+	padding: 3px;
 	/* float: right; */
-	margin:0px 4px;
+	margin: 0px 4px;
 }
 
 .allProjects_add {
@@ -760,13 +760,13 @@ allProjects_delete
 	/* make the cursor like hovering over an <a> element */
 	height: 30px;
 	width: 30px;
-	padding:3px;
+	padding: 3px;
 	/* float: right; */
-	margin:0px 4px;
+	margin: 0px 4px;
 }
 
 .toolbarButtonsContainer {
-	float:right;
+	float: right;
 	height: 100%;
 	padding-top: 4px;
 	padding-right: 8px;
@@ -783,13 +783,8 @@ allProjects_delete
 	/* make the cursor like hovering over an <a> element */
 	height: 30px;
 	width: 30px;
-	padding:3px;
+	padding: 3px;
 	/* float: right; */
-	margin:0px 4px;
+	margin: 0px 4px;
 }
 
-.sidebadMenuItem {
-	vertical-align: baseline;
-}
-ine-middle;
-}
