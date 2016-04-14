@@ -83,10 +83,8 @@ $(function() {
 
 	var pGrid = new Slick.Grid("#gridContainer", data, columns, {
 		editable : true,
-		enableAddRow : true,
 		enableCellNavigation : true,
 		enableColumnReorder : true,
-//		autoHeight:true,
 		forceFitColumns: true
 	});
 

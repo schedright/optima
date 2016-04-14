@@ -1,5 +1,6 @@
 $('#titleDiv').html('Enterprise');
 var allProjects = rpcClient.projectService.findAllLight();
+
 var dateFormatter = new DateFmt(
     "%d/%m/%y");
 
@@ -34,9 +35,6 @@ var enableButtons = function(enable) {
 }
 enableButtons(false);
 
-/*
- * $('#addUserBtn').on('click', function() { $("#addUserDialog").dialog("open"); });
- */
 $(function() {
   var columns = [
       {
@@ -73,7 +71,6 @@ $(function() {
       columns,
       {
         editable : true,
-        enableAddRow : true,
         enableCellNavigation : true,
         enableColumnReorder : true,
         // autoHeight:true,
@@ -183,109 +180,163 @@ $(function() {
 
     }
   });
-  
-  $('#removeProjectLink')
-  .on(
-      'click',
-      function() {
-        var row = pGrid.getSelectedRows();
-        if (row) {
-          var item = pGrid.getDataItem(row);
-          var optionSelected = $("#portfolioSelect option:selected");
-          if (item && item.proj && item.proj.projectId && optionSelected && optionSelected.data()) {
-            var portfolioId = optionSelected.data().portfolioId;
-            var projectId = item.proj.projectId;
-            var buttons = {
-              Yes : function() {
-                $(this).dialog("close");
-                var call = rpcClient.projectService
-                    .removePortfolio(projectId);
-                if (call.result == 0) {
-                  location.reload();
-                } else {
-                  showMessage("Remove link to project",
-                      'Error:' + result.message,
-                      'error');
-                }
-              },
-              No : function() {
-                $(this).dialog("close");
-                return false;
-              }
+
+  $('#addProjectLink').on('click', function() {
+    $("#linkToProjectDialog").dialog("open");
+  });
+
+  $('#removeProjectLink').on('click', function() {
+    var row = pGrid.getSelectedRows();
+    if (row) {
+      var item = pGrid.getDataItem(row);
+      var optionSelected = $("#portfolioSelect option:selected");
+      if (item && item.proj && item.proj.projectId && optionSelected && optionSelected.data()) {
+        var portfolioId = optionSelected.data().portfolioId;
+        var projectId = item.proj.projectId;
+        var buttons = {
+          Yes : function() {
+            $(this).dialog("close");
+            var call = rpcClient.projectService.removePortfolio(projectId);
+            if (call.result == 0) {
+              location.reload();
+            } else {
+              showMessage("Remove link to project", 'Error:' + result.message, 'error');
             }
-            showMessage(
-                'Remove link to project',
-                'The selected project will be removed from this portfolio!',
-                'warning', buttons);
+          },
+          No : function() {
+            $(this).dialog("close");
+            return false;
           }
         }
-      });
-  
-  $("#newPortfolioDialog").dialog(
-      {
-        autoOpen : false,
-        height : 500,
-        width : 450,
-        modal : true,
-        show : {
-          effect : "blind",
-          duration : 300
-        },
-        hide : {
-          effect : "fade",
-          duration : 300
-        },
-        open : function() {
+        showMessage('Remove link to project', 'The selected project will be removed from this portfolio!', 'warning', buttons);
+      }
+    }
+  });
+
+  $("#newPortfolioDialog").dialog({
+    autoOpen : false,
+    height : 320,
+    width : 450,
+    modal : true,
+    show : {
+      effect : "blind",
+      duration : 300
+    },
+    hide : {
+      effect : "fade",
+      duration : 300
+    },
+    open : function() {
+
+      var portfolio = $(this).data("portfolio");
+      if (portfolio) {
+
+        $("#portName").val(portfolio.portfolioName);
+        $("#portDescription").val(portfolio.portfolioDescreption);
+
+      } else {
+        $("#portName").val("");
+        $("#portDescription").val("");
+      }
+    },
+    buttons : {
+      "Save" : function() {
+        var bValid = true;
+        var portName = $("#portName");
+        var portDescription = $("#portDescription");
+
+        bValid = bValid && checkLength(portName, "portName", 3, 32);
+        bValid = bValid && checkLength(portDescription, "portDescription", 0, 1024);
+
+        if (bValid) {
+          $(this).dialog("close");
 
           var portfolio = $(this).data("portfolio");
           if (portfolio) {
-
-            $("#portName").val(portfolio.portfolioName);
-            $("#portDescription").val(portfolio.portfolioDescreption);
+            var createPortResult = rpcClient.portfolioService.update(portfolio.portfolioId, portName.val(), portDescription.val());
+            if (createPortResult.result == 0) {
+              location.reload();
+            } else {
+              showMessage("Edit Portfolio", 'Error:' + result.message, 'error');
+            }
 
           } else {
-            $("#portName").val("");
-            $("#portDescription").val("");
-          }
-        },
-        buttons : {
-          "Save" : function() {
-            var bValid = true;
-            var portName = $("#portName");
-            var portDescription = $("#portDescription");
-
-            bValid = bValid && checkLength(portName, "portName", 3, 32);
-            bValid = bValid && checkLength(portDescription, "portDescription", 0, 1024);
-
-            if (bValid) {
-              $(this).dialog("close");
-              
-              var portfolio = $(this).data("portfolio");
-              if (portfolio) {
-                var createPortResult = rpcClient.portfolioService.update(portfolio.portfolioId ,portName.val(), portDescription.val());
-                if (createPortResult.result == 0) {
-                  location.reload();
-                } else {
-                  showMessage("Edit Portfolio", 'Error:' + result.message, 'error');
-                }
-
-              } else {
-                var createPortResult = rpcClient.portfolioService.create(portName.val(), portDescription.val());
-                if (createPortResult.result == 0) {
-                  location.reload();
-                } else {
-                  showMessage("Create Portfolio", 'Error:' + result.message, 'error');
-                }
-                
-              }
+            var createPortResult = rpcClient.portfolioService.create(portName.val(), portDescription.val());
+            if (createPortResult.result == 0) {
+              location.reload();
+            } else {
+              showMessage("Create Portfolio", 'Error:' + result.message, 'error');
             }
-          },
-          Cancel : function() {
-            $(this).dialog("close");
+
           }
-        },
-        close : function() {
         }
-      });
+      },
+      Cancel : function() {
+        $(this).dialog("close");
+      }
+    },
+    close : function() {
+    }
+  });
+
+  $("#linkToProjectDialog").dialog({
+    autoOpen : false,
+    height : 240,
+    width : 450,
+    modal : true,
+    show : {
+      effect : "blind",
+      duration : 300
+    },
+    hide : {
+      effect : "fade",
+      duration : 300
+    },
+    open : function() {
+      var unlinkedProjects = rpcClient.projectService.getUnlinkedProjects();
+      for (var i = 0; i < unlinkedProjects.data.list.length; i++) {
+        var name = unlinkedProjects.data.list[i].projectName;
+        var projId = unlinkedProjects.data.list[i].projectId;
+
+        if (i == 0) {
+          $('#projectsSelect').append($("<option></option>").attr("projectId", projId).attr("selected", "selected").data(unlinkedProjects.data.list[i]).text(name));
+        } else {
+          $('#projectsSelect').append($("<option></option>").attr("projectId", projId).data(unlinkedProjects.data.list[i]).text(name));
+        }
+      }
+    },
+
+    buttons : {
+      "Link" : function() {
+        var projOptionSelected = $("#projectsSelect option:selected");
+        var portOptionSelected = $("#portfolioSelect option:selected");
+
+        if (projOptionSelected && projOptionSelected.data() && portOptionSelected && portOptionSelected.data()) {
+          $(this).dialog("close");
+
+          var project = projOptionSelected.data();
+          var projectId = project.projectId;
+
+          var port = portOptionSelected.data();
+          var portfolioId = port.portfolioId;
+
+          call = rpcClient.projectService.updateShort(projectId, project.projectName, project.projectCode, project.projectDescription, portfolioId);
+          if (call.result == 0) {
+            location.reload();
+          } else {
+            showMessage("Link Project", 'Error:' + call.message, 'error');
+          }
+
+        } else {
+          $("#portfolioSelect").addClass("ui-state-error");
+        }
+      },
+      Cancel : function() {
+        $(this).dialog("close");
+      }
+    },
+    close : function() {
+    }
+  });
 
 })

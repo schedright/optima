@@ -1293,4 +1293,16 @@ public class ProjectController {
 		}
 	}
 
+	public ServerResponse getUnlinkedProjects(HttpSession session)
+			throws OptimaException {
+		EntityController<ProjectLight> controller = new EntityController<ProjectLight>(session.getServletContext());
+		try {
+			List<ProjectLight> projects = controller.findAllQuery(ProjectLight.class,"SELECT o FROM ProjectLight o where o.portfolio is null");
+			return new ServerResponse("0", PortfolioSolver.SUCCESS, projects);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PROJ0005", String.format("Error getting unlinked projects : %s", e.getMessage()), e);
+		}
+	}
+
 }

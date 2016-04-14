@@ -40,6 +40,16 @@
 		</form>
 	</div>
 
+	<div id="linkToProjectDialog" title="Link to Project">
+		<p class="validateTips">Select project to include</p>
+	
+		<form id="newPortfolioForm">
+			<fieldset>
+				<select id="projectsSelect" class="projectsSelect"></select>
+			</fieldset>
+		</form>
+	</div>
+
 </div>
 
 <script src="js/formutils.js"></script>
