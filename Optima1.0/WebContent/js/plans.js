@@ -70,7 +70,8 @@ $(function() {
 		} 
 		return 0;
 	};
-	var allRowsTotal = 0;
+	var totalsRow = {};
+	var allTotal = 0;
 	for (var i = 0; i < projects.length; i++) {
 		var proj = projects[i].map;
 		if (!proj.Details) {
@@ -87,16 +88,25 @@ $(function() {
 			if (payment) {
 				t += payment;
 				row[allYears[p]] = parseFloat(payment).toFixed(2);
+				if (!totalsRow[allYears[p]]) {
+				  totalsRow[allYears[p]] = 0;
+				}
+				totalsRow[allYears[p]] += payment;
 			}
 		}
 		row["Total"] = parseFloat(t).toFixed(2);
-		allRowsTotal += t;
+		allTotal += t;
 		pData.push(row); 	
 	}
-	pData.push({
-		"Year" : "Total",
-		"Total" : parseFloat(allRowsTotal).toFixed(2)
-	})
+  for (var val in totalsRow) {
+    if (typeof totalsRow[val] === 'number') {
+      totalsRow[val] = parseFloat(totalsRow[val]).toFixed(2)
+    }
+  }
+
+	totalsRow["Year"] = "Total";
+	totalsRow["Total"] = parseFloat(allTotal).toFixed(2);
+	pData.push(totalsRow);
 
 	var pGrid = new Slick.Grid("#projectPayments", pData, pColumns, {
 		editable : false,

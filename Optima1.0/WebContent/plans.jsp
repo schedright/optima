@@ -26,7 +26,7 @@
 		<label for="pFinishDateTxt">Plan Finish Date</label> 
 		<input type="text" id="pFinishDateTxt" name="pFinishDateTxt" class="datepicker" />
 		<div style="padding-top:15px">
-			<button id="savePlanDatesBtn">Save Plan Calendar</button>
+			<button id="savePlanDatesBtn">Save Finance Period</button>
 		</div>
 
 	</div>
@@ -45,7 +45,7 @@
 				<label>Included Projects</label>
 				<ul id="includedProjects" class="sortable">
 				</ul>
-				<button id="refreshPlanBtn">Refresh Plan</button>
+				<button id="refreshPlanBtn" style="margin-top:10px">Refresh Plan</button>
 			</div>
 	
 		</div>
