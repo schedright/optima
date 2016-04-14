@@ -13,6 +13,11 @@
 			<button id="editPortfolio" class="allProjects_edit" title="Edit Portfolio"></button>
 			<button id="deletePortfolio" class="allProjects_delete" title="Delete Portolio"></button>
 		</div>
+		<div class="toolbarButtonsContainer">
+			<button id="addProjectLink" class="projectlink_add" title="Link to project"></button>
+			<button id="removeProjectLink" class="projectlink_remove" title="Remove link to project"></button>
+		</div>
+		
 		</div>
 		<div class="gridScroll">
 			<div id="gridContainer" class="projectsGrid"></div>

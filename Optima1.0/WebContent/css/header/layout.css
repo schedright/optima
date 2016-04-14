@@ -765,6 +765,42 @@ allProjects_delete
 	margin: 0px 4px;
 }
 
+.projectlink_add {
+	background-image: url(../../images/link_add.png);
+	background-color: transparent; /* make the button transparent */
+	background-repeat: no-repeat;
+	/* make the background image appear only once */
+	background-position: 3px 3px; /* equivalent to 'top left' */
+	border: none; /* assuming we don't want any borders */
+	cursor: pointer;
+	/* make the cursor like hovering over an <a> element */
+	height: 30px;
+	width: 30px;
+	padding: 3px;
+	/* float: right; */
+	margin: 0px 4px;
+}
+
+.projectlink_remove {
+	background-image: url(../../images/link_delete.png);
+	background-color: transparent; /* make the button transparent */
+	background-repeat: no-repeat;
+	/* make the background image appear only once */
+	background-position: 3px 3px; /* equivalent to 'top left' */
+	border: none; /* assuming we don't want any borders */
+	cursor: pointer;
+	/* make the cursor like hovering over an <a> element */
+	height: 30px;
+	width: 30px;
+	padding: 3px;
+	/* float: right; */
+	margin: 0px 4px;
+}
+
+#toolbarContainer button:disabled {
+	opacity: 0.3;
+}
+
 .toolbarButtonsContainer {
 	float: right;
 	height: 100%;

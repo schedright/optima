@@ -30,8 +30,7 @@ var prepareProjectData = function(projects) {
 }
 
 var enableButtons = function(enable) {
-  $('#editProject').prop("disabled", !enable);
-  $('#deleteProject').prop("disabled", !enable);
+  $('#removeProjectLink').prop("disabled", !enable);
 }
 enableButtons(false);
 
@@ -184,7 +183,44 @@ $(function() {
 
     }
   });
-
+  
+  $('#removeProjectLink')
+  .on(
+      'click',
+      function() {
+        var row = pGrid.getSelectedRows();
+        if (row) {
+          var item = pGrid.getDataItem(row);
+          var optionSelected = $("#portfolioSelect option:selected");
+          if (item && item.proj && item.proj.projectId && optionSelected && optionSelected.data()) {
+            var portfolioId = optionSelected.data().portfolioId;
+            var projectId = item.proj.projectId;
+            var buttons = {
+              Yes : function() {
+                $(this).dialog("close");
+                var call = rpcClient.projectService
+                    .removePortfolio(projectId);
+                if (call.result == 0) {
+                  location.reload();
+                } else {
+                  showMessage("Remove link to project",
+                      'Error:' + result.message,
+                      'error');
+                }
+              },
+              No : function() {
+                $(this).dialog("close");
+                return false;
+              }
+            }
+            showMessage(
+                'Remove link to project',
+                'The selected project will be removed from this portfolio!',
+                'warning', buttons);
+          }
+        }
+      });
+  
   $("#newPortfolioDialog").dialog(
       {
         autoOpen : false,
