@@ -324,6 +324,15 @@ div.wrapper h1, div.wrapper h2, div.wrapper h3, div.wrapper h4, div.wrapper h5,
 	
 }
 
+.main-body .ui-tabs-panel {
+    padding-top: 50px;
+    margin-top: -40;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+}
+ 
+
 #container .ui-tabs .ui-tabs-hide {
 	display: none;
 }
