@@ -1,3 +1,5 @@
+$('#titleDiv').html('Capital Plan');
+
 var planRet = rpcClient.projectService.getPlan();
 var planDates = rpcClient.projectService.getPlanDates();
 var plansList = planRet.data.map;
@@ -142,6 +144,12 @@ $(function() {
         enableCellNavigation : true,
         enableColumnReorder : true
       });
+  var windowResizeFunc = function() {
+    $('#planTabs').height($('#main').height() - $('#projectsGantt').height())
+    pGrid.resizeCanvas();
+  }; 
+  $(window).resize(windowResizeFunc);
+  windowResizeFunc();
 
   $('input.datepicker').datepicker({
     showOn : "button",
