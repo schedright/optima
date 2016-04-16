@@ -6,6 +6,16 @@
 			type="text" id="pStartDateTxt" class="datepicker"
 			name="pStartDateTxt" />
 
+		<div id="ulContainer" class="two-columns" style="margin-top:10px;width:60%">
+			<label>Vacation and Days Off:</label>
+			<ul id="daysOffList"></ul>
+		</div>
+		<div class="two-columns" style="margin-top:38px;width:30%">
+			<button id="addDayOffBtn" style="margin-bottom:10px">Add</button>
+			<br />
+			<button id="deleteDayOffBtn">Delete</button>
+		</div>
+
 	</div>
 
 	<div class="two-columns right">
@@ -14,40 +24,26 @@
 			type="text" id="pFinishDateTxt" name="pFinishDateTxt"
 			class="datepicker" />
 
+		<div class="three-columns">
+
+			<label>Week End Days</label> <select id="weDays" class="dropdown">
+
+				<option value="-1">No Week End</option>
+
+				<option value="1">Sat-Sun</option>
+
+				<option value="2">Fri-Sat</option>
+
+				<option value="3">Thu-Fri</option>
+
+			</select>
+
+		</div>
+
 	</div>
 </div>
-<div class="form-section">
+<div class="form-section"></div>
 
-	<div class="three-columns">
-
-		<label>Week End Days</label> <select id="weDays" class="dropdown">
-
-			<option value="-1">No Week End</option>
-
-			<option value="1">Sat-Sun</option>
-
-			<option value="2">Fri-Sat</option>
-
-			<option value="3">Thu-Fri</option>
-
-		</select>
-
-	</div>
-
-</div>
-
-<div class="form-section">
-	<div id="ulContainer" class="two-columns">
-
-		<label>Vacation and Days Off:</label>
-		<ul id="daysOffList"></ul>
-	</div>
-	<div class="two-columns">
-		<button id="addDayOffBtn">Add To Off Days</button><br/>
-		<button id="deleteDayOffBtn">Delete</button>
-	</div>
-
-</div>
 
 <div id="addDaysOffDialog" title="Add Vacation Day">
 	<p class="validateTips">Select day to add</p>
@@ -55,7 +51,7 @@
 	<form id="daysOffForm">
 		<fieldset>
 			<input type="text" id="pDayOffDateTxt" name="pDayOffDateTxt"
-				class="datepicker" />
+				class="datepicker"/>
 		</fieldset>
 	</form>
 </div>

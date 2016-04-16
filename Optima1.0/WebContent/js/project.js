@@ -72,16 +72,7 @@ $(function() {
     }
   }
 
-  /** Start Code for Project Days off */
-  $("#pDayOffDateTxt").datepicker({
-    showOn : "button",
-    buttonImage : "images/calendar.png",
-    buttonImageOnly : true,
-    numberOfMonths : 3
-  });
-
-  $("#daysOffList").selectable();
-  var selected = {};
+/*  var selected = {};
   $('#daysOffList').selectable({
     selected : function(event,
         ui) {
@@ -95,7 +86,7 @@ $(function() {
       $('#deleteDayOffBtn').prop("disabled", true);
     }
   });
-  
+*/  
   var daysOffList = rpcClient.daysOffService.findAllByProject(projectId);
   var fmt = new DateFmt(
       "%w %d-%n-%y");
@@ -112,6 +103,62 @@ $(function() {
 
     }
   }
+  
+  $("#addDaysOffDialog")
+  .dialog(
+      {
+        autoOpen : false,
+        height : 250,
+        width : 450,
+        modal : true,
+        dialogClass: "ZIndex900",
+        show : {
+          effect : "blind",
+          duration : 300
+        },
+        hide : {
+          effect : "fade",
+          duration : 300
+        },
+        open : function() {
+          /** Start Code for Project Days off */
+          $("#pDayOffDateTxt").datepicker({
+            showOn : "button",
+            buttonImage : "images/calendar.png",
+            buttonImageOnly : true,
+            numberOfMonths : 3
+          });
+         },
+        buttons : {
+          "Add" : function() {
+            var dayoff = $("#pDayOffDateTxt").val();
+            if (dayoff == null || dayoff == "") {
+              showMessage("Add day", 'A date must be selected', 'error');
+            } else {
+              $(this).dialog("close");
+              var dayOffDate = new Date(
+                  dayoff);
+              var createDayOffRequest = rpcClient.daysOffService.create(dayOffDate, "VACATION", projectId);
+              if (createDayOffRequest.result == 0) {
+                var dayOff = createDayOffRequest.data;
+                var theDate = new Date(
+                    dayOff.dayOff.time);
+                var li = $('<li></li>').addClass('ui-state-default').attr('id', dayOff.dayoffId).text(fmt.format(theDate));
+
+                $("#daysOffList").append(li);
+              } else {
+                showMessage("Add day", 'error:' + createDayOffRequest.message, 'error');
+              }
+            }
+
+          },
+          Cancel : function() {
+            $(this).dialog("close");
+          }
+        },
+        close : function() {
+        }
+      });
 
 /*  $("#dayOffTrash").droppable({
     accept : "#daysOffList li",
@@ -160,28 +207,39 @@ $(function() {
   });
 
   $("#addDayOffBtn").button({
-    icons : {
-      primary : "ui-icon-circle-plus"
-    },
     text : true
   }).click(function() {
-    var dayoff = $("#pDayOffDateTxt").val();
-    if (dayoff == null || dayoff == "") {
-      showMessage("Add day", 'A date must be selected', 'error');
-    } else {
-      var dayOffDate = new Date(
-          dayoff);
-      var createDayOffRequest = rpcClient.daysOffService.create(dayOffDate, "VACATION", projectId);
-      if (createDayOffRequest.result == 0) {
-        var dayOff = createDayOffRequest.data;
-        var theDate = new Date(
-            dayOff.dayOff.time);
-        var li = $('<li></li>').addClass('ui-state-default').attr('id', dayOff.dayoffId).text(fmt.format(theDate));
+    $("#addDaysOffDialog").dialog("open");
+  });
 
-        $("#daysOffList").append(li);
-      } else {
-        showMessage("Add day", 'error:' + createDayOffRequest.message, 'error');
-      }
+  var salectedDayOff = {};
+  $("#deleteDayOffBtn").button({
+    text : true
+  }).click(function() {
+    if (salectedDayOff.selection) {
+      var buttons = {
+          Yes : function() {
+            $(this).dialog("close");
+            var delDayCall = rpcClient.daysOffService.remove(salectedDayOff.selection.id);
+            if (delDayCall && delDayCall.result == 0) {
+              // success, reload
+              salectedDayOff.selection.remove();
+              salectedDayOff.selection = null;
+              $('#deleteDayOffBtn').prop("disabled", true);
+            } else {
+              showMessage("Delete Day", 'Error:'
+                  + result.message, 'error');
+            }
+          },
+          No : function() {
+            $(this).dialog("close");
+            return false;
+          }
+        }
+        showMessage('Delete Vacation Day',
+            'The selected vacation day will be deleted permanently!',
+            'warning', buttons);
+     
     }
   });
 
@@ -245,6 +303,22 @@ $(function() {
       showMessage("Show Project Details", 'Error: ' + tskCall.message, 'error')
     }
   }
+  $('#deleteDayOffBtn').prop("disabled", true);
+  
+  $("#daysOffList").selectable();
+
+  $('#daysOffList').selectable(
+      {
+        selected : function(event, ui) {
+          $('#deleteDayOffBtn').prop("disabled", true);
+          salectedDayOff.selection = ui.selected;
+          $('#deleteDayOffBtn').prop("disabled", false);
+        },
+        unselected : function(event, ui) {
+          $('#deleteDayOffBtn').prop("disabled", true);
+          salectedDayOff.selection = null;
+        }
+      });
 
   $("#mainAllTasks li").dblclick(function() {
 
