@@ -6,7 +6,7 @@
 <div class="mainContainer">
 	<div id="main" style="width: 100%;" class="main-body">
 
-		<div id="tasksGantt" class="gantt tasksgantt" style="height: 500px"></div>
+		<div id="tasksGantt" class="gantt tasksgantt" style="height: 420px"></div>
 		
 		<div id="projectTabs">
 

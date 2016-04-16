@@ -710,11 +710,15 @@
 
                             // Fill months
                             if (rday.getMonth() !== month) {
+                                var temp = "";
+                                if (settings.excludeYears) {
+                                  temp = " " + year;
+                                }
                                 monthArr.push(
                                     ('<div class="row header month" style="width:'
                                        + tools.getCellSize() * daysInMonth
                                        + 'px;"><div class="fn-label">'
-                                       + settings.months[month]
+                                       + settings.months[month] + temp
                                        + '</div></div>'));
                                 month = rday.getMonth();
                                 daysInMonth = 0;
@@ -742,11 +746,16 @@
                             + year
                             + '</div></div>');
 
+                        var temp = "";
+                        if (settings.excludeYears) {
+                          temp = " " + year;
+                        }
+
                         // Last month
                         monthArr.push(
                             '<div class="row header month" style="width: '
                             + tools.getCellSize() * daysInMonth + 'px"><div class="fn-label">'
-                            + settings.months[month]
+                            + settings.months[month] + temp
                             + '</div></div>');
 
                         var dataPanel = core.dataPanel(element, range.length * tools.getCellSize());
@@ -756,7 +765,9 @@
                         var dateHeader = $('<div id="dateHeader" class="dateHeader"/>');
                         dataPanel.append(dateHeader);
 
-                        dateHeader.append(yearArr.join(""));
+                        if (!settings.excludeYears) {
+                          dateHeader.append(yearArr.join(""));
+                        }
                         dateHeader.append(monthArr.join(""));
                         dateHeader.append($('<div class="row" style="margin-left: 0;" />').html(dayArr.join("")));
                         dateHeader.append($('<div class="row" style="margin-left: 0;" />').html(dowArr.join("")));
@@ -1207,8 +1218,11 @@
 
                                     // find row
                                     var topEl = $(element).find("#rowheader" + i);
-
-                                    var top = tools.getCellSize() * 4 + 2 + parseInt(topEl.attr("offset"), 10);
+                                    var headerLevels = 4;
+                                    if (settings.excludeYears) {
+                                      headerLevels = 3;
+                                    }
+                                    var top = tools.getCellSize() * headerLevels + 2 + parseInt(topEl.attr("offset"), 10);
                                     _bar.css({ 'margin-top': top, 'margin-left': Math.floor(cFrom) });
 
                                     datapanel.append(_bar);
@@ -1304,7 +1318,13 @@
                     var headerRows = element.headerRows;
                     if (settings.scale === "hours" && scaleSt >= 13) {
                         scale = "days";
-                        headerRows = 4;
+                        if (settings.excludeYears) {
+                          this.headerRows = 3
+                          headerRows = 3;
+                        } else {
+                          this.headerRows = 4
+                          headerRows = 4;
+                        }
                         scaleSt = 13;
                     } else if (settings.scale === "days" && zoomIn) {
                         scale = "hours";
@@ -1783,7 +1803,7 @@
                 case "hours": this.headerRows = 5; this.scaleStep = 1; break;
                 case "weeks": this.headerRows = 3; this.scaleStep = 13; break;
                 case "months": this.headerRows = 2; this.scaleStep = 14; break;
-                default: this.headerRows = 4; this.scaleStep = 13; break;
+                default: (settings.excludeYears)?this.headerRows = 3:this.headerRows = 4; this.scaleStep = 13; break;
             }
 
             this.scrollNavigation = {

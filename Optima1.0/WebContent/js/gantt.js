@@ -85,7 +85,8 @@ $("#tasksGantt").gantt({
 	maxScale : "months",
 	minScale : "days",
 	scale : "days",
-
+	excludeYears :  true,
+	  
 	waitText : "Please wait...",
 
 	itemsPerPage : 1000,

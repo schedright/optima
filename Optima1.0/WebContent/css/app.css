@@ -148,7 +148,7 @@ select option {
 .fn-gantt .scoll-container {
 	overflow-y: auto;
 	overflow-x: hidden;
-	max-height: 450px;
+	max-height: 380px;
 }
 
 .fn-gantt .dataPanel {
@@ -1315,6 +1315,7 @@ h2 {
 #sidebar.visible {
 	left: 0px;
 	transition: left 0.3s linear;
+	z-index : 10000;
 }
 
 #sidebar ul {
