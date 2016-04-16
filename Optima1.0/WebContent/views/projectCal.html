@@ -2,15 +2,17 @@
 
 	<div class="two-columns">
 
-		<label for="pStartDateTxt">Proposed Start Date</label> <input type="text"
-			id="pStartDateTxt" class="datepicker" name="pStartDateTxt" />
+		<label for="pStartDateTxt">Proposed Start Date</label> <input
+			type="text" id="pStartDateTxt" class="datepicker"
+			name="pStartDateTxt" />
 
 	</div>
 
 	<div class="two-columns right">
 
-		<label for="pFinishDateTxt">Proposed Finish Date</label> 
-		<input type="text" id="pFinishDateTxt" name="pFinishDateTxt" class="datepicker" />
+		<label for="pFinishDateTxt">Proposed Finish Date</label> <input
+			type="text" id="pFinishDateTxt" name="pFinishDateTxt"
+			class="datepicker" />
 
 	</div>
 </div>
@@ -18,15 +20,14 @@
 
 	<div class="three-columns">
 
-		<label>Week End Days</label> 
-		<select id="weDays" class="dropdown">
-			
+		<label>Week End Days</label> <select id="weDays" class="dropdown">
+
 			<option value="-1">No Week End</option>
-			
+
 			<option value="1">Sat-Sun</option>
 
 			<option value="2">Fri-Sat</option>
-			
+
 			<option value="3">Thu-Fri</option>
 
 		</select>
@@ -36,30 +37,27 @@
 </div>
 
 <div class="form-section">
-	
-	
-	<label for="pDayOffDateTxt">Vacation and Days Off:</label>
-	
-	<div class="two-columns">
-	
-	<input type="text"
-		id="pDayOffDateTxt" name="pDayOffDateTxt"  class="datepicker" />
-	</div>
-	<div class="two-columns right">
-		<button id="addDayOffBtn" >Add To Off Days</button>
-	</div>
-	
+	<div id="ulContainer" class="two-columns">
 
-</div>
-<div class="form-section">		
-	<div class="two-columns">
-
-	<label>Selected Days off</label>
-		<ul id="daysOffList" class="draggable"></ul>
+		<label>Vacation and Days Off:</label>
+		<ul id="daysOffList"></ul>
 	</div>
 	<div class="two-columns">
-		<label>Drag here to delete</label>
-		<ul id="dayOffTrash" class="draggable trash"></ul>
+		<button id="addDayOffBtn">Add To Off Days</button><br/>
+		<button id="deleteDayOffBtn">Delete</button>
 	</div>
 
 </div>
+
+<div id="addDaysOffDialog" title="Add Vacation Day">
+	<p class="validateTips">Select day to add</p>
+
+	<form id="daysOffForm">
+		<fieldset>
+			<input type="text" id="pDayOffDateTxt" name="pDayOffDateTxt"
+				class="datepicker" />
+		</fieldset>
+	</form>
+</div>
+
+

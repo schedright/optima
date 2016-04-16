@@ -670,7 +670,7 @@ important
 }
 
 .draggable li, #allTasks li, #dependencies li, #allProjects li,
-	#includedProjects li {
+	#includedProjects li, #usersList li, #ulContainer li {
 	margin: 0 5px 5px 5px;
 	padding: 2px;
 	font-size: 1em;
@@ -728,7 +728,7 @@ important
 	font-weight: bold;
 }
 
-.draggable, #divTasksDepends ul {
+.draggable, #divTasksDepends ul, #ulContainer ul {
 	height: 160px;
 	border: 1px solid #D3D3D3;
 	border-radius: 2px;

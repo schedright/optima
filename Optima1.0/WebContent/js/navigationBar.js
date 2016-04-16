@@ -1,156 +1,167 @@
-$(document).ready( function() {
-	var isAdminCheck = rpcClient.usersService.isAdmin();
-	if (!isAdminCheck) {
-		$("#usersNavBar").hide();
-	}
-	var currentUser = rpcClient.usersService.getCurrentUser();
-	
-	$("#allProjectsNavBar").append("<a href=\"allprojects.jsp\">Projects<img class=\"menuIcon\" src=\"css/header/images/icon_projects.png\" /></a>");
-	$("#portfoliosNavBar").append("<a href=\"enterprise.jsp\">Enterprise<img class=\"menuIcon\" src=\"css/header/images/icon_portfolio.png\" /></a>");
-	$("#financingNavBar").append("<a href=\"#\">Financing<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
-	$("#scheduleNavBar").append("<a href=\"#\">Scheduling<img class=\"menuIcon\" src=\"css/header/images/icon_Scheduling.png\" /></a>");
-	$("#cashflowNavBar").append("<a href=\"#\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
-	$("#financialNavBar").append("<a href=\"#\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
-	$("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\">Capital Plan<img class=\"menuIcon\" src=\"css/header/images/icon_results1.png\" /></a>");
-	if (isAdminCheck) {
-		$("#usersNavBar").append("<a href=\"users.jsp\"><img class=\"menuIcon\" src=\"css/header/images/icon_results1.png\" />Users</a>");
-	}
-	
-	$( "#menuLogout" ).click(function() {
-		rpcClient.portfolioService.logout();
-		location.reload();
-		});
-	$('#sidebar-btn').click(function(){
-		if (!$('#sidebar').hasClass('visible')) {
-			setTimeout(function(){
-					$('#sidebar').addClass('visible');
-			},0);
-		}
-	});
-	$('body,html').click(function(e){
-		   $('#sidebar').removeClass('visible');
-		});
-	
-	setTimeout(function() {
-	rpcClient.portfolioService.findAllLight(function(result , exception) {
-		if (result.result == 0) {
-			var data = result.data;
-			
-			if (data.list.length != 0) {
-				var portfolioIndex = 0;
-				var savedPortfolioIndex = $.cookie('saved_index_pf');
-				if (savedPortfolioIndex) {
-					try {
-						portfolioIndex = parseInt(savedPortfolioIndex);
-					} catch (e) {
-					}
-				}
-				for (var i = 0; i< data.list.length; i++) {
-					if (i != portfolioIndex) {
-						continue;
-					}
-					$("#financingNavBar").children().get(0).parentNode.removeChild($("#financingNavBar").children().get(0));
-					$("#financingNavBar").append("<a href=\"finData.jsp?portfolioId=" + data.list[i].portfolioId + "\">Financing<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
+$(document).ready(function() {
+  var isAdminCheck = rpcClient.usersService.isAdmin();
+  if (!isAdminCheck) {
+    $("#usersNavBar").hide();
+  }
+  var currentUser = rpcClient.usersService.getCurrentUser();
 
-					$("#scheduleNavBar").children().get(0).parentNode.removeChild($("#scheduleNavBar").children().get(0));
-					$("#scheduleNavBar").append("<a href=\"schedule.jsp?portfolioId=" + data.list[i].portfolioId + "\">Scheduling<img class=\"menuIcon\" src=\"css/header/images/icon_Scheduling.png\" /></a>");
+  $("#allProjectsNavBar").append("<a href=\"allprojects.jsp\">Projects<img class=\"menuIcon\" src=\"css/header/images/icon_projects.png\" /></a>");
+  $("#portfoliosNavBar").append("<a href=\"enterprise.jsp\">Enterprise<img class=\"menuIcon\" src=\"css/header/images/icon_portfolio.png\" /></a>");
+  $("#financingNavBar").append("<a href=\"#\">Financing<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
+  $("#scheduleNavBar").append("<a href=\"#\">Scheduling<img class=\"menuIcon\" src=\"css/header/images/icon_Scheduling.png\" /></a>");
+  $("#cashflowNavBar").append("<a href=\"#\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
+  $("#financialNavBar").append("<a href=\"#\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
+  $("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\">Capital Plan<img class=\"menuIcon\" src=\"css/header/images/icon_results1.png\" /></a>");
+  if (isAdminCheck) {
+    $("#usersNavBar").append("<a href=\"users.jsp\"><img class=\"menuIcon\" src=\"css/header/images/icon_results1.png\" />Users</a>");
+  }
 
-					$("#cashflowNavBar").children().get(0).parentNode.removeChild($("#cashflowNavBar").children().get(0));
-					$("#cashflowNavBar").append("<a href=\"cashFlow.jsp?portfolioId=" + data.list[i].portfolioId + "\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
+  $("#menuLogout").click(function() {
+    rpcClient.portfolioService.logout();
+    location.reload();
+  });
+  $('#sidebar-btn').click(function() {
+    if (!$('#sidebar').hasClass('visible')) {
+      setTimeout(function() {
+        $('#sidebar').addClass('visible');
+      }, 0);
+    }
+  });
+  $('body,html').click(function(e) {
+    $('#sidebar').removeClass('visible');
+  });
 
-					$("#financialNavBar").children().get(0).parentNode.removeChild($("#financialNavBar").children().get(0));
-					$("#financialNavBar").append("<a href=\"financials.jsp?portfolioId=" + data.list[i].portfolioId + "\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
-				}
-				
-			}
-		}
-	});
-	},0);
+  var updateLinks = function(link) {
+    $("#financingNavBar").children().get(0).parentNode.removeChild($("#financingNavBar").children().get(0));
+    $("#financingNavBar").append("<a href=\"finData.jsp?" + link + "\">Financing<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
 
-	var editUserFormUserName = $("#editUserFormUserName");
-	var editUserFormPassword1 = $("#editUserFormPassword1");
-	var editUserFormPassword2 = $("#editUserFormPassword2");
+    $("#scheduleNavBar").children().get(0).parentNode.removeChild($("#scheduleNavBar").children().get(0));
+    $("#scheduleNavBar").append("<a href=\"schedule.jsp?" + link + "\">Scheduling<img class=\"menuIcon\" src=\"css/header/images/icon_Scheduling.png\" /></a>");
 
-	$("#editUserDialog")
-	.dialog(
-			{
-				autoOpen : false,
-				height : 500,
-				width : 450,
-				modal : true,
-				show : {
-					effect : "blind",
-					duration : 300
-				},
-				hide : {
-					effect : "fade",
-					duration : 300
-				},
-				buttons : {
-					"Save" : function() {
-						var bValid = true;
+    $("#cashflowNavBar").children().get(0).parentNode.removeChild($("#cashflowNavBar").children().get(0));
+    $("#cashflowNavBar").append("<a href=\"cashFlow.jsp?" + link + "\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
 
-						bValid = bValid
-								&& checkLength(editUserFormUserName,
-										"editUserFormUserName", 6, 20);
-						bValid = bValid
-								&& checkLength(editUserFormPassword1,
-										"editUserFormPassword1", 6, 20);
-						if ((editUserFormPassword1.val() !== editUserFormPassword2
-								.val())) {
-							editUserFormPassword2
-									.addClass("ui-state-error");
-							bValid = false;
-						}
+    $("#financialNavBar").children().get(0).parentNode.removeChild($("#financialNavBar").children().get(0));
+    $("#financialNavBar").append("<a href=\"financials.jsp?" + link + "\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
+  }
+  setTimeout(function() {
+    var activeProject = $.cookie('activeProject');
+    var linksUpdated = false;
+    if (typeof activeProject === 'string') {
+      var tags = activeProject.split(',');
+      var projId = null;
+      var portId = null;
+      for (var i = 0; i < tags.length; i++) {
+        var subTag = tags[i].split('=');
+        if (subTag.length == 2) {
+          // portfolio-" + item.proj.portfolio.portfolioId + "," + "project-" + item.proj.projectId
+          if (subTag[0] === 'portfolio') {
+            portId = subTag[1];
+          } else if (subTag[0] === 'project') {
+            projId = subTag[1];
+          }
+        }
+      }
+      if (portId) {
+        updateLinks("portfolioId=" + portId);
+        linksUpdated = true;
+      } else if (projId) {
+        updateLinks("projectId=" + projId);
+        linksUpdated = true;
+      }
+    }
+    if (!linksUpdated) {
+      rpcClient.portfolioService.findAllLight(function(result,
+          exception) {
+        if (result.result == 0) {
+          var data = result.data;
 
-						if (bValid) {
-							var makeAdmin = true;
-							var result = rpcClient.usersService
-									.updateUser(currentUser.userName,
-											editUserFormUserName.val(),
-											editUserFormPassword1.val(),
-											makeAdmin);
-							if (result && result.result == 0) {
-								location.reload();
-							} else {
-								showMessage("Update User", 'Error:'
-										+ result.message, 'error');
-							}
-						}
-					},
-					Cancel : function() {
-						$(this).dialog("close");
-					}
-				},
-				close : function() {
-					allFields.val("").removeClass("ui-state-error");
-				}
-			});	
-	$( "#editUserName" ).click(function() {
-//		currentUser
-		$("#editUserFormUserName").val(currentUser.userName);
-		$("#editUserFormPassword1").val(currentUser.userPass);
-		$("#editUserFormPassword2").val(currentUser.userPass);
-		$("#editUserDialog").dialog("open");
-	});
-	
-	if(currentPage == 1)
-		$("#portfoliosNavBar").addClass("active");
-	else if(currentPage == 2)
-		$("#financingNavBar").addClass("active");
-	else if(currentPage == 4)
-		$("#scheduleNavBar").addClass("active");
-	else if(currentPage == 5)
-		$("#cashflowNavBar").addClass("active");
-	else if(currentPage == 6)
-		$("#financialNavBar").addClass("active");	
-	else if(currentPage == 7)
-		$("#projectsRoadMapNavBar").addClass("active");	
-	else if(currentPage == 8 && isAdminCheck)
-		$("#usersNavBar").addClass("active");	
-	else if(currentPage == 9 && isAdminCheck)
-		$("#allProjectsNavBar").addClass("active");	
+          if (data.list.length != 0) {
+            var portfolioIndex = 0;
 
-	
-	
+            var savedPortfolioIndex = 0;
+            for (var i = 0; i < data.list.length; i++) {
+              if (i != portfolioIndex) {
+                continue;
+              }
+              updateLinks("portfolioId=" + data.list[i].portfolioId);
+            }
+
+          }
+        }
+      });
+    }
+  }, 0);
+
+  var editUserFormUserName = $("#editUserFormUserName");
+  var editUserFormPassword1 = $("#editUserFormPassword1");
+  var editUserFormPassword2 = $("#editUserFormPassword2");
+
+  $("#editUserDialog").dialog({
+    autoOpen : false,
+    height : 500,
+    width : 450,
+    modal : true,
+    show : {
+      effect : "blind",
+      duration : 300
+    },
+    hide : {
+      effect : "fade",
+      duration : 300
+    },
+    buttons : {
+      "Save" : function() {
+        var bValid = true;
+
+        bValid = bValid && checkLength(editUserFormUserName, "editUserFormUserName", 6, 20);
+        bValid = bValid && checkLength(editUserFormPassword1, "editUserFormPassword1", 6, 20);
+        if ((editUserFormPassword1.val() !== editUserFormPassword2.val())) {
+          editUserFormPassword2.addClass("ui-state-error");
+          bValid = false;
+        }
+
+        if (bValid) {
+          var makeAdmin = true;
+          var result = rpcClient.usersService.updateUser(currentUser.userName, editUserFormUserName.val(), editUserFormPassword1.val(), makeAdmin);
+          if (result && result.result == 0) {
+            location.reload();
+          } else {
+            showMessage("Update User", 'Error:' + result.message, 'error');
+          }
+        }
+      },
+      Cancel : function() {
+        $(this).dialog("close");
+      }
+    },
+    close : function() {
+      allFields.val("").removeClass("ui-state-error");
+    }
+  });
+  $("#editUserName").click(function() {
+    // currentUser
+    $("#editUserFormUserName").val(currentUser.userName);
+    $("#editUserFormPassword1").val(currentUser.userPass);
+    $("#editUserFormPassword2").val(currentUser.userPass);
+    $("#editUserDialog").dialog("open");
+  });
+
+  if (currentPage == 1)
+    $("#portfoliosNavBar").addClass("active");
+  else if (currentPage == 2)
+    $("#financingNavBar").addClass("active");
+  else if (currentPage == 4)
+    $("#scheduleNavBar").addClass("active");
+  else if (currentPage == 5)
+    $("#cashflowNavBar").addClass("active");
+  else if (currentPage == 6)
+    $("#financialNavBar").addClass("active");
+  else if (currentPage == 7)
+    $("#projectsRoadMapNavBar").addClass("active");
+  else if (currentPage == 8 && isAdminCheck)
+    $("#usersNavBar").addClass("active");
+  else if (currentPage == 9 && isAdminCheck)
+    $("#allProjectsNavBar").addClass("active");
+
 });

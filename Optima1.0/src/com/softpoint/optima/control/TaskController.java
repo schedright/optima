@@ -120,28 +120,27 @@ public class TaskController {
 	}
 	
 	
-	public ServerResponse resetTaskScheduling(HttpSession session, int taskId ) throws OptimaException
-	{
-		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
-
-		ProjectTask projectTask = null;
-		try {
-			
-			//System.out.println("Resetting");
-			projectTask = controller.find(ProjectTask.class, taskId);
-			projectTask.setScheduledStartDate(null);
-			projectTask.setCalendarStartDate(null);
-			projectTask.setCalenderDuration(0);
-			controller.merge(projectTask);
-			adjustStartDateBasedOnTaskDependency(session, projectTask.getProject().getProjectId() , false);
-			return new ServerResponse("0", "Success", null);
-		} catch (EntityControllerException e) {
-			e.printStackTrace();
-			return new ServerResponse("TASK0002-3", String.format("Error resetting scheduling for task %d: %s", taskId, e.getMessage()), e);
-		}
-
-	}
-	public ServerResponse updateStartDate(HttpSession session, int taskId ,  Date scheduledStartDate ) throws OptimaException {
+	/*
+	 * public ServerResponse resetTaskScheduling(HttpSession session, int taskId
+	 * ) throws OptimaException { EntityController<ProjectTask> controller = new
+	 * EntityController<ProjectTask>(session.getServletContext());
+	 * 
+	 * ProjectTask projectTask = null; try {
+	 * 
+	 * //System.out.println("Resetting"); projectTask =
+	 * controller.find(ProjectTask.class, taskId);
+	 * projectTask.setScheduledStartDate(null);
+	 * projectTask.setCalendarStartDate(null);
+	 * projectTask.setCalenderDuration(0); controller.merge(projectTask);
+	 * adjustStartDateBasedOnTaskDependency(session,
+	 * projectTask.getProject().getProjectId() , false); return new
+	 * ServerResponse("0", "Success", null); } catch (EntityControllerException
+	 * e) { e.printStackTrace(); return new ServerResponse("TASK0002-3",
+	 * String.format("Error resetting scheduling for task %d: %s", taskId,
+	 * e.getMessage()), e); }
+	 * 
+	 * }
+	 */	public ServerResponse updateStartDate(HttpSession session, int taskId ,  Date scheduledStartDate ) throws OptimaException {
 
 		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 

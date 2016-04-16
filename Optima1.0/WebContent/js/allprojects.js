@@ -105,6 +105,14 @@ $(function() {
 		var row = cell.row;
 		var item = pGrid.getDataItem(row);
 		if (item && item.proj && item.proj.projectId) {
+		  var selectedProjectCookie = "";
+		  if (item.proj.portfolio) {
+		    selectedProjectCookie = "portfolio=" + item.proj.portfolio.portfolioId + "," + "project=" + item.proj.projectId; 
+		  } else {
+		    selectedProjectCookie = "project=" + item.proj.projectId;
+		  }
+		  $.cookie('activeProject', selectedProjectCookie);
+		  
 			window.location.href = "projectDetails.jsp?projectId="
 					+ item.proj.projectId;
 		}

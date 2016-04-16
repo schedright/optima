@@ -1,3 +1,5 @@
+$('#titleDiv').html('User Management');
+
 var isAdminCheck = rpcClient.usersService.isAdmin();
 if (!isAdminCheck) {
 	window.location.href = "allprojects.jsp";

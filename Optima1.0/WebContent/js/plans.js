@@ -125,16 +125,6 @@ $(function() {
   totalsRow["Total"] = parseFloat(allTotal).toFixed(2);
   pData.push(totalsRow);
 
-  $('#planTabs').tabs({
-    activate : function(e,
-        ui) {
-      $.cookie('plan-selected-tab', ui.newTab.index(), {
-        path : '/'
-      });
-    },
-    active : $.cookie('plan-selected-tab')
-  });
-
   var pGrid = new Slick.Grid(
       "#projectPayments",
       pData,
@@ -144,6 +134,20 @@ $(function() {
         enableCellNavigation : true,
         enableColumnReorder : true
       });
+
+  $('#planTabs').tabs({
+    activate : function(e,
+        ui) {
+      if (ui.newTab.index()==2) {
+        pGrid.resizeCanvas();
+      }
+      $.cookie('plan-selected-tab', ui.newTab.index(), {
+        path : '/'
+      });
+    },
+    active : $.cookie('plan-selected-tab')
+  });
+
   var windowResizeFunc = function() {
     $('#planTabs').height($('#main').height() - $('#projectsGantt').height())
     pGrid.resizeCanvas();

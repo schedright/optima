@@ -2005,8 +2005,6 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		//Add projectStartDate
 		ProjectPayment projectPayment = new ProjectPayment();
 		
-		projectPayment.setPaymentAmount(project.getAdvancedPaymentAmount());
-		
 		projectPayment.setPaymentDate(projectStartDate);
 		
 		PaymentType paymentType = new PaymentType();

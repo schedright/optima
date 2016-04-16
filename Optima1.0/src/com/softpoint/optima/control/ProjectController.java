@@ -63,7 +63,7 @@ public class ProjectController {
 	public ServerResponse create(HttpSession session, String name, String code, String descritpion,
 			Date proposedStartDate, Date proposedFinishDate, double interestRate, double overheadPerDay,
 			int portfolioId, int weekendDaysId, double retainedPercentage, double advancedPaymentPercentage,
-			double advancedPaymentAmount, double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod)
+			double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod)
 					throws OptimaException {
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 
@@ -82,7 +82,6 @@ public class ProjectController {
 			project.setAdvancedPaymentPercentage(new BigDecimal(advancedPaymentPercentage));
 
 			project.setDelayPenaltyAmount(new BigDecimal(delayPenaltyAmount));
-			project.setAdvancedPaymentAmount(new BigDecimal(advancedPaymentAmount));
 			project.setPaymentRequestPeriod(paymentRequestPeriod);
 			project.setCollectPaymentPeriod(collectPaymentPeriod);
 
@@ -114,7 +113,7 @@ public class ProjectController {
 	public ServerResponse update(HttpSession session, int key, String name, String code, String descritpion,
 			Date proposedStartDate, Date proposedFinishDate, double interestRate, double overheadPerDay,
 			int portfolioId, int weekendDaysId, double retainedPercentage, double advancedPaymentPercentage,
-			double advancedPaymentAmount, double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod)
+			double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod)
 					throws OptimaException {
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 		Project project = null;
@@ -132,7 +131,6 @@ public class ProjectController {
 			project.setAdvancedPaymentPercentage(new BigDecimal(advancedPaymentPercentage));
 
 			project.setDelayPenaltyAmount(new BigDecimal(delayPenaltyAmount));
-			project.setAdvancedPaymentAmount(new BigDecimal(advancedPaymentAmount));
 			project.setPaymentRequestPeriod(paymentRequestPeriod);
 			project.setCollectPaymentPeriod(collectPaymentPeriod);
 

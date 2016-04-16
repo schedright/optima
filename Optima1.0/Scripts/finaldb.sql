@@ -41,7 +41,6 @@ interest_rate numeric(16,13),
 overhead_per_day numeric(9,3),
 retained_percentage numeric(16,13),
 advanced_payment_percentage numeric(16,13),
-advanced_payment_amount numeric(19,3), 
 collect_payment_period INT,              
 payment_request_period INT,              
 delay_penalty_amount numeric(19,3)      

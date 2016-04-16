@@ -24,9 +24,6 @@ public class Project implements Serializable {
 	@Column(name = "advanced_payment_percentage")
 	private BigDecimal advancedPaymentPercentage;
 
-	@Column(name = "advanced_payment_amount")
-	private BigDecimal advancedPaymentAmount;
-
 	@Column(name = "delay_penalty_amount")
 	private BigDecimal delayPenaltyAmount;
 
@@ -102,14 +99,6 @@ public class Project implements Serializable {
 
 	public void setAdvancedPaymentPercentage(BigDecimal advancedPaymentPercentage) {
 		this.advancedPaymentPercentage = advancedPaymentPercentage;
-	}
-
-	public BigDecimal getAdvancedPaymentAmount() {
-		return advancedPaymentAmount;
-	}
-
-	public void setAdvancedPaymentAmount(BigDecimal advancedPaymentAmount) {
-		this.advancedPaymentAmount = advancedPaymentAmount;
 	}
 
 	public BigDecimal getDelayPenaltyAmount() {

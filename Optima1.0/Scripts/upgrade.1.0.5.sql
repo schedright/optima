@@ -68,6 +68,7 @@ alter table project drop column project_address_postal_code;
 alter table project drop column project_address_street;
 alter table project drop column project_address_province;
 alter table project drop column client_id;
+alter table project drop column advanced_payment_amount;
 
 drop table client;
 drop table location_info;
