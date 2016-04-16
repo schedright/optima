@@ -73,9 +73,6 @@ $(function() {
   }
 
   $("#resetSchedulingBtn").button({
-    icons : {
-      primary : "ui-icon-refresh"
-    },
     text : true
   }).click(function() {
     rpcClient.taskService.resetScheduling(function(result,
@@ -503,6 +500,8 @@ $(function() {
       if (pData.portfolio && pData.portfolio.portfolioId) {
         portId = pData.portfolio.portfolioId;
       }
+      $('#titleDiv').html(pData.projectName);
+
       $("#portfolioId").val(portId);
       $("#projnameTxt").val(pData.projectName);
       $("#projCodeTxt").val(pData.projectCode);

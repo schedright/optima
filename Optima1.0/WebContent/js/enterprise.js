@@ -107,7 +107,7 @@ $(function() {
       $.cookie('saved_pfid', null);
       $.cookie('saved_pfid', portData.portfolioId);
 
-      var selectedProjectCookie = "portfolio=" + item.proj.portfolio.portfolioId; 
+      var selectedProjectCookie = "portfolio=" + optionSelected.data().portfolioId; 
       $.cookie('activeProject', selectedProjectCookie);
       
       var newData = prepareProjectData(portData.projects.list);

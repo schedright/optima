@@ -221,6 +221,17 @@ public class ProjectController {
 		}
 	}
 
+	public ServerResponse findLight(HttpSession session, Integer key) throws OptimaException {
+		EntityController<ProjectLight> controller = new EntityController<ProjectLight>(session.getServletContext());
+		try {
+			ProjectLight project = controller.find(ProjectLight.class, key);
+			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("PROJ0003", String.format("Error looking up project %d: %s", key, e.getMessage()),
+					e);
+		}
+	}
 	/**
 	 * @param session
 	 * @param key
