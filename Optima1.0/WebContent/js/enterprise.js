@@ -110,6 +110,8 @@ $(function() {
       var selectedProjectCookie = "portfolio=" + optionSelected.data().portfolioId; 
       $.cookie('activeProject', selectedProjectCookie);
       
+      window.updateLinks("portfolioId=" + optionSelected.data().portfolioId);
+      
       var newData = prepareProjectData(portData.projects.list);
       pGrid.setData(newData);
       pGrid.invalidate();

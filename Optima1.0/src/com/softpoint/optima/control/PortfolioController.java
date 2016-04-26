@@ -186,8 +186,13 @@ public class PortfolioController {
 			} else if (projectId != 0) {
 				EntityController<Project> projController = new EntityController<Project>(session.getServletContext());
 				Project project = projController.find(Project.class, projectId);
-				projects = new ArrayList<Project>();
-				projects.add(project);
+				if (project.getPortfolio()==null) {
+					projects = new ArrayList<Project>();
+					projects.add(project);
+				} else {
+					portfolioId = project.getPortfolio().getPortfolioId();
+					projects = project.getPortfolio().getProjects();
+				}
 			} else {
 				throw new Exception("portfolio or project ids must be provided");
 			}
@@ -216,16 +221,30 @@ public class PortfolioController {
 		Boolean solved = isSolved(session, portfolioId, projectId);
 
 		EntityController<Portfolio> controller = new EntityController<Portfolio>(session.getServletContext());
-		Portfolio portfolio = null;
 		try {
-			portfolio = controller.find(Portfolio.class, portfolioId);
+			List<Project> projects = null;
+			if (portfolioId != 0) {
+				Portfolio portfolio = controller.find(Portfolio.class, portfolioId);
+				projects = portfolio.getProjects();
+			} else if (projectId != 0) {
+				EntityController<Project> projController = new EntityController<Project>(session.getServletContext());
+				Project project = projController.find(Project.class, projectId);
+				if (project.getPortfolio()==null) {
+					projects = new ArrayList<Project>();
+					projects.add(project);
+				} else {
+					portfolioId = project.getPortfolio().getPortfolioId();
+					projects = project.getPortfolio().getProjects();
+				}
+			} else {
+				return new ServerResponse("PORT0008", "portfolio or project ids must be provided", "");
+			}
 
 			// if all tasks have scheduled start date it means that it is
 			// already been solved before
 			SimpleDateFormat format = new SimpleDateFormat("dd MMM, yyyy");
 
 			List<Map<String, Object>> allSolution = new ArrayList<Map<String, Object>>();
-			List<Project> projects = portfolio.getProjects();
 			for (Project project : projects) {
 				Map<String, Object> projDetails = new HashMap<String, Object>();
 				List<Map<String, String>> tasksList = new ArrayList<Map<String, String>>();
@@ -305,8 +324,7 @@ public class PortfolioController {
 			return new ServerResponse("0", solved ? "Success" : "Not Solved", allSolution);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
-			return new ServerResponse("PORT0002", String.format("Error updating Portfolio %s: %s",
-					portfolio != null ? portfolio.getPortfolioName() : "", e.getMessage()), e);
+			return new ServerResponse("PORT0002", "Error getting solution", e);
 		}
 	}
 
@@ -731,8 +749,13 @@ public class PortfolioController {
 			} else if (projectId != 0) {
 				EntityController<Project> projController = new EntityController<Project>(session.getServletContext());
 				Project project = projController.find(Project.class, projectId);
-				projects = new ArrayList<Project>();
-				projects.add(project);
+				if (project.getPortfolio()==null) {
+					projects = new ArrayList<Project>();
+					projects.add(project);
+				} else {
+					portfolioId = project.getPortfolio().getPortfolioId();
+					projects = project.getPortfolio().getProjects();
+				}
 			} else {
 				return new ServerResponse("PORT0008", "portfolio or project ids must be provided", "");
 			}
@@ -757,7 +780,7 @@ public class PortfolioController {
 			projectsCashFlow.put("end", end);
 
 			return new ServerResponse("0", "Success", projectsCashFlow);
-		} catch (EntityControllerException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new ServerResponse("PORT0008", String.format("Error loading portfolios : %s", e.getMessage()), e);
 		}
@@ -1481,8 +1504,13 @@ public class PortfolioController {
 			} else if (projectId != 0) {
 				EntityController<Project> projController = new EntityController<Project>(session.getServletContext());
 				Project project = projController.find(Project.class, projectId);
-				projects = new ArrayList<Project>();
-				projects.add(project);
+				if (project.getPortfolio()==null) {
+					projects = new ArrayList<Project>();
+					projects.add(project);
+				} else {
+					portfolioId = project.getPortfolio().getPortfolioId();
+					projects = project.getPortfolio().getProjects();
+				}
 			} else {
 				throw new Exception("portfolio or project ids must be provided");
 			}
@@ -2129,8 +2157,11 @@ public class PortfolioController {
 		session.invalidate();
 	}
 
-	public Boolean isInvalidSolution(HttpSession session, int portfolioId) {
+	public Boolean isInvalidSolution(HttpSession session, int portfolioId, int projectId) {
 		Boolean ret = true;
+		if (portfolioId==0) {
+			return false;
+		}
 
 		try {
 			Date taskTimeStamp = null;

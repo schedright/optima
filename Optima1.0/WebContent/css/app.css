@@ -1302,11 +1302,11 @@ h2 {
 
 #sidebar {
 	background: #DFDFDF;
-	width: 200px;
+	width: 250px;
 	height: 100%;
 	display: block;
 	position: absolute;
-	left: -200px;
+	left: -250px;
 	top: 0px;
 	transition: left 0.3s linear;
 	z-index: 99;
@@ -1315,7 +1315,7 @@ h2 {
 #sidebar.visible {
 	left: 0px;
 	transition: left 0.3s linear;
-	z-index : 10000;
+	z-index : 15000;
 }
 
 #sidebar ul {
@@ -1330,9 +1330,9 @@ h2 {
 #sidebar ul li a {
 	/*background: #1C1E1F;*/
 	color: #5c5c5c;
-	border-bottom: 1px solid transparent;
+	border-bottom: 1px solid #2c2c2c;
 	display: block;
-	width: 180px;
+	width: 230px;
 	padding: 10px;
 	text-decoration: none;
 	font-size: larger;
@@ -1392,15 +1392,7 @@ h2 {
 }
 
 .sidebadMenuItem.active {
-	height: 55px;
-	font-size: 20px;
 	background-color: #FAFAFA;
-}
-
-.sidebadMenuItem.active .menuIcon {
-	width: 42;
-	margin-right: -5;
-	z-index: 200;
 }
 
 .menuIcon {

@@ -94,7 +94,11 @@ public class ProjectSolutionDetails {
 				}
 
 				DailyCashFlowMapEntity entity = new DailyCashFlowMapEntity();
-				entity.setPortfolioId(project.getPortfolio().getPortfolioId());
+				if (project.getPortfolio()!=null) {
+					entity.setPortfolioId(project.getPortfolio().getPortfolioId());
+				} else {
+					entity.setPortfolioId(0);
+				}
 				entity.setProjectId(project.getProjectId());
 				entity.setDay(date);
 
@@ -185,7 +189,14 @@ public class ProjectSolutionDetails {
 		portfolioStart = currentProject.getPropusedStartDate();
 		portfolioEnd = currentProject.getPropusedStartDate();
 
-		for (Project project : currentProject.getPortfolio().getProjects()) {
+		List<Project> allProjects = null;
+		if (currentProject.getPortfolio()==null) {
+			allProjects = new ArrayList<Project>();
+			allProjects.add(currentProject);
+		} else {
+			allProjects = currentProject.getPortfolio().getProjects();
+		}
+		for (Project project : allProjects) {
 			List<ProjectTask> tasks = project.getProjectTasks();
 			int requestPeriod = project.getPaymentRequestPeriod();
 			if (requestPeriod==0) {

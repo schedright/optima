@@ -44,6 +44,7 @@ $(document).ready(function() {
     $("#financialNavBar").children().get(0).parentNode.removeChild($("#financialNavBar").children().get(0));
     $("#financialNavBar").append("<a href=\"financials.jsp?" + link + "\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
   }
+  window.updateLinks = updateLinks;
   setTimeout(function() {
     var activeProject = $.cookie('activeProject');
     var linksUpdated = false;

@@ -17,13 +17,17 @@ $(function() {
   if (portfolioId) {
     rpcClient.portfolioService.findLight(function(result , exception) {
       if (result.result == 0) {
-        $('#titleDiv').html(result.data.portfolioName);
+        $('#titleDiv').html("Portfolio: " + result.data.portfolioName);
       }
     } , portfolioId);
   } else if (projectId) {
     rpcClient.projectService.findLight(function(result , exception) {
       if (result.result == 0) {
-        $('#titleDiv').html(result.data.projectName);
+        if (result.data.portfolio) {
+          $('#titleDiv').html("Portfolio: " + result.data.portfolio.portfolioName);
+        } else {
+          $('#titleDiv').html("Project: " + result.data.projectName);
+        }
       } 
     } , projectId);
 

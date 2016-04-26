@@ -1,23 +1,48 @@
 $(function() {
 	document.title = 'SchedRight - Financial Details';
 	var grid;
+  var portfolioId = 0;
+  var projectId = 0;
+  var currentDate = null;
+  
+  $("#accordion").accordion();
 
-	var portfolioId = null;
-	var currentDate = null;
-	for ( var i in getURLVariables()) {
-		if (i == "portfolioId") {
-			portfolioId = getURLVariables()[i];
-		}
-		if (i == "currentDate") {
-			currentDate = new Date(getURLVariables()[i]);
-		}
-	}
+  for ( var i in getURLVariables()) {
+    if (i == "portfolioId") {
+      portfolioId = getURLVariables()[i];
+    } else if (i == "projectId") {
+      projectId = getURLVariables()[i];
+    } else if (i == "currentDate") {
+      currentDate = new Date(getURLVariables()[i]);
+    }
+  }
+  
+  if (portfolioId) {
+    rpcClient.portfolioService.findLight(function(result , exception) {
+      if (result.result == 0) {
+        $('#titleDiv').html("Portfolio: " + result.data.portfolioName);
+      }
+    } , portfolioId);
+  } else if (projectId) {
+    rpcClient.projectService.findLight(function(result , exception) {
+      if (result.result == 0) {
+        if (result.data.portfolio) {
+          $('#titleDiv').html("Portfolio: " + result.data.portfolio.portfolioName);
+        } else {
+          $('#titleDiv').html("Project: " + result.data.projectName);
+        }
+      } 
+    } , projectId);
+
+  } else {
+    $('#titleDiv').html('Financial Results');
+  }
 
 	if (currentDate == null) {
 		currentDate = new Date();
 	}
 
-	var solutionResponse = rpcClient.portfolioService.getSolution(portfolioId);
+	var solutionResponse = rpcClient.portfolioService.getSolution(portfolioId,projectId);
 
 	if (solutionResponse.result == 0 && solutionResponse.data
 			&& solutionResponse.data.list && solutionResponse.data.list.length) {
@@ -197,9 +222,9 @@ $(function() {
 			});
 
     setTimeout(function() {
-    	var solutionResponse = rpcClient.portfolioService.hasSolution(portfolioId);
+    	var solutionResponse = rpcClient.portfolioService.hasSolution(portfolioId,projectId);
     	if (solutionResponse.result==0 && solutionResponse.data && solutionResponse.data=='TRUE') {
-    		var result = rpcClient.portfolioService.isInvalidSolution(portfolioId);
+    		var result = rpcClient.portfolioService.isInvalidSolution(portfolioId,projectId);
     		if (result) {
     			showMessage(
     					'Portfolio has changed',
