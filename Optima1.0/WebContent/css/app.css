@@ -737,6 +737,7 @@ important
 	background-color: #fff;
 	box-shadow: 2px 2px 2px #888 inset;
 	padding: 8px 0 0 2px;
+	min-height:200px;
 }
 
 .ui-datepicker-trigger {
