@@ -7,8 +7,7 @@ $(document).ready(function() {
 
   $("#allProjectsNavBar").append("<a href=\"allprojects.jsp\">Projects<img class=\"menuIcon\" src=\"css/header/images/icon_projects.png\" /></a>");
   $("#portfoliosNavBar").append("<a href=\"enterprise.jsp\">Enterprise<img class=\"menuIcon\" src=\"css/header/images/icon_portfolio.png\" /></a>");
-  $("#financingNavBar").append("<a href=\"#\">Financing<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
-  $("#scheduleNavBar").append("<a href=\"#\">Scheduling<img class=\"menuIcon\" src=\"css/header/images/icon_Scheduling.png\" /></a>");
+  $("#financingNavBar").append("<a href=\"#\">Constraint/Reschedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
   $("#cashflowNavBar").append("<a href=\"#\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
   $("#financialNavBar").append("<a href=\"#\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
   $("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\">Capital Plan<img class=\"menuIcon\" src=\"css/header/images/icon_results1.png\" /></a>");
@@ -33,10 +32,7 @@ $(document).ready(function() {
 
   var updateLinks = function(link) {
     $("#financingNavBar").children().get(0).parentNode.removeChild($("#financingNavBar").children().get(0));
-    $("#financingNavBar").append("<a href=\"finData.jsp?" + link + "\">Financing<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
-
-    $("#scheduleNavBar").children().get(0).parentNode.removeChild($("#scheduleNavBar").children().get(0));
-    $("#scheduleNavBar").append("<a href=\"schedule.jsp?" + link + "\">Scheduling<img class=\"menuIcon\" src=\"css/header/images/icon_Scheduling.png\" /></a>");
+    $("#financingNavBar").append("<a href=\"finData.jsp?" + link + "\">Constraint/Reschedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
 
     $("#cashflowNavBar").children().get(0).parentNode.removeChild($("#cashflowNavBar").children().get(0));
     $("#cashflowNavBar").append("<a href=\"cashFlow.jsp?" + link + "\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
@@ -152,8 +148,6 @@ $(document).ready(function() {
     $("#portfoliosNavBar").addClass("active");
   else if (currentPage == 2)
     $("#financingNavBar").addClass("active");
-  else if (currentPage == 4)
-    $("#scheduleNavBar").addClass("active");
   else if (currentPage == 5)
     $("#cashflowNavBar").addClass("active");
   else if (currentPage == 6)

@@ -413,8 +413,8 @@ public class ProjectController {
 
 		public void run() {
 			long millis1 = System.currentTimeMillis();
-			PortfolioSolver solver = new PortfolioSolver(portfolio, projectsPriority);
-			solver.solveIt(session);
+			PortfolioSolver solver = new PortfolioSolver(portfolio, projectsPriority, session);
+			solver.solveIt();
 
 			long millis2 = System.currentTimeMillis();
 			System.out.println(millis2 - millis1);
@@ -422,10 +422,16 @@ public class ProjectController {
 
 	}
 
-	public ServerResponse getStatus(HttpSession session, int portfolioId) {
+	public ServerResponse getStatus(HttpSession session, int portfolioId, int projectId) {
+		String key = "";
+		if (portfolioId!=0) {
+			key = "Port" + portfolioId;
+		} else {
+			key = "Proj" + projectId;
+		}
 
-		if (PortfolioSolver.currentWorkingSolutions.containsKey(portfolioId)) {
-			ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(portfolioId);
+		if (PortfolioSolver.currentWorkingSolutions.containsKey(key)) {
+			ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(key);
 			if (solStatus.containsKey(PortfolioSolver.STATUS)) {
 				return new ServerResponse("0", PortfolioSolver.SUCCESS, PortfolioSolver.formatMessage(solStatus));
 			} else {
@@ -442,19 +448,26 @@ public class ProjectController {
 		try {
 			synchronized (this) {
 				Project project = projectController.find(Project.class, projectId);
-				int portfolioId = project.getPortfolio().getPortfolioId();
-				if (PortfolioSolver.currentWorkingSolutions.containsKey(portfolioId)) {
-					ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(portfolioId);
+				int portfolioId = 0;
+				String key = "";
+				if (project.getPortfolio()!=null) {
+					portfolioId = project.getPortfolio().getPortfolioId();
+					key = "Port" + portfolioId;
+				} else {
+					key = "Proj" + project.getProjectId();
+				}
+				if (PortfolioSolver.currentWorkingSolutions.containsKey(key)) {
+					ConcurrentMap<String, Object> solStatus = PortfolioSolver.currentWorkingSolutions.get(key);
 					if (!solStatus.containsKey(PortfolioSolver.SOLVER)) {
-						PortfolioSolver.currentWorkingSolutions.remove(portfolioId);
+						PortfolioSolver.currentWorkingSolutions.remove(key);
 					}
 				}
 
-				if (PortfolioSolver.currentWorkingSolutions.containsKey(portfolioId)) {
+				if (PortfolioSolver.currentWorkingSolutions.containsKey(key)) {
 					return new ServerResponse("0", PortfolioSolver.SUCCESS, "running");
 				} else {
 					int running = 0;
-					for (Integer pid : PortfolioSolver.currentWorkingSolutions.keySet()) {
+					for (String pid : PortfolioSolver.currentWorkingSolutions.keySet()) {
 						ConcurrentMap<String, Object> s = PortfolioSolver.currentWorkingSolutions.get(pid);
 						if (s.containsKey(PortfolioSolver.SOLVER)) {
 							running++;
@@ -476,7 +489,7 @@ public class ProjectController {
 																	// updated
 																	// from the
 																	// solver
-						PortfolioSolver.currentWorkingSolutions.put(portfolioId, x);
+						PortfolioSolver.currentWorkingSolutions.put(key, x);
 
 						Thread t = new Thread(runner);
 						t.start();

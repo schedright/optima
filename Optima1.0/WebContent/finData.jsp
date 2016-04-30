@@ -5,37 +5,17 @@
 <div class="mainContainer">
 	<div id="main" style="width: 100%;" class="main-body">
 
-		<ul id="paymentMenu" class="contextMenu"
-			style="display: none; position: absolute">
-			<li data="Delete">Delete</li>
-		</ul>
-
-		<ul id="financeMenu" class="contextMenu"
-			style="display: none; position: absolute">
-			<li data="Delete">Delete</li>
-		</ul>
-
-		<div id="main" style="width: 100%; padding: 20px">
+		<div id="main" style="width: 100%; height: 100%; padding: 20px">
 
 			<div id="FinPeriods"
-				class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+				class="ui-tabs ui-widget ui-widget-content ui-corner-all"
+				style="height: 40%">
 				<label>Constraints</label>
 
 
 				<div id="finances"
 					class="ui-tabs ui-widget ui-widget-content ui-corner-all ui-center"
 					style="width: 90%;">
-
-					<!--div class="form-section">
-						<div class="two-columns">
-							<label for="financeAmount">Finance Amount</label> <input
-								type="text" id="financeAmount" name="financeAmount" class="" />
-						</div>
-						<div class="two-columns right">
-							<label for="financeDate">Finance Date</label> <input type="text"
-								id="financeDate" name="financeDate" class="" />
-						</div>
-					</div-->
 					<div id="ulContainer" class="form-section">
 						<div class="two-columns">
 							<ul id="financeList" class="sortable" style="height: initial">
@@ -59,7 +39,37 @@
 
 
 			</div>
+			<div id="FinPeriods"
+				class="ui-tabs ui-widget ui-widget-content ui-corner-all"
+				style="height: 50%">
+				<label>Projects Priority</label>
+				<div class="form-section">
+					<div class="one-column project-priorities">
+						<ul id="mainAllProjects" data-role="listview" data-inset="true"
+							class="draggable"></ul>
+					</div>
+				</div>
 
+				<div class="ui-dialog-buttonset">
+					<div class="two-columns-right">
+						<button id="findFinalSolBtn" class="btnRight">Solve</button>
+					</div>
+				</div>
+
+				<div id="currentSolution" class="form-section" style="display: none">
+					<div class="solutionContainer">
+						<div id="schedResults" class="div-Table"></div>
+					</div>
+				</div>
+
+				<div id="loading-indicator" style="display: none">
+					<div id="loading-indicator-image">
+						<img src="images/Sched-loaderLogo.png" /><img
+							src="images/Sched-loader.gif" />
+					</div>
+				</div>
+
+			</div>
 			<div id="addFinanceDialog" title="Add Finance">
 				<p class="validateTips">All form fields are required.</p>
 
@@ -74,7 +84,7 @@
 					</fieldset>
 				</form>
 			</div>
-			
+
 			<script src="js/formutils.js"></script>
 			<script src="js/finData.js"></script>
 		</div>
