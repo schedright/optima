@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 
@@ -42,6 +43,7 @@ public class Portfolio implements Serializable {
 
 	//bi-directional many-to-one association to PortfolioFinance
 	@OneToMany(mappedBy="portfolio" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	@OrderBy("financeUntillDate ASC")
 	private List<PortfolioFinance> portfolioFinances;
 
 	//bi-directional many-to-one association to Project
@@ -105,13 +107,13 @@ public class Portfolio implements Serializable {
 		this.portfolioFinances = portfolioFinances;
 	}
 
-	public PortfolioFinance addPortfolioFinance(PortfolioFinance portfolioFinance) {
+/*	public PortfolioFinance addPortfolioFinance(PortfolioFinance portfolioFinance) {
 		getPortfolioFinances().add(portfolioFinance);
 		portfolioFinance.setPortfolio(this);
 
 		return portfolioFinance;
 	}
-
+*/
 	public PortfolioFinance removePortfolioFinance(PortfolioFinance portfolioFinance) {
 		getPortfolioFinances().remove(portfolioFinance);
 		portfolioFinance.setPortfolio(null);

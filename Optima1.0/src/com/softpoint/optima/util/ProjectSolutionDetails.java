@@ -136,7 +136,7 @@ public class ProjectSolutionDetails {
 
 				entity.setCashout(tasksCost);
 				if (lastDayEntity.getBalance() < 0) {
-					entity.setFinanceCost(lastDayEntity.getBalance() * project.getInterestRate().doubleValue());
+					entity.setFinanceCost(lastDayEntity.getBalance() * PaymentUtil.getInterestInDay(project,date));
 				}
 
 				Double payment = paymentsCalendar.get(date);

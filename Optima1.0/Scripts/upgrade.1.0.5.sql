@@ -69,6 +69,16 @@ alter table project drop column project_address_street;
 alter table project drop column project_address_province;
 alter table project drop column client_id;
 alter table project drop column advanced_payment_amount;
+alter table project drop column interest_rate;
+--interest_rate numeric(16,13), 
 
 drop table client;
 drop table location_info;
+
+alter table portfolio_finance add column interest_rate numeric(16,13);
+alter table portfolio_finance add column project_id INT;
+
+ALTER TABLE portfolio_finance ADD 
+FOREIGN KEY (project_id) REFERENCES project(project_id) 
+ON UPDATE CASCADE ON DELETE CASCADE;
+

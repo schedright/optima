@@ -96,14 +96,14 @@ $(document).ready( function() {
 	        					 $("#projectName").val(),
 	        					 $("#projectCode").val(),
 	        					 $("#projectDescription").val(),
-	        					 null , null , 0.0 , 0.0 , portfolioId , -1, 0, 0, 0, 0, 0, 0);
+	        					 null , null , 0.0 , portfolioId , -1, 0, 0, 0, 0, 0, 0);
 	        					
 	        		 } else {
 	        			 call =  rpcClient.projectService.update( projectId , 
 	        					 $("#projectName").val(),
 	        					 $("#projectCode").val(),
 	        					 $("#projectDescription").val(),
-	        					 null , null , 0.0 , 0.0 , portfolioId , -1, 0, 0, 0, 0, 0, 0);
+	        					 null , null , 0.0 , portfolioId , -1, 0, 0, 0, 0, 0, 0);
 	        		 }
 	        		  if (call.result == 0) {
 	        			 $( this ).dialog( "close" );

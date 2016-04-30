@@ -435,11 +435,31 @@ public class PaymentUtil {
 		if(previousDay == null || previousDay.getBalance() >= 0 ){
 			return 0d;
 		}else {
-			double financeCost = previousDay.getBalance() * project.getInterestRate().doubleValue();
+			double financeCost = previousDay.getBalance() * getInterestInDay(project,currentDate);
 			return financeCost;
 		}
 	}
 	
+	public static Double getInterestInDay(Project project, Date date) {
+		List<PortfolioFinance> finances = null;
+		if (project.getPortfolio()==null) {
+			finances = project.getPortfolioFinances();
+		}else {
+			finances = project.getPortfolio().getPortfolioFinances();
+		}
+		
+		Double interest = (double) 0;
+		
+		if (finances!=null) {
+			for (PortfolioFinance fin : finances) {
+				if (!fin.getFinanceUntillDate().before(date)) {
+					interest = fin.getInterestRate().doubleValue();
+					break;
+				}
+			}
+		}
+		return interest;
+	}
 	//3.	Balance = yesterday netbalance – today cashout – finance cost of today. 
 	public static double getBalance(Date currentDate, DailyCashFlowMapEntity currentDayInfo, Map<String, DailyCashFlowMapEntity> results ){
 		DailyCashFlowMapEntity previousDay = getPreviousDayInfo(currentDate, results, currentDayInfo.getProjectId());
@@ -958,7 +978,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 					}
 					balanceCounter -= currentProject.getOverheadPerDay().doubleValue();
 					if (balanceCounter < 0) {
-						financeCostCounter += balanceCounter * currentProject.getInterestRate().doubleValue();
+						financeCostCounter += balanceCounter * getInterestInDay(currentProject,date);
 						// balanceCounter -= balanceCounter * currentProject.getDailyInterestRate().doubleValue();	
 					}
 					
@@ -1025,7 +1045,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 					}
 					balanceCounter -= currentProject.getOverheadPerDay().doubleValue();
 					if (balanceCounter < 0) {
-						financeCostCounter += balanceCounter * currentProject.getInterestRate().doubleValue();
+						financeCostCounter += balanceCounter * getInterestInDay(currentProject,date);
 						// balanceCounter -= balanceCounter * currentProject.getDailyInterestRate().doubleValue();	
 					}
 					
@@ -1384,10 +1404,10 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 			balanceCounterLeftovers -= project.getOverheadPerDay().doubleValue();
 			
 			if (balanceCounterLeftovers < 0) {
-				financeCostCounterLeftovers += balanceCounterLeftovers * project.getInterestRate().doubleValue();
+				financeCostCounterLeftovers += balanceCounterLeftovers * getInterestInDay(project,date);
 			}
 			if (balanceCounterEligibleTasks < 0) {
-				financeCostCounterEligibleTasks += balanceCounterEligibleTasks * project.getInterestRate().doubleValue();
+				financeCostCounterEligibleTasks += balanceCounterEligibleTasks * getInterestInDay(project,date);
 			}
 		}
 
@@ -1450,10 +1470,10 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 			balanceCounterLeftovers -= project.getOverheadPerDay().doubleValue();
 			
 			if (balanceCounterLeftovers < 0) {
-				financeCostCounterLeftovers += balanceCounterLeftovers * project.getInterestRate().doubleValue();
+				financeCostCounterLeftovers += balanceCounterLeftovers * getInterestInDay(project,date);
 			}
 			if (balanceCounterEligibleTasks < 0) {
-				financeCostCounterEligibleTasks += balanceCounterEligibleTasks * project.getInterestRate().doubleValue();
+				financeCostCounterEligibleTasks += balanceCounterEligibleTasks * getInterestInDay(project,date);
 			}
 		}
 
@@ -2179,7 +2199,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 			balanceCounter -= project.getOverheadPerDay().doubleValue();
 			
 			if (balanceCounter < 0) {
-				financeCostCounter  += balanceCounter * project.getInterestRate().doubleValue();
+				financeCostCounter  += balanceCounter * getInterestInDay(project, date);
 			}
 			
 		}

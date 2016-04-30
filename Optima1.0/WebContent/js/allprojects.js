@@ -248,7 +248,7 @@ $(function() {
 										"#projectName").val(),
 										$("#projectCode").val(), $(
 												"#projectDescription").val(),
-										null, null, 0.0, 0.0, portfolioId, -1,
+										null, null, 0.0, portfolioId, -1,
 										0, 0, 0, 0, 0, 0);
 
 							} else {

@@ -70,7 +70,7 @@ $(function() {
 
   });
 
-  var result = rpcClient.financeService.findAllByPortfolio(portfolioId);
+  var result = rpcClient.financeService.findAllByPortfolio(portfolioId,projectId);
   if (result.result == 0) {
     var fmt = new DateFmt(
         "%w %d-%n-%y");
@@ -85,7 +85,7 @@ $(function() {
       var startDate = new Date(
           financesList[i].financeUntillDate.time);
       formattedDate = dateFormatter.format(startDate);
-      var title = formattedDate + "  -  " + financesList[i].financeAmount + "$ @ " + "%";
+      var title = formattedDate + "  -  " + financesList[i].financeAmount + "$ @ " + financesList[i].interestRate + "%";
       var li = $('<li></li>').addClass('ui-state-default').attr('id', financesList[i].financeId).text(title);
       li.attr('title', title);
 
@@ -277,7 +277,7 @@ $(function() {
         }
 
         if (bValid) {
-          var createFinanceResult = rpcClient.financeService.create(portfolioId, financeAmount, financeDate);
+          var createFinanceResult = rpcClient.financeService.create(portfolioId, projectId, financeAmount,interestRate ,financeDate);
 
           if (createFinanceResult.result == 0) {
             location.reload(true);

@@ -690,7 +690,7 @@ public class PortfolioSolver {
 			}
 			currentProjectDayDetails.setFinance(getFinanceAtDate(date));
 			if (currentProjectDayDetails.getBalance()<0) {
-				currentProjectDayDetails.setFinanceInterest(projectW.getProject().getInterestRate().doubleValue() * Math.abs(currentProjectDayDetails.getBalance()));
+				currentProjectDayDetails.setFinanceInterest(PaymentUtil.getInterestInDay(projectW.getProject(),date) * Math.abs(currentProjectDayDetails.getBalance()));
 			}
 			if (results.containsKey(P1_END) && !results.containsKey(P2_START)) {
 				start2Detailes = new DayDetails(currentProjectDayDetails);

@@ -32,12 +32,6 @@ $(function() {
     }
   });
 
-  $("#interestRateTxt").pcntspinner({
-    min : 0,
-    max : 100000,
-    step : 1
-  });
-
   $("#retainedPercentageTxt").pcntspinner({
     min : 0,
     max : 100000,
@@ -383,7 +377,6 @@ $(function() {
       function() {
 
         $("#projnameTxt").removeClass("ui-state-error");
-        $("#interestRateTxt").removeClass("ui-state-error");
         $("#overHeadPerDayTxt").removeClass("ui-state-error");
         $("#retainedPercentageTxt").removeClass("ui-state-error");
 
@@ -395,16 +388,6 @@ $(function() {
         var bValid = true;
 
         bValid = bValid && checkLength($("#projnameTxt"), "projnameTxt", 3, 128);
-
-        var interestRateTxt = $("#interestRateTxt").val();
-
-        if (interestRateTxt.match("\%$") == "%") {
-          interestRateTxt = interestRateTxt.substr(0, interestRateTxt.length - 1);
-        }
-        if (!/^-?\d*\.?\d*$/.test(interestRateTxt)) {
-          $("#interestRateTxt").addClass("ui-state-error");
-          bValid = false;
-        }
 
         var retainedPercentageTxt = $("#retainedPercentageTxt").val();
 
@@ -459,11 +442,10 @@ $(function() {
         }
 
         if (bValid) {
-          var interestRateValue = parseFloat(interestRateTxt) / (100 * 360.0);
           var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
           var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
 
-          var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt").val(), $("#projectDescTxt").val(), pStartDateTxt, pFinishDateTxt, interestRateValue, overHeadPerDayTxt, $("#portfolioId").val(), $(
+          var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt").val(), $("#projectDescTxt").val(), pStartDateTxt, pFinishDateTxt, overHeadPerDayTxt, $("#portfolioId").val(), $(
               "#weDays option:selected").val(), retainedPercentageValue, advancedPaymentPercentageValue, delayPenaltyTxt, collectPaymentPeriodTxt, payRequestsPeriodTxt);
           if (call.result == 0) {
             showMessage("Update Project", "Project updated successfully", 'success', {
@@ -524,7 +506,6 @@ $(function() {
         $("#weDays").val(-1).prop('selected', true);
       }
 
-      $("#interestRateTxt").val(roundToThreePlaces(parseFloat(pData.interestRate) * 100 * 360));
 
       $("#overHeadPerDayTxt").val(pData.overheadPerDay);
       $("#retainedPercentageTxt").val(pData.retainedPercentage * 100);

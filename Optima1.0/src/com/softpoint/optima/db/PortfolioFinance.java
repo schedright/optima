@@ -30,7 +30,14 @@ public class PortfolioFinance implements Serializable {
 	//bi-directional many-to-one association to Portfolio
     @ManyToOne
 	@JoinColumn(name="portfolio_id")
-	private Portfolio portfolio;
+	private PortfolioLight portfolio;
+
+    @ManyToOne
+	@JoinColumn(name="project_id")
+	private ProjectLight project;
+
+	@Column(name="interest_rate")
+	private BigDecimal interestRate;
 
     public PortfolioFinance() {
     }
@@ -59,12 +66,28 @@ public class PortfolioFinance implements Serializable {
 		this.financeUntillDate = financeUntillDate;
 	}
 
-	public Portfolio getPortfolio() {
+	public PortfolioLight getPortfolio() {
 		return this.portfolio;
 	}
 
-	public void setPortfolio(Portfolio portfolio) {
+	public void setPortfolio(PortfolioLight portfolio) {
 		this.portfolio = portfolio;
+	}
+
+	public ProjectLight getProject() {
+		return project;
+	}
+
+	public void setProject(ProjectLight project) {
+		this.project = project;
+	}
+
+	public BigDecimal getInterestRate() {
+		return interestRate;
+	}
+
+	public void setInterestRate(BigDecimal interestRate) {
+		this.interestRate = interestRate;
 	}
 	
 }

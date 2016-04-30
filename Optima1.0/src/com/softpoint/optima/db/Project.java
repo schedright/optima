@@ -33,9 +33,6 @@ public class Project implements Serializable {
 	@Column(name = "payment_request_period")
 	private int paymentRequestPeriod;
 
-	@Column(name = "interest_rate")
-	private BigDecimal interestRate;
-
 	@Column(name = "overhead_per_day")
 	private BigDecimal overheadPerDay;
 
@@ -82,6 +79,11 @@ public class Project implements Serializable {
 	@OrderBy("calendarStartDate ASC,tentativeStartDate ASC")
 	private List<ProjectTask> projectTasks;
 
+	//bi-directional many-to-one association to PortfolioFinance
+	@OneToMany(mappedBy="project" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	@OrderBy("financeUntillDate ASC")
+	private List<PortfolioFinance> portfolioFinances;
+
 	public Project() {
 	}
 
@@ -123,14 +125,6 @@ public class Project implements Serializable {
 
 	public void setPaymentRequestPeriod(int paymentRequestPeriod) {
 		this.paymentRequestPeriod = paymentRequestPeriod;
-	}
-
-	public BigDecimal getInterestRate() {
-		return this.interestRate;
-	}
-
-	public void setInterestRate(BigDecimal interestRate) {
-		this.interestRate = interestRate;
 	}
 
 	public BigDecimal getOverheadPerDay() {
@@ -255,6 +249,14 @@ public class Project implements Serializable {
 
 	public void setProjectTasks(List<ProjectTask> projectTasks) {
 		this.projectTasks = projectTasks;
+	}
+
+	public List<PortfolioFinance> getPortfolioFinances() {
+		return portfolioFinances;
+	}
+
+	public void setPortfolioFinances(List<PortfolioFinance> portfolioFinances) {
+		this.portfolioFinances = portfolioFinances;
 	}
 
 }

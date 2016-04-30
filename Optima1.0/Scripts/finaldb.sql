@@ -37,7 +37,6 @@ project_description varchar(1024),
 propused_start_date DATE, 
 proposed_finish_date DATE, 
 Weekend_days_id INT, 
-interest_rate numeric(16,13), 
 overhead_per_day numeric(9,3),
 retained_percentage numeric(16,13),
 advanced_payment_percentage numeric(16,13),
@@ -232,6 +231,13 @@ alter table days_off add column last_updated timestamp default now() on update n
 
 alter table payment add column last_updated timestamp default now() on update now() ;
 alter table capicatl_plan_projects add column last_updated timestamp default now() on update now() ;
+
+alter table portfolio_finance add column interest_rate numeric(16,13);
+alter table portfolio_finance add column project_id INT;
+
+ALTER TABLE portfolio_finance ADD 
+FOREIGN KEY (project_id) REFERENCES project(project_id) 
+ON UPDATE CASCADE ON DELETE CASCADE;
 
 commit;
 

@@ -75,7 +75,6 @@ public class ProjectController {
 
 			project.setPropusedStartDate(proposedStartDate);
 			project.setProposedFinishDate(proposedFinishDate);
-			project.setInterestRate(new BigDecimal(interestRate));
 			project.setOverheadPerDay(new BigDecimal(overheadPerDay));
 
 			project.setRetainedPercentage(new BigDecimal(retainedPercentage));
@@ -111,7 +110,7 @@ public class ProjectController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse update(HttpSession session, int key, String name, String code, String descritpion,
-			Date proposedStartDate, Date proposedFinishDate, double interestRate, double overheadPerDay,
+			Date proposedStartDate, Date proposedFinishDate, double overheadPerDay,
 			int portfolioId, int weekendDaysId, double retainedPercentage, double advancedPaymentPercentage,
 			double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod)
 					throws OptimaException {
@@ -124,7 +123,6 @@ public class ProjectController {
 			project.setProjectDescription(descritpion);
 			project.setPropusedStartDate(proposedStartDate);
 			project.setProposedFinishDate(proposedFinishDate);
-			project.setInterestRate(new BigDecimal(interestRate));
 			project.setOverheadPerDay(new BigDecimal(overheadPerDay));
 
 			project.setRetainedPercentage(new BigDecimal(retainedPercentage));
