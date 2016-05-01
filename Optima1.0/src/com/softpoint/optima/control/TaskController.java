@@ -392,9 +392,11 @@ public class TaskController {
 			// We need to reread the project here in all cases.
 			Project project = controller.find(Project.class, projectId);
 			List<ProjectTask> rootTasks = getRootTasks(project, taskController);
+			taskController.mergeTransactionStart();
 			for (ProjectTask task : rootTasks) {
 				processTask(task, project, taskController);
 			}
+			taskController.mergeTransactionClose();
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
 		} finally {
@@ -407,7 +409,8 @@ public class TaskController {
 	protected void processTask(ProjectTask task, Project project, EntityController<ProjectTask> controller) throws EntityControllerException {
 		// Bug#1 Shifting is not working correctly when changing weekends! -- BassemVic
 		//System.out.println(task.getTaskId());
-		task = controller.find(ProjectTask.class, task.getTaskId());
+		//task = controller.find(ProjectTask.class, task.getTaskId());
+		
 		calculateCalederDuration(project, task);
 		for (TaskDependency dependency : task.getAsDependency()) {
 			ProjectTask nextTask = dependency.getDependent();
@@ -420,12 +423,12 @@ public class TaskController {
 					Date newDate = adjustStart(project, cal.getTime());
 					nextTask.setCalendarStartDate(newDate);
 					nextTask.setTentativeStartDate(newDate);
-					controller.merge(nextTask);
+					controller.mergeTransactionMerge(nextTask);
 				}
 				processTask(dependency.getDependent(), project, controller);
 			}
 		}
-		controller.merge(task);
+		controller.mergeTransactionMerge(task);
 	}
 
 	private static Date skipOffDays() {
