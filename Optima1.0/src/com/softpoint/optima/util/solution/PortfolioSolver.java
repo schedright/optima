@@ -107,7 +107,7 @@ public class PortfolioSolver {
 
 		List<Project> subProjects = null;
 		if (portfolio != null) {
-			portfolio.getProjects();
+			subProjects = portfolio.getProjects();
 		} else {
 			String[] projectIds = projectsPriority.split(",");
 			EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
@@ -436,7 +436,7 @@ public class PortfolioSolver {
 			}
 
 			try {
-				if (portfolio == null) {
+				if (portfolio != null) {
 					EntityController<Portfolio> paymentController = new EntityController<Portfolio>(session.getServletContext());
 					String query = "update portfolio set portfolio.solve_date=now() where portfolio.portfolio_id=?1";
 					paymentController.nativeUpdate(query, portfolio.getPortfolioId());

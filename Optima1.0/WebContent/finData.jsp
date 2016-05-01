@@ -34,28 +34,30 @@
 					</div>
 
 				</div>
-
-
-
-
 			</div>
-			<div id="FinPeriods"
+
+			<div id="SolveDiv"
 				class="ui-tabs ui-widget ui-widget-content ui-corner-all"
 				style="height: 50%">
 				<label>Projects Priority</label>
-				<div class="form-section">
-					<div class="one-column project-priorities">
-						<ul id="mainAllProjects" data-role="listview" data-inset="true"
+				
+				<div class="ui-tabs ui-widget ui-widget-content ui-corner-all ui-center"
+					style="width: 90%;">
+					<div id="ulContainer" class="form-section">
+						<div class="two-columns">
+							<ul id="mainAllProjects" data-role="listview" data-inset="true"
 							class="draggable"></ul>
-					</div>
-				</div>
+						</div>
+						<div class="two-columns">
+							<p>
+								<button id="findFinalSolBtn">Solve</button>
+							</p>
+						</div>
 
-				<div class="ui-dialog-buttonset">
-					<div class="two-columns-right">
-						<button id="findFinalSolBtn" class="btnRight">Solve</button>
 					</div>
-				</div>
 
+				</div>
+				
 				<div id="currentSolution" class="form-section" style="display: none">
 					<div class="solutionContainer">
 						<div id="schedResults" class="div-Table"></div>

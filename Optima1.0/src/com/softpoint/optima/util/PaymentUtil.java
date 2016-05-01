@@ -453,7 +453,9 @@ public class PaymentUtil {
 		if (finances!=null) {
 			for (PortfolioFinance fin : finances) {
 				if (!fin.getFinanceUntillDate().before(date)) {
-					interest = fin.getInterestRate().doubleValue();
+					if (fin.getInterestRate()!=null) {
+						interest = fin.getInterestRate().doubleValue();
+					}
 					break;
 				}
 			}
@@ -807,18 +809,23 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	/**
 	 * @param session
 	 * @param portfolioId
+	 * @param projectId 
 	 * @param toDate
 	 * @return
 	 * @throws EntityControllerException
 	 */
+	@SuppressWarnings("unchecked")
 	public static double getFinanceLimit(HttpSession session, int portfolioId,
-			Date toDate) throws EntityControllerException {
+			int projectId, Date toDate) throws EntityControllerException {
 		EntityController<PortfolioFinance> financeController = new EntityController<PortfolioFinance>(session.getServletContext());
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		String theDate = format.format(toDate);
-		
-		@SuppressWarnings("unchecked")
-		List<BigDecimal> financeLimit = (List<BigDecimal>) financeController.nativeQuery("Select  finance_amount from portfolio_finance where portfolio_id = ? and finance_untill_date > ? order by finance_untill_date asc" , portfolioId , theDate);
+		List<BigDecimal> financeLimit = null;
+		if (portfolioId!=0) {
+			financeLimit = (List<BigDecimal>) financeController.nativeQuery("Select  finance_amount from portfolio_finance where portfolio_id = ? and finance_untill_date > ? order by finance_untill_date asc" , portfolioId , theDate);
+		} else {
+			financeLimit = (List<BigDecimal>) financeController.nativeQuery("Select  finance_amount from portfolio_finance where project_id = ? and finance_untill_date > ? order by finance_untill_date asc" , projectId , theDate);
+		}
 		if (financeLimit == null || financeLimit.isEmpty()) return 0d;
 		return financeLimit.get(0).doubleValue();
 	}

@@ -203,10 +203,10 @@ public class FinanceController {
 	 * @return
 	 * @throws OptimaException
 	 */
-	public ServerResponse findFinanceByDate(HttpSession session, int portfolioId, Date toDate) throws OptimaException {
+	public ServerResponse findFinanceByDate(HttpSession session, int portfolioId,int projectId, Date toDate) throws OptimaException {
 		try {
 
-			double financeLimit = PaymentUtil.getFinanceLimit(session, portfolioId, toDate);
+			double financeLimit = PaymentUtil.getFinanceLimit(session, portfolioId,projectId, toDate);
 			// this list needs to be sorted by finance date
 			return new ServerResponse("0", "Success", financeLimit);
 		} catch (EntityControllerException e) {

@@ -221,8 +221,8 @@ create table user_role (
 
 );
 
-alter table portfolio add column solve_timestamp timestamp;
-alter table project add column solve_timestamp timestamp;
+alter table portfolio add column solve_date timestamp;
+alter table project add column solve_date timestamp;
 
 alter table Project add column last_updated timestamp default now() on update now() ;
 alter table project_task add column last_updated timestamp default now() on update now() ;

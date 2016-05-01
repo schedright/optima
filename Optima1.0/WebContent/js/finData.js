@@ -364,11 +364,7 @@ $(function() {
   });
 
   $("#findFinalSolBtn").button({
-    icons : {
-      secondary : "ui-icon-lightbulb"
-    },
     text : true
-
   }).click(function() {
     var displayed = $("#currentSolution").css('display');
     if (displayed == 'none') {

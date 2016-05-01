@@ -17,13 +17,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpSession;
 
+import com.softpoint.optima.JsonRpcInitializer;
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.PlanProject;
 import com.softpoint.optima.db.Portfolio;
+import com.softpoint.optima.db.PortfolioLight;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectLight;
 import com.softpoint.optima.db.ProjectTask;
@@ -176,6 +180,13 @@ public class ProjectController {
 			controller.merge(project);
 			TaskController taskController = new TaskController();
 			taskController.adjustStartDateBasedOnTaskDependency(session, key, false);
+			
+			EntityManagerFactory factory = (EntityManagerFactory) session.getServletContext()
+					.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
+			EntityManager manager = factory.createEntityManager();
+			manager.getEntityManagerFactory().getCache().evict(PortfolioLight.class);
+			manager.getEntityManagerFactory().getCache().evict(ProjectLight.class);
+
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -193,6 +204,13 @@ public class ProjectController {
 			controller.merge(project);
 			TaskController taskController = new TaskController();
 			taskController.adjustStartDateBasedOnTaskDependency(session, key, false);
+			
+			EntityManagerFactory factory = (EntityManagerFactory) session.getServletContext()
+					.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
+			EntityManager manager = factory.createEntityManager();
+			manager.getEntityManagerFactory().getCache().evict(PortfolioLight.class);
+			manager.getEntityManagerFactory().getCache().evict(ProjectLight.class);
+			
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -427,7 +445,18 @@ public class ProjectController {
 		if (portfolioId!=0) {
 			key = "Port" + portfolioId;
 		} else {
-			key = "Proj" + projectId;
+			EntityController<Project> projectController = new EntityController<>(session.getServletContext());
+			try {
+				Project project = projectController.find(Project.class, projectId);
+				if (project!=null && project.getPortfolio()!=null) {
+					key = "Port" + project.getPortfolio().getPortfolioId();
+				} else {
+					key = "Proj" + projectId;
+				}
+			} catch (EntityControllerException e) {
+				key = "Proj" + projectId;
+			}
+
 		}
 
 		if (PortfolioSolver.currentWorkingSolutions.containsKey(key)) {

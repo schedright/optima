@@ -1291,7 +1291,11 @@ public class PortfolioController {
 					else
 						totalBalanceSolution.put(date, totalBalanceSolution.get(date) + balanceSolutionValue);
 
-					double finance = PaymentUtil.getFinanceLimit(session, portfolioId, date);
+					int projectId = 0;
+					if (portfolioId==0) {
+						projectId = projects.get(0).getProjectId();
+					}
+					double finance = PaymentUtil.getFinanceLimit(session, portfolioId, projectId, date);
 					financeCell.setCellValue(-1 * finance);
 					totalFinance.put(date, -1 * finance);
 
@@ -1561,7 +1565,7 @@ public class PortfolioController {
 			cal.setTime(startDate);
 			for (Date date = cal.getTime(); !date.after(endDate); cal.add(Calendar.DATE, 1), date = cal.getTime()) {
 				String dateStamp = PaymentUtil.dateOnlyFormat.format(date) + ",";
-				double finance = PaymentUtil.getFinanceLimit(session, portfolioId, date);
+				double finance = PaymentUtil.getFinanceLimit(session, portfolioId, projectId, date);
 				totalFinance.put(date, -finance);
 				for (Integer i : projectIds) {
 					String theId = dateStamp + i;
