@@ -4,7 +4,8 @@ $(function() {
   var projectId = 0;
 
   
-  $("#accordion").accordion();
+  $('#accordion').tabs();
+
 
   for ( var i in getURLVariables()) {
     if (i == "portfolioId") {
