@@ -133,6 +133,8 @@ $(function() {
           if (portId == currentPortfolioId) {
             $('#portfolioSelect').append($("<option></option>").attr("portfolioId", portId).attr("selected", "selected").data(data.list[i]).text(name));
             selectedItem = data.list[i];
+            window.updateLinks("portfolioId=" + selectedItem.portfolioId);
+
           } else {
             $('#portfolioSelect').append($("<option></option>").attr("portfolioId", portId).data(data.list[i]).text(name));
           }
