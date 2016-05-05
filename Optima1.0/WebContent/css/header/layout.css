@@ -272,7 +272,6 @@ div.wrapper h1, div.wrapper h2, div.wrapper h3, div.wrapper h4, div.wrapper h5,
 	list-style: none;
 	text-transform: uppercase;
 	font-size: 12px;
-	font-family: Georgia, "Times New Roman", Times, serif;
 	background: url("images/bar_gradient.png") top left repeat-x;
 }
 
@@ -420,7 +419,6 @@ div.wrapper h1, div.wrapper h2, div.wrapper h3, div.wrapper h4, div.wrapper h5,
 	margin: 0;
 	padding: 0 0 8px 0;
 	font-weight: normal;
-	font-family: Georgia, "Times New Roman", Times, serif;
 	line-height: normal;
 	border-bottom: 1px dotted #999999;
 }
