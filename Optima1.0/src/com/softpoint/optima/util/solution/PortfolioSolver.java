@@ -553,7 +553,34 @@ public class PortfolioSolver {
 						bestLength = projectW.getProjectDuratoin();
 						newIsBetter = true;
 					} else {
-						if (bestIsFeasible && !resultFeasible) {
+						//our best bet is if the solution will take shorter
+						int d2 = projectW.getProjectDuratoin();
+						if (d2 > bestLength) {
+							//if the new option is taking longer, then ignore it
+						} else if (d2 < bestLength) {
+							bestLength = d2;
+							newIsBetter = true;
+							bestIsFeasible = resultFeasible;
+						} else {
+							if (bestIsFeasible && !resultFeasible) {
+								//if equal duration but best is feasible, then ifnore the current option 
+							} else if (bestIsFeasible && resultFeasible) {
+								if (bestP1Cost < p1EndDetails.getPeriodCost()) {
+									newIsBetter = true;
+									bestIsFeasible = resultFeasible;
+								} else if (bestP1Cost < p1EndDetails.getPeriodCost()) {
+									if (task.getChildren().contains(shiftedTask)) {
+										newIsBetter = true;
+										bestIsFeasible = resultFeasible;
+									}
+								}
+							} else {
+								newIsBetter = true;
+								bestIsFeasible = resultFeasible;
+							}
+						}
+							
+/*						if (bestIsFeasible && !resultFeasible) {
 							// do nothing, as there is a better option
 						} else if (bestIsFeasible && resultFeasible) {
 							int d2 = projectW.getProjectDuratoin();
@@ -578,7 +605,6 @@ public class PortfolioSolver {
 							// best is not feasible and result is not feasible,
 							// get the best of them for another round of
 							// shifting
-							int d2 = projectW.getProjectDuratoin();
 							if (d2 < bestLength) {
 								newIsBetter = true;
 								bestLength = d2;
@@ -591,7 +617,7 @@ public class PortfolioSolver {
 									}
 								}
 							}
-						}
+						}*/
 					}
 					if (newIsBetter) {
 						shiftedTask = task;

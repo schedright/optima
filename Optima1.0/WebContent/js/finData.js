@@ -340,7 +340,7 @@ $(function() {
   if (solutionResponse.result == 0 && solutionResponse.data && solutionResponse.data == 'TRUE') {
     $("#currentSolution").css('display', '');
     $("#schedResults").html('');
-    $("#schedResults").append("<p style='margin-left:65px'><a href='financials.jsp?portfolioId=" + portfolioId + "'>You currently have a solution check Results and Cash Flow.</a></p>");
+    $("#schedResults").append("<p><a href='financials.jsp?portfolioId=" + portfolioId + "'>You currently have a solution check Results and Cash Flow.</a></p>");
 
   } else {
     $("#currentSolution").css('display', 'none');

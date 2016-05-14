@@ -10,14 +10,13 @@
 			<div id="FinPeriods"
 				class="ui-tabs ui-widget ui-widget-content ui-corner-all"
 				style="height: 40%">
-				<label>Constraints</label>
-
 
 				<div id="finances"
 					class="ui-tabs ui-widget ui-widget-content ui-corner-all ui-center"
 					style="width: 90%;">
 					<div id="ulContainer" class="form-section">
 						<div class="two-columns">
+							<label>Constraints</label>
 							<ul id="financeList" class="sortable" style="height: initial">
 
 							</ul>
@@ -39,12 +38,12 @@
 			<div id="SolveDiv"
 				class="ui-tabs ui-widget ui-widget-content ui-corner-all"
 				style="height: 50%">
-				<label>Projects Priority</label>
 				
 				<div class="ui-tabs ui-widget ui-widget-content ui-corner-all ui-center"
 					style="width: 90%;">
 					<div id="ulContainer" class="form-section">
 						<div class="two-columns">
+							<label style="padding-bottom:8px">Projects Priority</label>
 							<ul id="mainAllProjects" data-role="listview" data-inset="true"
 							class="draggable"></ul>
 						</div>
