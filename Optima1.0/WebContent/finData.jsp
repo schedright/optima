@@ -24,10 +24,10 @@
 						</div>
 						<div class="two-columns">
 							<p>
-								<button id="addFinanceBtn">Add Finance</button>
+								<button id="addFinanceBtn">Add Overdraft Constraint</button>
 							</p>
 							<p>
-								<button id="deleteFinanceBtn">Delete Finance</button>
+								<button id="deleteFinanceBtn">Delete Overdraft Constraint</button>
 							</p>
 						</div>
 
@@ -50,7 +50,7 @@
 						</div>
 						<div class="two-columns">
 							<p>
-								<button id="findFinalSolBtn">Solve</button>
+								<button id="findFinalSolBtn">Schedule</button>
 							</p>
 						</div>
 
@@ -72,16 +72,16 @@
 				</div>
 
 			</div>
-			<div id="addFinanceDialog" title="Add Finance">
+			<div id="addFinanceDialog" title="Add Constraint">
 				<p class="validateTips">All form fields are required.</p>
 
 				<form id="addUserForm" autocomplete="off">
 					<fieldset>
-						<label for="financeAmount">Finance Amount</label> <input
+						<label for="financeAmount">Fund Amount</label> <input
 							type="text" id="financeAmount" name="financeAmount" class="" />
 						<label for="interestRate">Interest Rate</label> <input type="text"
 							id="interestRate" name="interestRate" class="" /> <label
-							for="financeDate">Finance Date</label> <input type="text"
+							for="financeDate">End Date</label> <input type="text"
 							id="financeDate" name="financeDate" class="" />
 					</fieldset>
 				</form>

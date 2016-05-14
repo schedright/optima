@@ -681,6 +681,9 @@ important
 #projectButtons {
 	float: right;
 	margin: 20px 100px;
+	position:absolute;
+	bottom:0px;
+	right:0px
 }
 
 #projectTabs {
@@ -1416,9 +1419,11 @@ h2 {
 .logoClass{
 	width:  100%;
     height: 100px;
-	background-image: url(../images/SchedRightLogo.png);
+	background-image: url(../images/LOGO-Schedright.png);
 	background-size: contain;
     background-repeat: no-repeat;
+    border: 10px solid transparent;
+    box-sizing: border-box;
 	
 }
 

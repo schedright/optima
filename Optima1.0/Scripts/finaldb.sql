@@ -240,5 +240,23 @@ ALTER TABLE portfolio_finance ADD
 FOREIGN KEY (project_id) REFERENCES project(project_id) 
 ON UPDATE CASCADE ON DELETE CASCADE;
 
+alter table project add column guid varchar(20);
+alter table project_task add column guid varchar(20);
+
+create table primavira_file (
+file_id INT NOT null AUTO_INCREMENT primary key, 
+file_name varchar(32),
+file_contnet LONGTEXT
+);
+
+create table primavira_project {
+primavira_project_id INT NOT null AUTO_INCREMENT primary key, 
+file_name varchar(32),
+primavira_projectfile_id INT,
+project_quid guid varchar(20),
+
+FOREIGN KEY (primavira_projectfile_id) REFERENCES primavira_file(file_id) 
+}
+
 commit;
 

@@ -7,7 +7,7 @@ $(document).ready(function() {
 
   $("#allProjectsNavBar").append("<a href=\"allprojects.jsp\">Projects<img class=\"menuIcon\" src=\"css/header/images/icon_projects.png\" /></a>");
   $("#portfoliosNavBar").append("<a href=\"enterprise.jsp\">Enterprise<img class=\"menuIcon\" src=\"css/header/images/icon_portfolio.png\" /></a>");
-  $("#financingNavBar").append("<a href=\"#\">Constraint/Reschedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
+  $("#financingNavBar").append("<a href=\"#\">Constraint/Schedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
   $("#cashflowNavBar").append("<a href=\"#\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
   $("#financialNavBar").append("<a href=\"#\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
   $("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\">Capital Plan<img class=\"menuIcon\" src=\"css/header/images/icon_results1.png\" /></a>");
@@ -32,7 +32,7 @@ $(document).ready(function() {
 
   var updateLinks = function(link) {
     $("#financingNavBar").children().get(0).parentNode.removeChild($("#financingNavBar").children().get(0));
-    $("#financingNavBar").append("<a href=\"finData.jsp?" + link + "\">Constraint/Reschedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
+    $("#financingNavBar").append("<a href=\"finData.jsp?" + link + "\">Constraint/Schedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
 
     $("#cashflowNavBar").children().get(0).parentNode.removeChild($("#cashflowNavBar").children().get(0));
     $("#cashflowNavBar").append("<a href=\"cashFlow.jsp?" + link + "\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");

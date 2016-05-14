@@ -181,11 +181,9 @@ public class ProjectController {
 			TaskController taskController = new TaskController();
 			taskController.adjustStartDateBasedOnTaskDependency(session, key, false);
 			
-			EntityManagerFactory factory = (EntityManagerFactory) session.getServletContext()
-					.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
-			EntityManager manager = factory.createEntityManager();
-			manager.getEntityManagerFactory().getCache().evict(PortfolioLight.class);
-			manager.getEntityManagerFactory().getCache().evict(ProjectLight.class);
+			refreshJPAClass(session,Portfolio.class);
+			refreshJPAClass(session,PortfolioLight.class);
+			refreshJPAClass(session,ProjectLight.class);
 
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);
 		} catch (EntityControllerException e) {
@@ -193,6 +191,14 @@ public class ProjectController {
 			return new ServerResponse("PROJ0002", String.format("Error updating project %s: %s",
 					project != null ? project.getProjectName() : "", e.getMessage()), e);
 		}
+	}
+
+	private EntityManager refreshJPAClass(HttpSession session, Class clazz) {
+		EntityManagerFactory factory = (EntityManagerFactory) session.getServletContext()
+				.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
+		EntityManager manager = factory.createEntityManager();
+		manager.getEntityManagerFactory().getCache().evict(clazz);
+		return manager;
 	}
 
 	public ServerResponse removePortfolio(HttpSession session, int key) throws OptimaException {
@@ -205,11 +211,9 @@ public class ProjectController {
 			TaskController taskController = new TaskController();
 			taskController.adjustStartDateBasedOnTaskDependency(session, key, false);
 			
-			EntityManagerFactory factory = (EntityManagerFactory) session.getServletContext()
-					.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
-			EntityManager manager = factory.createEntityManager();
-			manager.getEntityManagerFactory().getCache().evict(PortfolioLight.class);
-			manager.getEntityManagerFactory().getCache().evict(ProjectLight.class);
+			refreshJPAClass(session,Portfolio.class);
+			refreshJPAClass(session,PortfolioLight.class);
+			refreshJPAClass(session,ProjectLight.class);
 			
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);
 		} catch (EntityControllerException e) {
@@ -255,9 +259,9 @@ public class ProjectController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse remove(HttpSession session, Integer key) throws OptimaException {
-		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		EntityController<ProjectLight> controller = new EntityController<ProjectLight>(session.getServletContext());
 		try {
-			controller.remove(Project.class, key);
+			controller.remove(ProjectLight.class, key);
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, null);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();

@@ -37,12 +37,10 @@
 				<%@ include file="views/projectFinancialPeriods.html"%>
 			</div>
 		</div>
-			<div class="form-section" style="position:absolute;bottom:0px">
 				<div id="projectButtons" class="ui-dialog-buttonset">
 					<button id="resetSchedulingBtn">Reset Project Scheduling</button>
 					<button id="saveProjectBtn">Save Project</button>
 				</div>
-			</div>
 	</div>
 </div>
 <script src="js/formutils.js">

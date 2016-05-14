@@ -82,3 +82,6 @@ ALTER TABLE portfolio_finance ADD
 FOREIGN KEY (project_id) REFERENCES project(project_id) 
 ON UPDATE CASCADE ON DELETE CASCADE;
 
+
+alter table capicatl_plan_projects drop FOREIGN KEY  capicatl_plan_projects_ibfk_1;
+alter table capicatl_plan_projects add FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE

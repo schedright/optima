@@ -37,7 +37,7 @@ $(function() {
 		if (solutionResponse.result==0 && solutionResponse.data && solutionResponse.data=='TRUE') {
 			$("#currentSolution").css('display','');
 			$("#schedResults").html('');
-			$("#schedResults").append("<p style='margin-left:65px'><a href='financials.jsp?portfolioId=" + portfolioId +"'>Go to the current solution.</a></p>"); 
+			$("#schedResults").append("<p style='margin-left:65px'><a href='financials.jsp?portfolioId=" + portfolioId +"'>You currently have a solution check Results and Cash Flow.</a></p>"); 
 			
 		} else {
 			$("#currentSolution").css('display','none');
@@ -130,7 +130,7 @@ function solveIt(portfolioId) {
 	rpcClient.projectService.getSolution( function(result , exception) {
 			if (result.result == 0 && result.message=='Success' && result.data=='running') {
 				//start dialog with progress
-				window.htmlElement = showMessageWithProgress("Solve Portfolio","Solving the portfolio ...", 'Info');
+				window.htmlElement = showMessageWithProgress("Schedule","Scheduling ...", 'Info');
 				window.intervalId=self.setInterval(function() {
 					if (window.htmlElement.parent().length==0) {
 						window.clearInterval(window.intervalId);
@@ -145,12 +145,12 @@ function solveIt(portfolioId) {
 								if (jsn.STATUS=='SAVING') {
 									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Saving tasks ( " + jsn.DONE + " / " + jsn.TOTAL + " )";
 								} else if (jsn.STATUS=='RUNNING') {
-									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Solving the portfolio ( " + jsn.DONE + " / " + jsn.TOTAL + " )";
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Scheduling ( " + jsn.DONE + " / " + jsn.TOTAL + " )";
 								} else if (jsn.STATUS=='Success') {
-									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Portfolio fixed successfully";
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Scheduling is done successfully";
 									window.clearInterval(window.intervalId);
 								} else if (jsn.STATUS=='FAILED') {
-									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Failed to solve portfolio";
+									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[0].innerHTML = "Failed to Schede";
 									window.htmlElement[0].children[0].children[0].children[0].children[0].children[1].children[1].innerHTML = jsn.ERROR_MESSAGE;
 									window.clearInterval(window.intervalId);
 									bar.style.background = 'red';
@@ -166,17 +166,17 @@ function solveIt(portfolioId) {
 					}
 				}, 1000);
 			} else if (result.result == 0 && result.message=='Busy') {
-				showMessage("Solve Portfolio",'Error:' + result.data,'error');
+				showMessage("Schede",'Error:' + result.data,'error');
 			}
 				/* 
-				showMessage("Solve Portfolio",'Error:' + result.message,'error');
+				showMessage("Schede",'Error:' + result.message,'error');
 
 				$("#currentSolution").css('display','');
 				$("#schedResults").html('');
-				$("#schedResults").append("<p style='margin-left:65px'><a href='financials.jsp?portfolioId=" + portfolioId +"'>Go to the current solution.</a></p>"); 
-				showMessage("Solve Portfolio",'Portfolio solved successfully.','success');
+				$("#schedResults").append("<p style='margin-left:65px'><a href='financials.jsp?portfolioId=" + portfolioId +"'>You currently have a solution check Results and Cash Flow.</a></p>"); 
+				showMessage("Schede",'Portfolio solved successfully.','success');
 			} else {
-				showMessage("Solve Portfolio",'Error:' + result.message,'error');
+				showMessage("Schede",'Error:' + result.message,'error');
 				$("#currentSolution").css('display','none');
 			}*/
 	}, projectID, "", priorityOrder); 

@@ -11,6 +11,8 @@
 			<button id="addProject" class="allProjects_add" title="Add New Project"></button>
 			<button id="editProject" class="allProjects_edit" title="Edit Project"></button>
 			<button id="deleteProject" class="allProjects_delete" title="Delete Project"></button>
+			<button id="importsProjects" class="allProjects_import" title="Import"></button>
+			<button id="exportProject" class="allProjects_export" title="Export"></button>
 		</div>
 		</div>
 		<div class="gridScroll">

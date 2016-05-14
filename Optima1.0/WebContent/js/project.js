@@ -84,8 +84,6 @@ $(function() {
     }, projectId);
   });
 
-
-
   /** End code for Project Days off */
   $('#projectTabs').tabs({
     activate : function(e,
@@ -372,95 +370,106 @@ $(function() {
     $("#projTasksDialog").data("task", null).dialog('option', 'title', 'Add New Task').dialog('open');
   });
 
-  $('#saveProjectBtn').on(
-      'click',
-      function() {
+  $("#saveProjectBtn").button({
+    text : true
+  }).click(function() {
+    $("#projnameTxt").removeClass("ui-state-error");
+    $("#overHeadPerDayTxt").removeClass("ui-state-error");
+    $("#retainedPercentageTxt").removeClass("ui-state-error");
 
-        $("#projnameTxt").removeClass("ui-state-error");
-        $("#overHeadPerDayTxt").removeClass("ui-state-error");
-        $("#retainedPercentageTxt").removeClass("ui-state-error");
+    $("#delayPenaltyTxt").removeClass("ui-state-error");
+    $("#collectPaymentPeriodTxt").removeClass("ui-state-error");
+    $("#payRequestsPeriodTxt").removeClass("ui-state-error");
 
-        $("#delayPenaltyTxt").removeClass("ui-state-error");
-        $("#collectPaymentPeriodTxt").removeClass("ui-state-error");
-        $("#payRequestsPeriodTxt").removeClass("ui-state-error");
+    $("#advancedPaymentPercentage").removeClass("ui-state-error");
+    var bValid = true;
 
-        $("#advancedPaymentPercentage").removeClass("ui-state-error");
-        var bValid = true;
+    bValid = bValid && checkLength($("#projnameTxt"), "projnameTxt", 3, 128);
 
-        bValid = bValid && checkLength($("#projnameTxt"), "projnameTxt", 3, 128);
+    var retainedPercentageTxt = $("#retainedPercentageTxt").val();
 
-        var retainedPercentageTxt = $("#retainedPercentageTxt").val();
+    if (retainedPercentageTxt.match("\%$") == "%") {
+      retainedPercentageTxt = retainedPercentageTxt.substr(0, retainedPercentageTxt.length - 1);
+    }
+    if (!/^-?\d*\.?\d*$/.test(retainedPercentageTxt)) {
+      $("#retainedPercentageTxt").addClass("ui-state-error");
+      bValid = false;
+    }
 
-        if (retainedPercentageTxt.match("\%$") == "%") {
-          retainedPercentageTxt = retainedPercentageTxt.substr(0, retainedPercentageTxt.length - 1);
-        }
-        if (!/^-?\d*\.?\d*$/.test(retainedPercentageTxt)) {
-          $("#retainedPercentageTxt").addClass("ui-state-error");
-          bValid = false;
-        }
+    var advancedPaymentPercentage = $("#advancedPaymentPercentage").val();
 
-        var advancedPaymentPercentage = $("#advancedPaymentPercentage").val();
+    if (advancedPaymentPercentage.match("\%$") == "%") {
+      advancedPaymentPercentage = advancedPaymentPercentage.substr(0, advancedPaymentPercentage.length - 1);
+    }
+    if (!/^-?\d*\.?\d*$/.test(advancedPaymentPercentage)) {
+      $("#advancedPaymentPercentage").addClass("ui-state-error");
+      bValid = false;
+    }
 
-        if (advancedPaymentPercentage.match("\%$") == "%") {
-          advancedPaymentPercentage = advancedPaymentPercentage.substr(0, advancedPaymentPercentage.length - 1);
-        }
-        if (!/^-?\d*\.?\d*$/.test(advancedPaymentPercentage)) {
-          $("#advancedPaymentPercentage").addClass("ui-state-error");
-          bValid = false;
-        }
+    var overHeadPerDayTxt = $("#overHeadPerDayTxt").val();
 
-        var overHeadPerDayTxt = $("#overHeadPerDayTxt").val();
+    if (!/^-?\d*\.?\d*$/.test(overHeadPerDayTxt)) {
+      $("#overHeadPerDayTxt").addClass("ui-state-error");
+      bValid = false;
+    }
 
-        if (!/^-?\d*\.?\d*$/.test(overHeadPerDayTxt)) {
-          $("#overHeadPerDayTxt").addClass("ui-state-error");
-          bValid = false;
-        }
+    var delayPenaltyTxt = $("#delayPenaltyTxt").val();
+    if (!/^-?\d*\.?\d*$/.test(delayPenaltyTxt)) {
+      $("#delayPenaltyTxt").addClass("ui-state-error");
+      bValid = false;
+    }
 
-        var delayPenaltyTxt = $("#delayPenaltyTxt").val();
-        if (!/^-?\d*\.?\d*$/.test(delayPenaltyTxt)) {
-          $("#delayPenaltyTxt").addClass("ui-state-error");
-          bValid = false;
-        }
+    var collectPaymentPeriodTxt = $("#collectPaymentPeriodTxt").val();
+    var payRequestsPeriodTxt = $("#payRequestsPeriodTxt").val();
 
-        var collectPaymentPeriodTxt = $("#collectPaymentPeriodTxt").val();
-        var payRequestsPeriodTxt = $("#payRequestsPeriodTxt").val();
+    var pStartDateTxt = $("#pStartDateTxt").val();
+    if (pStartDateTxt != null && pStartDateTxt.length != 0) {
+      pStartDateTxt = new Date(
+          pStartDateTxt);
+    } else {
+      pStartDateTxt = null;
+    }
 
-        var pStartDateTxt = $("#pStartDateTxt").val();
-        if (pStartDateTxt != null && pStartDateTxt.length != 0) {
-          pStartDateTxt = new Date(
-              pStartDateTxt);
-        } else {
-          pStartDateTxt = null;
-        }
+    var pFinishDateTxt = $("#pFinishDateTxt").val();
+    if (pFinishDateTxt != null && pFinishDateTxt.length != 0) {
+      pFinishDateTxt = new Date(
+          pFinishDateTxt);
+    } else {
+      pFinishDateTxt = null;
+    }
 
-        var pFinishDateTxt = $("#pFinishDateTxt").val();
-        if (pFinishDateTxt != null && pFinishDateTxt.length != 0) {
-          pFinishDateTxt = new Date(
-              pFinishDateTxt);
-        } else {
-          pFinishDateTxt = null;
-        }
+    if (bValid) {
+      var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
+      var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
 
-        if (bValid) {
-          var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
-          var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
-
-          var call = rpcClient.projectService.update(projectId, $("#projnameTxt").val(), $("#projCodeTxt").val(), $("#projectDescTxt").val(), pStartDateTxt, pFinishDateTxt, overHeadPerDayTxt, $("#portfolioId").val(), $(
-              "#weDays option:selected").val(), retainedPercentageValue, advancedPaymentPercentageValue, delayPenaltyTxt, collectPaymentPeriodTxt, payRequestsPeriodTxt);
-          if (call.result == 0) {
-            showMessage("Update Project", "Project updated successfully", 'success', {
-              Close : function() {
-                $(this).dialog("close");
-                location.reload(true);
-              }
-            });
-
-          } else {
-            showMessage("Update Project", "Error:" + call.message, 'error');
+      var call = rpcClient.projectService.update(
+          projectId,
+          $("#projnameTxt").val(),
+          $("#projCodeTxt").val(),
+          $("#projectDescTxt").val(),
+          pStartDateTxt,
+          pFinishDateTxt,
+          overHeadPerDayTxt,
+          $("#portfolioId").val(),
+          $("#weDays option:selected").val(),
+          retainedPercentageValue,
+          advancedPaymentPercentageValue,
+          delayPenaltyTxt,
+          collectPaymentPeriodTxt,
+          payRequestsPeriodTxt);
+      if (call.result == 0) {
+        showMessage("Update Project", "Project updated successfully", 'success', {
+          Close : function() {
+            $(this).dialog("close");
+            location.reload(true);
           }
-        }
+        });
 
-      });
+      } else {
+        showMessage("Update Project", "Error:" + call.message, 'error');
+      }
+    }
+  });
 
   // var projectId = null;
 
@@ -506,7 +515,6 @@ $(function() {
         $("#weDays").val(-1).prop('selected', true);
       }
 
-
       $("#overHeadPerDayTxt").val(pData.overheadPerDay);
       $("#retainedPercentageTxt").val(pData.retainedPercentage * 100);
       $("#advancedPaymentPercentage").val(pData.advancedPaymentPercentage * 100);
@@ -521,57 +529,54 @@ $(function() {
 
   }
 
-  //Tasks section
-  
+  // Tasks section
+
   var salectedTask = {};
   $("#deleteTaskBtn").button({
     text : true
   }).click(function() {
     if (salectedTask.selection) {
       var buttons = {
-          Yes : function() {
-            $(this).dialog("close");
-            var delTaskCall = rpcClient.taskService.remove(salectedTask.selection.id);
-            if (delTaskCall.result == 0) {
-              salectedTask.selection.remove();
-              salectedTask.selection = null;
-              $('#deleteTaskBtn').prop("disabled", true);
-            } else {
-              showMessage("Delete Task", 'Error occured: ' + delTaskCall.message, 'error')
-            }
-          },
-          No : function() {
-            $(this).dialog("close");
-            return false;
+        Yes : function() {
+          $(this).dialog("close");
+          var delTaskCall = rpcClient.taskService.remove(salectedTask.selection.id);
+          if (delTaskCall.result == 0) {
+            salectedTask.selection.remove();
+            salectedTask.selection = null;
+            $('#deleteTaskBtn').prop("disabled", true);
+          } else {
+            showMessage("Delete Task", 'Error occured: ' + delTaskCall.message, 'error')
           }
+        },
+        No : function() {
+          $(this).dialog("close");
+          return false;
         }
-        showMessage('Delete Task',
-            'The selected task will be deleted permanently!',
-            'warning', buttons);
-     
+      }
+      showMessage('Delete Task', 'The selected task will be deleted permanently!', 'warning', buttons);
+
     }
   });
-  
-  $('#deleteTaskBtn').prop("disabled", true);
-  
-  $("#mainAllTasks").selectable();
 
-  $('#mainAllTasks').selectable(
-      {
-        selected : function(event, ui) {
-          salectedTask.selection = ui.selected;
-          $('#deleteTaskBtn').prop("disabled", false);
-        },
-        unselected : function(event, ui) {
-          $('#deleteTaskBtn').prop("disabled", true);
-          salectedTask.selection = null;
-        }
-      });
-  
-  
-  //Tasks section end
-  
-  //Calendar Section
+  $('#deleteTaskBtn').prop("disabled", true);
+
+  $("#mainAllTasks").selectable({
+    cancel : '.ui-selected',
+    selected : function(event,
+        ui) {
+      salectedTask.selection = ui.selected;
+      $('#deleteTaskBtn').prop("disabled", false);
+    },
+    unselected : function(event,
+        ui) {
+      $('#deleteTaskBtn').prop("disabled", true);
+      salectedTask.selection = null;
+    }
+  });
+
+  // Tasks section end
+
+  // Calendar Section
   var daysOffList = rpcClient.daysOffService.findAllByProject(projectId);
   var fmt = new DateFmt(
       "%w %d-%n-%y");
@@ -588,64 +593,61 @@ $(function() {
 
     }
   }
-  
-  $("#addDaysOffDialog")
-  .dialog(
-      {
-        autoOpen : false,
-        height : 250,
-        width : 450,
-        modal : true,
-        dialogClass: "ZIndex900",
-        show : {
-          effect : "blind",
-          duration : 300
-        },
-        hide : {
-          effect : "fade",
-          duration : 300
-        },
-        open : function() {
-          /** Start Code for Project Days off */
-          $("#pDayOffDateTxt").datepicker({
-            showOn : "button",
-            buttonImage : "images/calendar.png",
-            buttonImageOnly : true,
-            numberOfMonths : 3
-          });
-         },
-        buttons : {
-          "Add" : function() {
-            var dayoff = $("#pDayOffDateTxt").val();
-            if (dayoff == null || dayoff == "") {
-              showMessage("Add day", 'A date must be selected', 'error');
-            } else {
-              $(this).dialog("close");
-              var dayOffDate = new Date(
-                  dayoff);
-              var createDayOffRequest = rpcClient.daysOffService.create(dayOffDate, "VACATION", projectId);
-              if (createDayOffRequest.result == 0) {
-                var dayOff = createDayOffRequest.data;
-                var theDate = new Date(
-                    dayOff.dayOff.time);
-                var li = $('<li></li>').addClass('ui-state-default').attr('id', dayOff.dayoffId).text(fmt.format(theDate));
 
-                $("#daysOffList").append(li);
-              } else {
-                showMessage("Add day", 'error:' + createDayOffRequest.message, 'error');
-              }
-            }
-
-          },
-          Cancel : function() {
-            $(this).dialog("close");
-          }
-        },
-        close : function() {
-        }
+  $("#addDaysOffDialog").dialog({
+    autoOpen : false,
+    height : 250,
+    width : 450,
+    modal : true,
+    dialogClass : "ZIndex900",
+    show : {
+      effect : "blind",
+      duration : 300
+    },
+    hide : {
+      effect : "fade",
+      duration : 300
+    },
+    open : function() {
+      /** Start Code for Project Days off */
+      $("#pDayOffDateTxt").datepicker({
+        showOn : "button",
+        buttonImage : "images/calendar.png",
+        buttonImageOnly : true,
+        numberOfMonths : 3
       });
+    },
+    buttons : {
+      "Add" : function() {
+        var dayoff = $("#pDayOffDateTxt").val();
+        if (dayoff == null || dayoff == "") {
+          showMessage("Add day", 'A date must be selected', 'error');
+        } else {
+          $(this).dialog("close");
+          var dayOffDate = new Date(
+              dayoff);
+          var createDayOffRequest = rpcClient.daysOffService.create(dayOffDate, "VACATION", projectId);
+          if (createDayOffRequest.result == 0) {
+            var dayOff = createDayOffRequest.data;
+            var theDate = new Date(
+                dayOff.dayOff.time);
+            var li = $('<li></li>').addClass('ui-state-default').attr('id', dayOff.dayoffId).text(fmt.format(theDate));
 
-  
+            $("#daysOffList").append(li);
+          } else {
+            showMessage("Add day", 'error:' + createDayOffRequest.message, 'error');
+          }
+        }
+
+      },
+      Cancel : function() {
+        $(this).dialog("close");
+      }
+    },
+    close : function() {
+    }
+  });
+
   $("#addDayOffBtn").button({
     text : true
   }).click(function() {
@@ -658,47 +660,45 @@ $(function() {
   }).click(function() {
     if (salectedDayOff.selection) {
       var buttons = {
-          Yes : function() {
-            $(this).dialog("close");
-            var delDayCall = rpcClient.daysOffService.remove(salectedDayOff.selection.id);
-            if (delDayCall && delDayCall.result == 0) {
-              // success, reload
-              salectedDayOff.selection.remove();
-              salectedDayOff.selection = null;
-              $('#deleteDayOffBtn').prop("disabled", true);
-            } else {
-              showMessage("Delete Day", 'Error:'
-                  + result.message, 'error');
-            }
-          },
-          No : function() {
-            $(this).dialog("close");
-            return false;
+        Yes : function() {
+          $(this).dialog("close");
+          var delDayCall = rpcClient.daysOffService.remove(salectedDayOff.selection.id);
+          if (delDayCall && delDayCall.result == 0) {
+            // success, reload
+            salectedDayOff.selection.remove();
+            salectedDayOff.selection = null;
+            $('#deleteDayOffBtn').prop("disabled", true);
+          } else {
+            showMessage("Delete Day", 'Error:' + result.message, 'error');
           }
+        },
+        No : function() {
+          $(this).dialog("close");
+          return false;
         }
-        showMessage('Delete Vacation Day',
-            'The selected vacation day will be deleted permanently!',
-            'warning', buttons);
-     
+      }
+      showMessage('Delete Vacation Day', 'The selected vacation day will be deleted permanently!', 'warning', buttons);
+
     }
   });
-  
+
   $('#deleteDayOffBtn').prop("disabled", true);
-  
+
   $("#daysOffList").selectable();
 
-  $('#daysOffList').selectable(
-      {
-        selected : function(event, ui) {
-          salectedDayOff.selection = ui.selected;
-          $('#deleteDayOffBtn').prop("disabled", false);
-        },
-        unselected : function(event, ui) {
-          $('#deleteDayOffBtn').prop("disabled", true);
-          salectedDayOff.selection = null;
-        }
-      });
-  //Calendar Section end
+  $('#daysOffList').selectable({
+    selected : function(event,
+        ui) {
+      salectedDayOff.selection = ui.selected;
+      $('#deleteDayOffBtn').prop("disabled", false);
+    },
+    unselected : function(event,
+        ui) {
+      $('#deleteDayOffBtn').prop("disabled", true);
+      salectedDayOff.selection = null;
+    }
+  });
+  // Calendar Section end
 });
 
 /*
