@@ -39,6 +39,9 @@ public class ProjectTask implements Serializable  {
 
 	@Column(name="task_name")
 	private String taskName;
+
+	@Column(name="guid")
+	private String taskGuid;
 	
 	@Column(name="task_description")
 	private String taskDescription;
@@ -201,6 +204,14 @@ public class ProjectTask implements Serializable  {
 	public boolean equals(Object obj) {
 		ProjectTask task = (ProjectTask)obj;
 		return task.getTaskId() == getTaskId();
+	}
+
+	public String getTaskGuid() {
+		return taskGuid;
+	}
+
+	public void setTaskGuid(String taskGuid) {
+		this.taskGuid = taskGuid;
 	}
 	
 	

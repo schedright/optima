@@ -114,6 +114,8 @@ public class PeriodLogGeneratorNew {
 	
 	public void finishTask() {
 		currentIteration = currentIteration.replace("%TASKS%", "");
+		currentIteration = currentIteration.replace("%DETAILS%", "");
+		currentIteration = currentIteration.replace("<Table border=\"1\"><tr></tr></Table>", "");
 		iterations.add(currentIteration);
 		currentIteration = null;
 		// previousTrials = "";

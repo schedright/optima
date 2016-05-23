@@ -93,7 +93,7 @@ $(function() {
         return false;
       }
     }
-    showMessage('Delete Overdraft Constraint', 'The selected finance will be deleted permanently!', 'warning', buttons);
+    showMessage('Delete Overdraft Constraint', 'Selected constraint will be deleted permanently!', 'warning', buttons);
 
   });
 

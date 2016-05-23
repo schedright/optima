@@ -95,7 +95,7 @@ public class PortfolioSolver {
 		double finance;
 	}
 
-	public PortfolioSolver(Portfolio portfolio, String projectsPriority,HttpSession session) {
+	public PortfolioSolver(Portfolio portfolio, String projectsPriority, HttpSession session) {
 		super();
 		this.session = session;
 		this.portfolio = portfolio;
@@ -504,6 +504,7 @@ public class PortfolioSolver {
 		} else {
 			Map<String, Object> bestResult = null;
 
+			TaskTreeNode shiftedTask = null;
 			// do the shifting
 			while (result.get(FEASIBLE) != Boolean.TRUE) {
 				if (logGenerator != null) {
@@ -521,7 +522,7 @@ public class PortfolioSolver {
 				double bestP1Cost = 0;
 				Map<Date, Double> bestPamymentClone = null;
 				boolean shiftHappens = false;
-				TaskTreeNode shiftedTask = null;
+				shiftedTask = null;
 				for (TaskTreeNode task : eligibleTasks) {
 					// left overs doesn't move, and we dont need to push any
 					// task further than outside the period
@@ -553,17 +554,17 @@ public class PortfolioSolver {
 						bestLength = projectW.getProjectDuratoin();
 						newIsBetter = true;
 					} else {
-						//our best bet is if the solution will take shorter
+						// our best bet is if the solution will take shorter
 						int d2 = projectW.getProjectDuratoin();
 						if (d2 > bestLength) {
-							//if the new option is taking longer, then ignore it
+							// if the new option is taking longer, then ignore it
 						} else if (d2 < bestLength) {
 							bestLength = d2;
 							newIsBetter = true;
 							bestIsFeasible = resultFeasible;
 						} else {
 							if (bestIsFeasible && !resultFeasible) {
-								//if equal duration but best is feasible, then ifnore the current option 
+								// if equal duration but best is feasible, then ifnore the current option
 							} else if (bestIsFeasible && resultFeasible) {
 								if (bestP1Cost < p1EndDetails.getPeriodCost()) {
 									newIsBetter = true;
@@ -574,50 +575,24 @@ public class PortfolioSolver {
 										bestIsFeasible = resultFeasible;
 									}
 								}
+							} else if(!bestIsFeasible && !resultFeasible) {
+								if (bestP1Cost > p1EndDetails.getPeriodCost()) {
+									newIsBetter = true;
+									bestIsFeasible = resultFeasible;
+								} 
 							} else {
 								newIsBetter = true;
 								bestIsFeasible = resultFeasible;
 							}
 						}
-							
-/*						if (bestIsFeasible && !resultFeasible) {
-							// do nothing, as there is a better option
-						} else if (bestIsFeasible && resultFeasible) {
-							int d2 = projectW.getProjectDuratoin();
-							if (d2 < bestLength) {
-								bestLength = d2;
-								newIsBetter = true;
-							} else if (d2 == bestLength) {
-								if (bestP1Cost < p1EndDetails.getPeriodCost()) {
-									newIsBetter = true;
-								} else if (bestP1Cost < p1EndDetails.getPeriodCost()) {
-									if (task.getChildren().contains(shiftedTask)) {
-										newIsBetter = true;
-									}
-								}
-							}
-							// compare which one is better
-						} else if (resultFeasible) {
-							newIsBetter = true;
-							bestLength = projectW.getProjectDuratoin();
-							bestIsFeasible = true;
-						} else {
-							// best is not feasible and result is not feasible,
-							// get the best of them for another round of
-							// shifting
-							if (d2 < bestLength) {
-								newIsBetter = true;
-								bestLength = d2;
-							} else if (d2 == bestLength) {
-								if (bestP1Cost > p1EndDetails.getPeriodCost()) {
-									newIsBetter = true;
-								} else if (bestP1Cost == p1EndDetails.getPeriodCost()) {
-									if (task.getChildren().contains(shiftedTask)) {
-										newIsBetter = true;
-									}
-								}
-							}
-						}*/
+
+						/*
+						 * if (bestIsFeasible && !resultFeasible) { // do nothing, as there is a better option } else if (bestIsFeasible && resultFeasible) { int d2 = projectW.getProjectDuratoin(); if (d2 < bestLength) { bestLength = d2;
+						 * newIsBetter = true; } else if (d2 == bestLength) { if (bestP1Cost < p1EndDetails.getPeriodCost()) { newIsBetter = true; } else if (bestP1Cost < p1EndDetails.getPeriodCost()) { if
+						 * (task.getChildren().contains(shiftedTask)) { newIsBetter = true; } } } // compare which one is better } else if (resultFeasible) { newIsBetter = true; bestLength = projectW.getProjectDuratoin(); bestIsFeasible =
+						 * true; } else { // best is not feasible and result is not feasible, // get the best of them for another round of // shifting if (d2 < bestLength) { newIsBetter = true; bestLength = d2; } else if (d2 == bestLength)
+						 * { if (bestP1Cost > p1EndDetails.getPeriodCost()) { newIsBetter = true; } else if (bestP1Cost == p1EndDetails.getPeriodCost()) { if (task.getChildren().contains(shiftedTask)) { newIsBetter = true; } } } }
+						 */
 					}
 					if (newIsBetter) {
 						shiftedTask = task;
@@ -628,6 +603,7 @@ public class PortfolioSolver {
 
 					task.shift(-actualShift);
 				}
+
 				if (bestResult != null) {
 					result = bestResult;
 				}
@@ -639,6 +615,14 @@ public class PortfolioSolver {
 				payments = cloneMap(bestPamymentClone);
 				iterationIndex++;
 			}
+			
+			if (logGenerator != null && shiftedTask!=null) {
+				shortVersion = getShortVersion(result, projectW, eligibleTasks, p1Start, p1End, iterationIndex, shiftedTask);
+				Date psd = projectW.getProject().getPropusedStartDate();
+				Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
+				writeShortVersionToHTMLLogFile(logGenerator, iterationIndex, shortVersion);
+			}
+
 
 		}
 		if (logGenerator != null) {
@@ -872,9 +856,9 @@ public class PortfolioSolver {
 		results.put(P2_END, new DayDetails(currentProjectDayDetails));
 
 		double p1Diff = end1Detailes.getBalance() + end1Detailes.getFinance() - currentProjectDayDetails.getOtherProjectsCashOut();
-		Boolean p1Feasible = p1Diff > 0;
+		Boolean p1Feasible = p1Diff >= 0.0;
 		double p2Diff = (currentProjectDayDetails.getBalance() + currentProjectDayDetails.getFinance() + totalCostForNextPeriod - currentProjectDayDetails.getOtherProjectsCashOut() - currentProjectDayDetails.getOtherProjectsCashOutNext());
-		Boolean p2Feasible = p2Diff > 0;
+		Boolean p2Feasible = p2Diff >= 0.0;
 		Boolean feasible = p1Feasible && p2Feasible;
 		String msg1 = "Planning from %s to %s for project (%s), Short (%.2f)$ to cover the minimum required expenses.";
 		if (!p1Feasible) {
@@ -971,6 +955,16 @@ public class PortfolioSolver {
 		return String.format(STATUS_JSON, status, done, total, message, errorMessage);
 	}
 
+	private void writeShortVersionToHTMLLogFile(PeriodLogGeneratorNew report, int iteration, String shortVersion) {
+		try {
+			report.startIteration(iteration, shortVersion);
+			report.setIterationDates("");
+			report.finishTask();
+		} catch (Exception e) {
+			
+		}
+	}
+	
 	private void writeTrialToHTMLLogFile(PeriodLogGeneratorNew report, int iteration, String shortVersion, Date from, Date to, ProjectWrapper projectW, Date projectEnd, Map<String, Object> result, TaskTreeNode shiftedTask) {
 
 		DayDetails p1StartDetails = (DayDetails) result.get(P1_START);

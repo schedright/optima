@@ -12,7 +12,7 @@ $(document).ready(function() {
   $("#financialNavBar").append("<a href=\"#\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
   $("#projectsRoadMapNavBar").append("<a href=\"plans.jsp\">Capital Plan<img class=\"menuIcon\" src=\"css/header/images/icon_results1.png\" /></a>");
   if (isAdminCheck) {
-    $("#usersNavBar").append("<a href=\"users.jsp\"><img class=\"menuIcon\" src=\"css/header/images/icon_results1.png\" />Users</a>");
+    $("#usersNavBar").append("<a href=\"users.jsp\">Users</a>");
   }
 
   $("#menuLogout").click(function() {
@@ -30,7 +30,8 @@ $(document).ready(function() {
     $('#sidebar').removeClass('visible');
   });
 
-  var updateLinks = function(link) {
+  var updateLinks = function(link1, link2) {
+    var link = link1 + link2;
     $("#financingNavBar").children().get(0).parentNode.removeChild($("#financingNavBar").children().get(0));
     $("#financingNavBar").append("<a href=\"finData.jsp?" + link + "\">Constraint/Schedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
 
@@ -39,6 +40,34 @@ $(document).ready(function() {
 
     $("#financialNavBar").children().get(0).parentNode.removeChild($("#financialNavBar").children().get(0));
     $("#financialNavBar").append("<a href=\"financials.jsp?" + link + "\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
+    
+    if (link1=='portfolioId') {
+      rpcClient.portfolioService.findLight(function(result , exception) {
+        if (result.result == 0) {
+          $('#financingNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
+          $('#cashflowNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
+          $('#financialNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
+        }
+      } , link2);
+      
+    } else {
+      rpcClient.projectService.findLight(function(result , exception) {
+        if (result.result == 0) {
+          var name = "";
+          if (result.data.portfolio) {
+            name = "Portfolio: " + result.data.portfolio.portfolioName;
+          } else {
+            name =  "Project: " + result.data.projectName;
+          }
+
+          $('#financingNavBar').attr('title', name);
+          $('#cashflowNavBar').attr('title',  name);
+          $('#financialNavBar').attr('title', name);
+          
+        } 
+      } , link2);
+      
+    }
   }
   window.updateLinks = updateLinks;
   setTimeout(function() {
@@ -60,10 +89,10 @@ $(document).ready(function() {
         }
       }
       if (portId) {
-        updateLinks("portfolioId=" + portId);
+        updateLinks("portfolioId=" , portId);
         linksUpdated = true;
       } else if (projId) {
-        updateLinks("projectId=" + projId);
+        updateLinks("projectId=" , projId);
         linksUpdated = true;
       }
     }
@@ -81,7 +110,7 @@ $(document).ready(function() {
               if (i != portfolioIndex) {
                 continue;
               }
-              updateLinks("portfolioId=" + data.list[i].portfolioId);
+              updateLinks("portfolioId=" , data.list[i].portfolioId);
             }
 
           }

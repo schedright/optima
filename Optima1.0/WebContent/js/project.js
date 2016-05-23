@@ -698,6 +698,13 @@ $(function() {
       salectedDayOff.selection = null;
     }
   });
+  
+  var windowResizeFunc = function() {
+    $('#projectTabs').height($('#main').height() - $('#tasksGantt').height())
+  }; 
+  $(window).resize(windowResizeFunc);
+  windowResizeFunc();
+
   // Calendar Section end
 });
 

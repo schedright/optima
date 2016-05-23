@@ -20,6 +20,7 @@
 		<class>com.softpoint.optima.db.Payment</class>
 		<class>com.softpoint.optima.db.User</class>
 		<class>com.softpoint.optima.db.UserRole</class>
+		<class>com.softpoint.optima.db.PrimaveraProject</class>
 		<properties>
 	      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
 	      <property name="javax.persistence.jdbc.url"

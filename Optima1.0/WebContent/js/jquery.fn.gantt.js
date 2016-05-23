@@ -1414,14 +1414,14 @@
 
                 var pos, mLeft;
 
-                if ((e.pageX >= bPos.left) && (e.pageX <= bPos.left + bWidth)) {
+                if ((e.pageX >= bPos.left) && (e.pageX <= bPos.left + bWidth - wButton)) {
                     pos = e.pageX - bPos.left;
-                    pos = pos - wButton / 2;
+                    //pos = pos - wButton / 2;
                     $sliderBarBtn.css("left", pos);
 
                     mLeft = $dataPanel.width() - $rightPanel.width();
 
-                    var pPos = pos * mLeft / bWidth * -1;
+                    var pPos = pos * mLeft / (bWidth - wButton)* -1;
                     if (pPos >= 0) {
                         $dataPanel.css("margin-left", "0px");
                         element.scrollNavigation.panelMargin = 0;
@@ -1472,7 +1472,7 @@
                     if ($dataPanel.css("margin-left")) {
                         hPos = $dataPanel.css("margin-left").replace("px", "");
                     }
-                    var pos = hPos * bWidth / mLeft - $sliderBtn.width() * 0.25;
+                    var pos = hPos * bWidth / mLeft ;
                     pos = pos > 0 ? 0 : (pos * -1 >= bWidth - (wButton * 0.75)) ? (bWidth - (wButton * 1.25)) * -1 : pos;
                     $sliderBtn.css("left", pos * -1);
                 }
