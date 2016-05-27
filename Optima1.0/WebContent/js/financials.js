@@ -46,18 +46,27 @@ $(function() {
 
 	if (solutionResponse.result == 0 && solutionResponse.data
 			&& solutionResponse.data.list && solutionResponse.data.list.length) {
-		for (var i = 0; i < solutionResponse.data.list.length; i++) {
+    var ul = "<ul>";
+
+	  for (var i = 0; i < solutionResponse.data.list.length; i++) {
+      var projDetails = solutionResponse.data.list[i].map;
+      ul += "<li><a href=\"#proj" + i + "\">" +projDetails.name + "</a></li>";
+    }
+	  ul += "</ul>";
+	  $("#schedResults").append(ul);
+	  for (var i = 0; i < solutionResponse.data.list.length; i++) {
+	    var tab = $('<div id="proj' + i + '"></div>').appendTo("#schedResults");
+//	    var tab = $("#schedResults").append('<div id="proj' + i + '"></div>');
 			var projDetails = solutionResponse.data.list[i].map;
-			$("#schedResults").append('<div style="font-size:2em">' + projDetails.name + '</div>');
-			$("#schedResults")
+			tab
 					.append(
 							'<div id="TasksGrid_' + i
 									+ '" style="height:300px"></div>');
-			$("#schedResults").append('<br/>');// separator
-			$("#schedResults").append(
+			tab.append('<br/>');// separator
+			tab.append(
 					'<div id="ProjectNumGrid_' + i
 							+ '" style="height:80px"></div>');
-			$("#schedResults").append('<br/>');// separator
+			tab.append('<br/>');// separator
 
 			var tasksColumns = [];
 			tasksColumns.push({
@@ -188,6 +197,7 @@ $(function() {
 						enableColumnReorder : false
 					});			
 		}
+	  $("#schedResults").tabs();
 
 		// $("#schedResults").html('');
 		/*

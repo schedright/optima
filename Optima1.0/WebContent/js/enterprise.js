@@ -95,6 +95,13 @@ $(function() {
     var row = cell.row;
     var item = pGrid.getDataItem(row);
     if (item && item.proj && item.proj.projectId) {
+      var selectedProjectCookie = "";
+      if (item.proj.portfolio) {
+        selectedProjectCookie = "portfolio=" + item.proj.portfolio.portfolioId + "," + "project=" + item.proj.projectId;
+      } else {
+        selectedProjectCookie = "project=" + item.proj.projectId;
+      }
+      $.cookie('activeProject', selectedProjectCookie);
       window.location.href = "projectDetails.jsp?projectId=" + item.proj.projectId;
     }
   });
@@ -110,7 +117,7 @@ $(function() {
       var selectedProjectCookie = "portfolio=" + optionSelected.data().portfolioId; 
       $.cookie('activeProject', selectedProjectCookie);
       
-      window.updateLinks("portfolioId=" + optionSelected.data().portfolioId);
+      window.updateLinks("portfolioId=" , optionSelected.data().portfolioId);
       
       var newData = prepareProjectData(portData.projects.list);
       pGrid.setData(newData);
@@ -133,7 +140,7 @@ $(function() {
           if (portId == currentPortfolioId) {
             $('#portfolioSelect').append($("<option></option>").attr("portfolioId", portId).attr("selected", "selected").data(data.list[i]).text(name));
             selectedItem = data.list[i];
-            window.updateLinks("portfolioId=" + selectedItem.portfolioId);
+            window.updateLinks("portfolioId=" , selectedItem.portfolioId);
 
           } else {
             $('#portfolioSelect').append($("<option></option>").attr("portfolioId", portId).data(data.list[i]).text(name));
@@ -207,7 +214,7 @@ $(function() {
             if (call.result == 0) {
               location.reload();
             } else {
-              showMessage("Remove link to project", 'Error:' + result.message, 'error');
+              showMessage("Remove project", 'Error:' + result.message, 'error');
             }
           },
           No : function() {
@@ -215,7 +222,7 @@ $(function() {
             return false;
           }
         }
-        showMessage('Remove link to project', 'The selected project will be removed from this portfolio!', 'warning', buttons);
+        showMessage('Remove project', 'The selected project will be removed from this Enterprise!', 'warning', buttons);
       }
     }
   });
@@ -264,7 +271,7 @@ $(function() {
             if (createPortResult.result == 0) {
               location.reload();
             } else {
-              showMessage("Edit Portfolio", 'Error:' + result.message, 'error');
+              showMessage("Edit Enterprise", 'Error:' + result.message, 'error');
             }
 
           } else {
@@ -272,7 +279,7 @@ $(function() {
             if (createPortResult.result == 0) {
               location.reload();
             } else {
-              showMessage("Create Portfolio", 'Error:' + result.message, 'error');
+              showMessage("Create Enterprise", 'Error:' + result.message, 'error');
             }
 
           }

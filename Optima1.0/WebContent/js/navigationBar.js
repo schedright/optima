@@ -41,7 +41,7 @@ $(document).ready(function() {
     $("#financialNavBar").children().get(0).parentNode.removeChild($("#financialNavBar").children().get(0));
     $("#financialNavBar").append("<a href=\"financials.jsp?" + link + "\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
     
-    if (link1=='portfolioId') {
+    if (link1=='portfolioId=') {
       rpcClient.portfolioService.findLight(function(result , exception) {
         if (result.result == 0) {
           $('#financingNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
