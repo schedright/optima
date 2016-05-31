@@ -580,7 +580,7 @@ public class PaymentUtil {
 			return task.getScheduledStartDate();
 		} else if (task.getCalendarStartDate() != null) {
 			return task.getCalendarStartDate();
-		} else return task.getTentativeStartDate();
+		} else return task.getEffectiveTentativeStartDate();
 		
 	}
 

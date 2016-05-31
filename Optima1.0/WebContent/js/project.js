@@ -261,7 +261,6 @@ $(function() {
     },
     buttons : {
       "Submit" : function() {
-        $("#sDateTentative").removeClass("ui-state-error");
         $("#durationTxt").removeClass("ui-state-error");
 
         if (projectId == null) {
@@ -272,11 +271,6 @@ $(function() {
         bValid = bValid && checkLength($("#taskNameTxt"), "taskNameTxt", 3, 256);
 
         var tentativeStartDate = $("#sDateTentative").val();
-
-        if (tentativeStartDate == null || tentativeStartDate.length == 0) {
-          $("#sDateTentative").addClass("ui-state-error");
-          bValid = false;
-        }
 
         var duration = $("#durationTxt").val();
 
@@ -327,9 +321,13 @@ $(function() {
         if (bValid) {
           var task = $(this).data('task');
           if (task != null) { // in case of updating
+            var d = null;
+            if ($("#sDateTentative").val()) {
+              d = new Date(
+                  $("#sDateTentative").val());
+            }
             // task
-            var updCall = rpcClient.taskService.update(task.taskId, projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, new Date(
-                $("#sDateTentative").val()), scheduledStartDate, actualStartDate);
+            var updCall = rpcClient.taskService.update(task.taskId, projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate);
 
             if (updCall.result == 0) {
               $(this).dialog("close");
@@ -339,9 +337,12 @@ $(function() {
             }
 
           } else { // new task
-
-            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, new Date(
-                $("#sDateTentative").val()), scheduledStartDate, actualStartDate)
+            var d = null;
+            if ($("#sDateTentative").val()) {
+              d = new Date(
+                  $("#sDateTentative").val());
+            }
+            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate)
 
             if (call.result == 0) {
               $(this).dialog("close");
@@ -372,104 +373,105 @@ $(function() {
 
   $("#saveProjectBtn").button({
     text : true
-  }).click(function() {
-    $("#projnameTxt").removeClass("ui-state-error");
-    $("#overHeadPerDayTxt").removeClass("ui-state-error");
-    $("#retainedPercentageTxt").removeClass("ui-state-error");
+  }).click(
+      function() {
+        $("#projnameTxt").removeClass("ui-state-error");
+        $("#overHeadPerDayTxt").removeClass("ui-state-error");
+        $("#retainedPercentageTxt").removeClass("ui-state-error");
 
-    $("#delayPenaltyTxt").removeClass("ui-state-error");
-    $("#collectPaymentPeriodTxt").removeClass("ui-state-error");
-    $("#payRequestsPeriodTxt").removeClass("ui-state-error");
+        $("#delayPenaltyTxt").removeClass("ui-state-error");
+        $("#collectPaymentPeriodTxt").removeClass("ui-state-error");
+        $("#payRequestsPeriodTxt").removeClass("ui-state-error");
 
-    $("#advancedPaymentPercentage").removeClass("ui-state-error");
-    var bValid = true;
+        $("#advancedPaymentPercentage").removeClass("ui-state-error");
+        var bValid = true;
 
-    bValid = bValid && checkLength($("#projnameTxt"), "projnameTxt", 3, 128);
+        bValid = bValid && checkLength($("#projnameTxt"), "projnameTxt", 3, 128);
 
-    var retainedPercentageTxt = $("#retainedPercentageTxt").val();
+        var retainedPercentageTxt = $("#retainedPercentageTxt").val();
 
-    if (retainedPercentageTxt.match("\%$") == "%") {
-      retainedPercentageTxt = retainedPercentageTxt.substr(0, retainedPercentageTxt.length - 1);
-    }
-    if (!/^-?\d*\.?\d*$/.test(retainedPercentageTxt)) {
-      $("#retainedPercentageTxt").addClass("ui-state-error");
-      bValid = false;
-    }
+        if (retainedPercentageTxt.match("\%$") == "%") {
+          retainedPercentageTxt = retainedPercentageTxt.substr(0, retainedPercentageTxt.length - 1);
+        }
+        if (!/^-?\d*\.?\d*$/.test(retainedPercentageTxt)) {
+          $("#retainedPercentageTxt").addClass("ui-state-error");
+          bValid = false;
+        }
 
-    var advancedPaymentPercentage = $("#advancedPaymentPercentage").val();
+        var advancedPaymentPercentage = $("#advancedPaymentPercentage").val();
 
-    if (advancedPaymentPercentage.match("\%$") == "%") {
-      advancedPaymentPercentage = advancedPaymentPercentage.substr(0, advancedPaymentPercentage.length - 1);
-    }
-    if (!/^-?\d*\.?\d*$/.test(advancedPaymentPercentage)) {
-      $("#advancedPaymentPercentage").addClass("ui-state-error");
-      bValid = false;
-    }
+        if (advancedPaymentPercentage.match("\%$") == "%") {
+          advancedPaymentPercentage = advancedPaymentPercentage.substr(0, advancedPaymentPercentage.length - 1);
+        }
+        if (!/^-?\d*\.?\d*$/.test(advancedPaymentPercentage)) {
+          $("#advancedPaymentPercentage").addClass("ui-state-error");
+          bValid = false;
+        }
 
-    var overHeadPerDayTxt = $("#overHeadPerDayTxt").val();
+        var overHeadPerDayTxt = $("#overHeadPerDayTxt").val();
 
-    if (!/^-?\d*\.?\d*$/.test(overHeadPerDayTxt)) {
-      $("#overHeadPerDayTxt").addClass("ui-state-error");
-      bValid = false;
-    }
+        if (!/^-?\d*\.?\d*$/.test(overHeadPerDayTxt)) {
+          $("#overHeadPerDayTxt").addClass("ui-state-error");
+          bValid = false;
+        }
 
-    var delayPenaltyTxt = $("#delayPenaltyTxt").val();
-    if (!/^-?\d*\.?\d*$/.test(delayPenaltyTxt)) {
-      $("#delayPenaltyTxt").addClass("ui-state-error");
-      bValid = false;
-    }
+        var delayPenaltyTxt = $("#delayPenaltyTxt").val();
+        if (!/^-?\d*\.?\d*$/.test(delayPenaltyTxt)) {
+          $("#delayPenaltyTxt").addClass("ui-state-error");
+          bValid = false;
+        }
 
-    var collectPaymentPeriodTxt = $("#collectPaymentPeriodTxt").val();
-    var payRequestsPeriodTxt = $("#payRequestsPeriodTxt").val();
+        var collectPaymentPeriodTxt = $("#collectPaymentPeriodTxt").val();
+        var payRequestsPeriodTxt = $("#payRequestsPeriodTxt").val();
 
-    var pStartDateTxt = $("#pStartDateTxt").val();
-    if (pStartDateTxt != null && pStartDateTxt.length != 0) {
-      pStartDateTxt = new Date(
-          pStartDateTxt);
-    } else {
-      pStartDateTxt = null;
-    }
+        var pStartDateTxt = $("#pStartDateTxt").val();
+        if (pStartDateTxt != null && pStartDateTxt.length != 0) {
+          pStartDateTxt = new Date(
+              pStartDateTxt);
+        } else {
+          pStartDateTxt = null;
+        }
 
-    var pFinishDateTxt = $("#pFinishDateTxt").val();
-    if (pFinishDateTxt != null && pFinishDateTxt.length != 0) {
-      pFinishDateTxt = new Date(
-          pFinishDateTxt);
-    } else {
-      pFinishDateTxt = null;
-    }
+        var pFinishDateTxt = $("#pFinishDateTxt").val();
+        if (pFinishDateTxt != null && pFinishDateTxt.length != 0) {
+          pFinishDateTxt = new Date(
+              pFinishDateTxt);
+        } else {
+          pFinishDateTxt = null;
+        }
 
-    if (bValid) {
-      var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
-      var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
+        if (bValid) {
+          var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
+          var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
 
-      var call = rpcClient.projectService.update(
-          projectId,
-          $("#projnameTxt").val(),
-          $("#projCodeTxt").val(),
-          $("#projectDescTxt").val(),
-          pStartDateTxt,
-          pFinishDateTxt,
-          overHeadPerDayTxt,
-          $("#portfolioId").val(),
-          $("#weDays option:selected").val(),
-          retainedPercentageValue,
-          advancedPaymentPercentageValue,
-          delayPenaltyTxt,
-          collectPaymentPeriodTxt,
-          payRequestsPeriodTxt);
-      if (call.result == 0) {
-        showMessage("Update Project", "Project updated successfully", 'success', {
-          Close : function() {
-            $(this).dialog("close");
-            location.reload(true);
+          var call = rpcClient.projectService.update(
+              projectId,
+              $("#projnameTxt").val(),
+              $("#projCodeTxt").val(),
+              $("#projectDescTxt").val(),
+              pStartDateTxt,
+              pFinishDateTxt,
+              overHeadPerDayTxt,
+              $("#portfolioId").val(),
+              $("#weDays option:selected").val(),
+              retainedPercentageValue,
+              advancedPaymentPercentageValue,
+              delayPenaltyTxt,
+              collectPaymentPeriodTxt,
+              payRequestsPeriodTxt);
+          if (call.result == 0) {
+            showMessage("Update Project", "Project updated successfully", 'success', {
+              Close : function() {
+                $(this).dialog("close");
+                location.reload(true);
+              }
+            });
+
+          } else {
+            showMessage("Update Project", "Error:" + call.message, 'error');
           }
-        });
-
-      } else {
-        showMessage("Update Project", "Error:" + call.message, 'error');
-      }
-    }
-  });
+        }
+      });
 
   // var projectId = null;
 
@@ -698,10 +700,10 @@ $(function() {
       salectedDayOff.selection = null;
     }
   });
-  
+
   var windowResizeFunc = function() {
     $('#projectTabs').height($('#main').height() - $('#tasksGantt').height())
-  }; 
+  };
   $(window).resize(windowResizeFunc);
   windowResizeFunc();
 

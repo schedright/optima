@@ -467,7 +467,10 @@ public class PortfolioSolver {
 		HashMap<Date, Double> clone = new HashMap<Date, Double>(original);
 		return clone;
 	}
-
+	Map<ProjectWrapper, Integer> cloneP2IMap(Map<ProjectWrapper, Integer> original) {
+		HashMap<ProjectWrapper, Integer> clone = new HashMap<ProjectWrapper, Integer>(original);
+		return clone;
+	}
 	private Map<String, Object> getPeriodSolutionPerProject(ProjectWrapper projectW, List<TaskTreeNode> eligibleTasks, List<TaskTreeNode> leftOverTasks, DayDetails currentProjectDayDetails, Date p1Start, Date p1End, Date p2End) {
 		DayDetails tempDayDetails = new DayDetails(currentProjectDayDetails);
 		Map<Date, Double> pamymentClone = cloneMap(payments);
@@ -502,6 +505,7 @@ public class PortfolioSolver {
 			projectLeftovers.put(projectW, newLeftOvers);
 
 		} else {
+			Integer nod = numberOfDaysSinceLastRequest.get(projectW);
 			Map<String, Object> bestResult = null;
 
 			TaskTreeNode shiftedTask = null;
@@ -524,6 +528,7 @@ public class PortfolioSolver {
 				boolean shiftHappens = false;
 				shiftedTask = null;
 				for (TaskTreeNode task : eligibleTasks) {
+					
 					// left overs doesn't move, and we dont need to push any
 					// task further than outside the period
 					if (leftOverTasks.contains(task) || !task.getCalculatedTaskStart().before(p1End) || task.getCalculatedTaskStart().before(p1Start)) {
@@ -536,7 +541,7 @@ public class PortfolioSolver {
 					shiftHappens = true;
 					int actualShift = task.shift(1);
 					payments = cloneMap(pamymentClone);
-					result = isValidPeriod(projectW, eligibleTasks, leftOverTasks, tempDayDetails, p1Start, p1End, p2End, numberOfDaysSinceLastRequest.get(projectW));
+					result = isValidPeriod(projectW, eligibleTasks, leftOverTasks, tempDayDetails, p1Start, p1End, p2End, nod);
 
 					if (logGenerator != null) {
 						shortVersion = getShortVersion(result, projectW, eligibleTasks, p1Start, p1End, iterationIndex, task);
@@ -579,7 +584,12 @@ public class PortfolioSolver {
 								if (bestP1Cost > p1EndDetails.getPeriodCost()) {
 									newIsBetter = true;
 									bestIsFeasible = resultFeasible;
-								} 
+								} else if (bestP1Cost == p1EndDetails.getPeriodCost()) {
+									if (task.getChildren().contains(shiftedTask)) {
+										newIsBetter = true;
+										bestIsFeasible = resultFeasible;
+									}
+								}
 							} else {
 								newIsBetter = true;
 								bestIsFeasible = resultFeasible;
@@ -611,10 +621,10 @@ public class PortfolioSolver {
 					break;
 				}
 				shiftedTask.shift(1);
-				numberOfDaysSinceLastRequest.put(projectW, (Integer) result.get(DAYSSINCELASTREQUEST2));
 				payments = cloneMap(bestPamymentClone);
 				iterationIndex++;
 			}
+			numberOfDaysSinceLastRequest.put(projectW, (Integer) bestResult.get(DAYSSINCELASTREQUEST2));
 			
 			if (logGenerator != null && shiftedTask!=null) {
 				shortVersion = getShortVersion(result, projectW, eligibleTasks, p1Start, p1End, iterationIndex, shiftedTask);

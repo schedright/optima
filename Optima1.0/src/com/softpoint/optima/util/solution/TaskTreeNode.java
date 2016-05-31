@@ -119,7 +119,7 @@ public class TaskTreeNode {
 	 */
 	public Date getCalculatedTaskEnd() {
 		if (calculatedTaskEnd == null) {
-			Date taskStart = task.getTentativeStartDate();
+			Date taskStart = task.getEffectiveTentativeStartDate();
 			// first move the task based on dependencies
 			for (TaskTreeNode pNode : parents) {
 				Date e = TaskUtil.addDays(pNode.getCalculatedTaskEnd(), 1);

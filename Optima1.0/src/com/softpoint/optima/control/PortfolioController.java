@@ -271,7 +271,7 @@ public class PortfolioController {
 					totalIncome += task.getUniformDailyIncome().doubleValue() * task.getDuration();
 
 					taskDetails.put("name", task.getTaskName());
-					taskDetails.put("original", format.format(task.getTentativeStartDate()));
+					taskDetails.put("original", format.format(task.getEffectiveTentativeStartDate()));
 					if (solved) {
 						taskDetails.put("final", format.format(task.getScheduledStartDate()));
 					}
@@ -376,7 +376,7 @@ public class PortfolioController {
 					totalIncome += task.getUniformDailyIncome().doubleValue() * task.getDuration();
 
 					sb.append(",");
-					if (task.getTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
+					if (task.getEffectiveTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
 						sb.append("✔,");
 					} else {
 						sb.append(">,");

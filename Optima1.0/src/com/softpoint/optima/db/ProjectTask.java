@@ -155,6 +155,15 @@ public class ProjectTask implements Serializable  {
 	public Date getTentativeStartDate() {
 		return this.tentativeStartDate;
 	}
+	
+	public Date getEffectiveTentativeStartDate() {
+		if (this.tentativeStartDate!=null) {
+			return this.tentativeStartDate;
+		} else {
+			return getProject().getPropusedStartDate();
+		}
+	}
+	
 
 	public void setTentativeStartDate(Date tentativeStartDate) {
 		this.tentativeStartDate = tentativeStartDate;
