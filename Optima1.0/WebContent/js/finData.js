@@ -16,7 +16,7 @@ $(function() {
   if (portfolioId) {
     var result = rpcClient.portfolioService.findLight(portfolioId);
     if (result.result == 0) {
-      $('#titleDiv').html("Portfolio: " + result.data.portfolioName);
+      $('#titleDiv').html("Enterprise: " + result.data.portfolioName);
       allProjects = result.data.projects.list;
     }
   } else if (projectId) {
@@ -25,7 +25,7 @@ $(function() {
     if (result.result == 0) {
       if (result.data.portfolio) {
         allProjects = result.data.portfolio.projects.list;
-        $('#titleDiv').html("Portfolio: " + result.data.portfolio.portfolioName);
+        $('#titleDiv').html("Enterprise: " + result.data.portfolio.portfolioName);
       } else {
         allProjects = [
           result.data

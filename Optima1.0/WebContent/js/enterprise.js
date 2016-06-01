@@ -222,7 +222,7 @@ $(function() {
             return false;
           }
         }
-        showMessage('Remove project', 'The selected project will be removed from this Enterprise!', 'warning', buttons);
+        showMessage('Remove project', 'The selected project will be removed from this Enterprise and all projects will be reset so they have to be solved again! ', 'warning', buttons);
       }
     }
   });
@@ -334,12 +334,23 @@ $(function() {
           var port = portOptionSelected.data();
           var portfolioId = port.portfolioId;
 
-          call = rpcClient.projectService.updateShort(projectId, project.projectName, project.projectCode, project.projectDescription, portfolioId);
-          if (call.result == 0) {
-            location.reload();
-          } else {
-            showMessage("Link Project", 'Error:' + call.message, 'error');
-          }
+          var buttons = {
+              Yes : function() {
+                $(this).dialog("close");
+                call = rpcClient.projectService.updateShort(projectId, project.projectName, project.projectCode, project.projectDescription, portfolioId);
+                if (call.result == 0) {
+                  location.reload();
+                } else {
+                  showMessage("Link Project", 'Error:' + call.message, 'error');
+                }
+                return;
+              },
+              No : function() {
+                $(this).dialog("close");
+                return;
+              }
+            }
+            showMessage('Link Project', 'All projects will be rest, you have to reschedule', 'info', buttons);
 
         } else {
           $("#portfolioSelect").addClass("ui-state-error");

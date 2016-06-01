@@ -9,8 +9,6 @@
 
 	<div class="form-section" id="financialDetails">
 		<div id="currentSolution" class="form-section">
-			<button id="exportSolutionToCSV" class="btnRight">Export to
-				CSV</button>
 			<div class="solutionContainer">
 				<div id="schedResults">
 					<div id="loader-overlay"></div>

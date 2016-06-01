@@ -10,7 +10,7 @@ import javax.servlet.ServletContext;
 
 public class PeriodLogGenerator {
 
-	private static final String HTML_FILE = "<html><style>td{position:relative;} .stripedDiv{top:0;bottom:0;left:0;right:0;position:absolute;background-image: linear-gradient(to right top,transparent 33%,black 33%,black 66%,transparent 66%);background-size: 3px 3px;}</style><body><H1>Portfolio:%PORTFOLIO%</H1><H2>Project:%PROJECT%</H2><H2>%START% - %END%</H>2%ITERATIONS%</body></html>";
+	private static final String HTML_FILE = "<html><style>td{position:relative;} .stripedDiv{top:0;bottom:0;left:0;right:0;position:absolute;background-image: linear-gradient(to right top,transparent 33%,black 33%,black 66%,transparent 66%);background-size: 3px 3px;}</style><body><H1>Enterprise:%PORTFOLIO%</H1><H2>Project:%PROJECT%</H2><H2>%START% - %END%</H>2%ITERATIONS%</body></html>";
 	private static final String ITERATION = "<H1>Iteration # %ITERATION_NUMBER%</H1><p>%PREVIOUS%</p><Table border=\"1\"><tr>%TASKS_DATES%</tr>%TASKS%</Table><p>%DETAILS%</p>";
 	private static final String TRIAL = "<p>%PREVIOUS%</p><Table  border=\"1\"><tr>%TASKS_DATES%</tr>%TASKS%</Table><p>%DETAILS%</p>";
 	private static final String DETAILS = "<Table><tr><td>Balance:</td><td>%Balance%</td></tr>"

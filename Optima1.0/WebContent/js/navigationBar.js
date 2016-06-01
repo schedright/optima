@@ -44,9 +44,9 @@ $(document).ready(function() {
     if (link1=='portfolioId=') {
       rpcClient.portfolioService.findLight(function(result , exception) {
         if (result.result == 0) {
-          $('#financingNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
-          $('#cashflowNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
-          $('#financialNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
+          $('#financingNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
+          $('#cashflowNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
+          $('#financialNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
         }
       } , link2);
       
@@ -55,7 +55,7 @@ $(document).ready(function() {
         if (result.result == 0) {
           var name = "";
           if (result.data.portfolio) {
-            name = "Portfolio: " + result.data.portfolio.portfolioName;
+            name = "Enterprise: " + result.data.portfolio.portfolioName;
           } else {
             name =  "Project: " + result.data.projectName;
           }

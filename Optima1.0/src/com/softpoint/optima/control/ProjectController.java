@@ -171,16 +171,22 @@ public class ProjectController {
 			project.setProjectName(name);
 			project.setProjectCode(code);
 			project.setProjectDescription(descritpion);
-
+			Portfolio portToReset = project.getPortfolio();
 			if (portfolioId != -1) {
 				EntityController<Portfolio> portController = new EntityController<Portfolio>(session.getServletContext());
 				Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
 				project.setPortfolio(portfolio);
+				portToReset = portfolio;
 			}
 			controller.merge(project);
 			TaskController taskController = new TaskController();
-			taskController.adjustStartDateBasedOnTaskDependency(session, key, false);
-
+			for (Project p:portToReset.getProjects()) {
+				taskController.adjustStartDateBasedOnTaskDependency(session, p.getProjectId(), true);
+			}
+			if (project.getPortfolio()!=portToReset) {
+				taskController.adjustStartDateBasedOnTaskDependency(session, key, true);
+			}
+			
 			refreshJPAClass(session, Portfolio.class);
 			refreshJPAClass(session, PortfolioLight.class);
 			refreshJPAClass(session, ProjectLight.class);
@@ -204,11 +210,16 @@ public class ProjectController {
 		Project project = null;
 		try {
 			project = controller.find(Project.class, key);
+			Portfolio portToReset = project.getPortfolio();
 			project.setPortfolio(null);
 			controller.merge(project);
 			TaskController taskController = new TaskController();
-			taskController.adjustStartDateBasedOnTaskDependency(session, key, false);
+			taskController.adjustStartDateBasedOnTaskDependency(session, key, true);
+			for (Project p:portToReset.getProjects()) {
+				taskController.adjustStartDateBasedOnTaskDependency(session, p.getProjectId(), true);
+			}
 
+			
 			refreshJPAClass(session, Portfolio.class);
 			refreshJPAClass(session, PortfolioLight.class);
 			refreshJPAClass(session, ProjectLight.class);
