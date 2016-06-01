@@ -14,6 +14,7 @@ import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.TaskDependency;
 import com.softpoint.optima.util.PaymentUtil;
+import com.softpoint.optima.util.TaskUtil;
 
 /**
  * @author user mhamdy
@@ -452,7 +453,7 @@ public class TaskController {
 		int calendarDuration = 0;
 		while (duration > 0) {
 			if ( PaymentUtil.isDayOff(startDate, project.getDaysOffs())
-					||  PaymentUtil.isWeekendDay(startDate, project.getWeekendDays())) {
+					||  TaskUtil.isWeekendDay(startDate, project.getWeekend())) {
 				calendarDuration++;
 			} else {
 				duration--;
@@ -492,7 +493,7 @@ public class TaskController {
 		calendar.setTime(date);
 		while (true) {
 			if ( !PaymentUtil.isDayOff(date, project.getDaysOffs())
-					&&   !PaymentUtil.isWeekendDay(date, project.getWeekendDays())) {
+					&&   !TaskUtil.isWeekendDay(date, project.getWeekend())) {
 				return date;
 			} 
 

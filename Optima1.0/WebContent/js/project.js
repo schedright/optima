@@ -443,7 +443,12 @@ $(function() {
         if (bValid) {
           var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
           var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
-
+          var weekend = '';
+          var weList = ['#we_sun', '#we_mon', '#we_tue', '#we_wed', '#we_thu', '#we_fri', '#we_sat'];
+          for (var i=0;i<7;i++) {
+            var checked =  $(weList[i]).prop("checked");
+            weekend += (checked)?'1':'0';
+          }
           var call = rpcClient.projectService.update(
               projectId,
               $("#projnameTxt").val(),
@@ -453,7 +458,7 @@ $(function() {
               pFinishDateTxt,
               overHeadPerDayTxt,
               $("#portfolioId").val(),
-              $("#weDays option:selected").val(),
+              weekend,
               retainedPercentageValue,
               advancedPaymentPercentageValue,
               delayPenaltyTxt,
@@ -511,6 +516,16 @@ $(function() {
         $("#pFinishDateTxt").val(fmt2.format(new Date(
             pData.proposedFinishDate.time)));
       }
+      
+      var weList = ['#we_sun', '#we_mon', '#we_tue', '#we_wed', '#we_thu', '#we_fri', '#we_sat'];
+      if (pData.weekend && pData.weekend.length==7) {
+        for (var i=0;i<7;i++) {
+          var checked = pData.weekend[i]=='1';
+           $(weList[i]).prop("checked",checked);
+        }
+        
+      }
+      
       if (pData.weekendDays != null) {
         $("#weDays").val(pData.weekendDays.weekendDaysId).prop('selected', true);
       } else {

@@ -124,7 +124,7 @@ public class TaskTreeNode {
 			for (TaskTreeNode pNode : parents) {
 				Date e = TaskUtil.addDays(pNode.getCalculatedTaskEnd(), 1);
 				while (PaymentUtil.isDayOff(e, projectW.getProjectVacations())
-						|| PaymentUtil.isWeekendDay(e, projectW.getProjectWeekends())) {
+						|| TaskUtil.isWeekendDay(e, projectW.getProjectWeekends())) {
 					e = TaskUtil.addDays(e, 1);
 				}
 				if (e.after(taskStart)) {
@@ -143,7 +143,7 @@ public class TaskTreeNode {
 			Date datePointer = taskStart;
 			while (duration > 0) {
 				if (PaymentUtil.isDayOff(datePointer, projectW.getProjectVacations())
-						|| PaymentUtil.isWeekendDay(datePointer, projectW.getProjectWeekends())) {
+						|| TaskUtil.isWeekendDay(datePointer, projectW.getProjectWeekends())) {
 					calendarDuration++;
 				} else {
 					if (calculatedTaskStart == null) {

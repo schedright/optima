@@ -65,10 +65,8 @@ public class Project implements Serializable {
 	@JoinColumn(name = "portfolio_id")
 	private Portfolio portfolio;
 
-	// bi-directional many-to-one association to WeekendDay
-	@ManyToOne
-	@JoinColumn(name = "Weekend_days_id")
-	private WeekendDay weekendDays;
+	@Column(name = "weekend")
+	private String weekend;
 
 	// bi-directional many-to-one association to ProjectPayment
 	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
@@ -213,12 +211,12 @@ public class Project implements Serializable {
 		this.portfolio = portfolio;
 	}
 
-	public WeekendDay getWeekendDays() {
-		return this.weekendDays;
+	public String getWeekend() {
+		return this.weekend;
 	}
 
-	public void setWeekendDays(WeekendDay weekendDays) {
-		this.weekendDays = weekendDays;
+	public void setWeekend(String weekend) {
+		this.weekend = weekend;
 	}
 
 	public List<ProjectPayment> getProjectPayments() {

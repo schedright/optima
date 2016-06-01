@@ -21,7 +21,6 @@ import com.softpoint.optima.db.Payment;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
-import com.softpoint.optima.db.WeekendDay;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 
 public class ProjectSolutionDetails {
@@ -81,7 +80,7 @@ public class ProjectSolutionDetails {
 				allPayments.put(projectStart, ammount);
 			}
 			List<DaysOff> daysOff = project.getDaysOffs();
-			WeekendDay weekEnds = project.getWeekendDays();
+			String weekEnds = project.getWeekend();
 
 			boolean startIncrement = false;
 			for (Date date = portfolioStart; !date.after(portfolioEnd); currentDate.add(Calendar.DATE,
@@ -104,7 +103,7 @@ public class ProjectSolutionDetails {
 
 				double tasksCost = 0d;
 				double tasksIncome = 0d;
-				if (!(PaymentUtil.isDayOff(date, daysOff) || PaymentUtil.isWeekendDay(date, weekEnds))) {
+				if (!(PaymentUtil.isDayOff(date, daysOff) || TaskUtil.isWeekendDay(date, weekEnds))) {
 					for (ProjectTask currentTask : projectTasks) {
 						Date taskStart = getTaskStart(currentTask,originalOrFinal);
 						if (!date.before(taskStart) && !date.after(tasksEnd.get(currentTask))) {
@@ -284,12 +283,12 @@ public class ProjectSolutionDetails {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(task.getEffectiveTentativeStartDate());
 			List<DaysOff> daysOff = project.getDaysOffs();
-			WeekendDay weekEnds = project.getWeekendDays();
+			String weekEnds = project.getWeekend();
 			int duration = task.getDuration();
 			Date theDate;
 			do {
 				theDate = cal.getTime();
-				if (!(PaymentUtil.isDayOff(theDate, daysOff) || PaymentUtil.isWeekendDay(theDate, weekEnds))) {
+				if (!(PaymentUtil.isDayOff(theDate, daysOff) || TaskUtil.isWeekendDay(theDate, weekEnds))) {
 					duration--;
 				}
 				cal.add(Calendar.DATE, 1);

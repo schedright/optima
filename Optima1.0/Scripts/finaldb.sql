@@ -250,6 +250,18 @@ create table primavera_project (
 	file_contnet LONGTEXT,
 	FOREIGN KEY (project_id) REFERENCES project(project_id)  ON DELETE CASCADE
 );
+alter table project add column weekend varchar(10);
+
+update project set weekend='1000001' where weekend_days_id=1;
+update project set weekend='0000011' where weekend_days_id=2;
+update project set weekend='0000110' where weekend_days_id=3;
+
+alter table project drop foreign key project_ibfk_6;
+alter table project drop column weekend_days_id;
+
+insert into weekend_days (weekend_days) values ('SAT-SUN');
+insert into weekend_days (weekend_days) values ('FRI-SAT');
+insert into weekend_days (weekend_days) values ('THU-FRI');
 
 commit;
 

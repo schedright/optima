@@ -40,7 +40,6 @@ import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectLight;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.Settings;
-import com.softpoint.optima.db.WeekendDay;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 import com.softpoint.optima.struct.Period;
 import com.softpoint.optima.struct.SchedulePeriod;
@@ -74,7 +73,7 @@ public class ProjectController {
 	 * @return
 	 * @throws OptimaException
 	 */
-	public ServerResponse create(HttpSession session, String name, String code, String descritpion, Date proposedStartDate, Date proposedFinishDate, double interestRate, double overheadPerDay, int portfolioId, int weekendDaysId,
+	public ServerResponse create(HttpSession session, String name, String code, String descritpion, Date proposedStartDate, Date proposedFinishDate, double interestRate, double overheadPerDay, int portfolioId, String weekendDays,
 			double retainedPercentage, double advancedPaymentPercentage, double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod) throws OptimaException {
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 
@@ -100,9 +99,7 @@ public class ProjectController {
 				Portfolio portfolio = portController.find(Portfolio.class, portfolioId);
 				project.setPortfolio(portfolio);
 			}
-			EntityController<WeekendDay> dayOffController = new EntityController<WeekendDay>(session.getServletContext());
-			WeekendDay weekendDay = dayOffController.find(WeekendDay.class, weekendDaysId);
-			project.setWeekendDays(weekendDay);
+			project.setWeekend(weekendDays);
 			controller.persist(project);
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);
 		} catch (EntityControllerException e) {
@@ -117,7 +114,7 @@ public class ProjectController {
 	 * @return
 	 * @throws OptimaException
 	 */
-	public ServerResponse update(HttpSession session, int key, String name, String code, String descritpion, Date proposedStartDate, Date proposedFinishDate, double overheadPerDay, int portfolioId, int weekendDaysId,
+	public ServerResponse update(HttpSession session, int key, String name, String code, String descritpion, Date proposedStartDate, Date proposedFinishDate, double overheadPerDay, int portfolioId, String weekendDays,
 			double retainedPercentage, double advancedPaymentPercentage, double delayPenaltyAmount, int collectPaymentPeriod, int paymentRequestPeriod) throws OptimaException {
 		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 		Project project = null;
@@ -143,9 +140,7 @@ public class ProjectController {
 				project.setPortfolio(portfolio);
 			}
 
-			EntityController<WeekendDay> dayOffController = new EntityController<WeekendDay>(session.getServletContext());
-			WeekendDay weekendDay = dayOffController.find(WeekendDay.class, weekendDaysId);
-			project.setWeekendDays(weekendDay);
+			project.setWeekend(weekendDays);
 			controller.merge(project);
 			// because we might have changed the weekend or the days off
 			// Bug#1 Shifting is not working correctly when changing weekends!
@@ -741,8 +736,8 @@ public class ProjectController {
 	 * if (totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent + expectedCashIn >= leftOverNextCost) { completed = true; } else {
 	 * 
 	 * List<TaskSolution> solutions = new LinkedList<>(); boolean noChange = true; for (ProjectTask task : currentEligibleSet) { task.setScheduledStartDate(null); Date taskDate = PaymentUtil.getTaskDate(task); Calendar calendar =
-	 * Calendar.getInstance(); calendar.setTime(taskDate); do { calendar.add(Calendar.DATE, 1); } while (PaymentUtil.isDayOff(calendar.getTime(), project.getDaysOffs()) || PaymentUtil.isWeekendDay(calendar.getTime(),
-	 * project.getWeekendDays()));
+	 * Calendar.getInstance(); calendar.setTime(taskDate); do { calendar.add(Calendar.DATE, 1); } while (PaymentUtil.isDayOff(calendar.getTime(), project.getDaysOffs()) || TaskUtil.isWeekendDay(calendar.getTime(),
+	 * project.getWeekend()));
 	 * 
 	 * // Bug#2 Not checking all the cases // if (to.equals(calendar.getTime()) || // to.after(calendar.getTime())) { noChange = false; task.setCalendarStartDate(calendar.getTime());
 	 * PaymentUtil.adjustStartDateBasedOnTaskDependency(project); updateScheduledState(project, taskStates);

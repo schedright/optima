@@ -34,7 +34,6 @@ import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.TaskDependency;
-import com.softpoint.optima.db.WeekendDay;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 import com.softpoint.optima.struct.Period;
 import com.softpoint.optima.struct.ProjectPaymentDetail;
@@ -67,27 +66,6 @@ public class PaymentUtil {
 		} 
 		return false;
 	}
-	
-	/**
-	 * @param date
-	 * @param weekendDays
-	 * @return
-	 */
-	public static boolean isWeekendDay(Date date, WeekendDay weekend) {
-		if (weekend == null) return false;
-		int weekendDays = weekend.getWeekendDaysId(); 
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		int dayOfTheWeek = calendar.get(Calendar.DAY_OF_WEEK);
-		if (weekendDays == 1 && (dayOfTheWeek == Calendar.SATURDAY || dayOfTheWeek == Calendar.SUNDAY) || weekendDays == 2
-				&& (dayOfTheWeek == Calendar.FRIDAY || dayOfTheWeek == Calendar.SATURDAY) || weekendDays == 3
-				&& (dayOfTheWeek == Calendar.THURSDAY || dayOfTheWeek == Calendar.FRIDAY)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	
 	public static double getPortfolioLeftOverCost(EntityController<Portfolio> controller , Portfolio portfolio , Date from , Date to, HashMap<Integer, Integer> completedProjects) {
 		List<Project> projects = portfolio.getProjects();
@@ -391,7 +369,7 @@ public class PaymentUtil {
 			}
 			
 			if (taskDate != null && isDateInBetweenDates(taskDate, DateUtils.add(taskDate, Calendar.DATE, currentTask.getCalenderDuration() - 1), currentDate)
-					&&  !isWeekendDay(currentDate, project.getWeekendDays())
+					&&  !TaskUtil.isWeekendDay(currentDate, project.getWeekend())
 					&& !isDayOff(currentDate, project.getDaysOffs()) ) {
 				cashoutTotal = cashoutTotal + currentTask.getUniformDailyCost().doubleValue();
 
@@ -968,7 +946,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 				
 				for (Date date = start.getTime() ; start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
 					
-					if (!PaymentUtil.isDayOff(date,currentProject.getDaysOffs()) && ! PaymentUtil.isWeekendDay(date,currentProject.getWeekendDays())) {
+					if (!PaymentUtil.isDayOff(date,currentProject.getDaysOffs()) && ! TaskUtil.isWeekendDay(date,currentProject.getWeekend())) {
 						tasks = currentProject.getProjectTasks();
 						for (ProjectTask currentTask : tasks) {
 					
@@ -1035,7 +1013,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 				
 				for (Date date = start.getTime() ; start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
 					
-					if (!PaymentUtil.isDayOff(date,currentProject.getDaysOffs()) && ! PaymentUtil.isWeekendDay(date,currentProject.getWeekendDays())) {
+					if (!PaymentUtil.isDayOff(date,currentProject.getDaysOffs()) && ! TaskUtil.isWeekendDay(date,currentProject.getWeekend())) {
 						tasks = currentProject.getProjectTasks();
 						for (ProjectTask currentTask : tasks) {
 					
@@ -1389,7 +1367,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		end.setTime(to);
 		
 		for (Date date = start.getTime() ; start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
-			if (!PaymentUtil.isDayOff(date,project.getDaysOffs()) && ! PaymentUtil.isWeekendDay(date,project.getWeekendDays())) {
+			if (!PaymentUtil.isDayOff(date,project.getDaysOffs()) && ! TaskUtil.isWeekendDay(date,project.getWeekend())) {
 				
 				for (ProjectTask currentTask : project.getProjectTasks()) {
 					Date taskDate = PaymentUtil.getTaskDate(currentTask);
@@ -1455,7 +1433,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		end.setTime(to);
 		
 		for (Date date = start.getTime() ; start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
-			if (!PaymentUtil.isDayOff(date,project.getDaysOffs()) && ! PaymentUtil.isWeekendDay(date,project.getWeekendDays())) {
+			if (!PaymentUtil.isDayOff(date,project.getDaysOffs()) && ! TaskUtil.isWeekendDay(date,project.getWeekend())) {
 				
 				for (ProjectTask currentTask : project.getProjectTasks()) {
 					Date taskDate = PaymentUtil.getTaskDate(currentTask);
@@ -1496,7 +1474,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		start.setTime(from);
 		for (Date date = start.getTime() ; date.before(to); start.add(Calendar.DATE, 1), date = start.getTime()) {
 			if ( isDayOff(date, currentTask.getProject().getDaysOffs()) 
-				|| isWeekendDay(date, currentTask.getProject().getWeekendDays()) ) {
+				|| TaskUtil.isWeekendDay(date, currentTask.getProject().getWeekend()) ) {
 				noOfWeekendDaysAndDaysOff++;
 			}
 		}
@@ -1552,7 +1530,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 					//Fix BUG - BassemVic
 
 					while (PaymentUtil.isDayOff(cal.getTime(), project.getDaysOffs())  
-							|| PaymentUtil.isWeekendDay(cal.getTime() ,  project.getWeekendDays()) )
+							|| TaskUtil.isWeekendDay(cal.getTime() ,  project.getWeekend()) )
 					{
 						cal.add(Calendar.DATE, 1);
 					}
@@ -1591,7 +1569,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		int calendarDuration = 0;
 		while (duration > 0) {
 			if ( PaymentUtil.isDayOff(startDate, project.getDaysOffs())
-					||  PaymentUtil.isWeekendDay(startDate, project.getWeekendDays())) {
+					||  TaskUtil.isWeekendDay(startDate, project.getWeekend())) {
 				calendarDuration++;
 			} else {
 				duration--;
@@ -2190,7 +2168,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 		// loop from "to" to tasksEndDate
 		calendar.setTime(to);
 		for (Date date = calendar.getTime() ; date.before(tasksEndDate); calendar.add(Calendar.DATE, 1), date = calendar.getTime()) {
-			if (!PaymentUtil.isDayOff(date,project.getDaysOffs()) && ! PaymentUtil.isWeekendDay(date,project.getWeekendDays())) {
+			if (!PaymentUtil.isDayOff(date,project.getDaysOffs()) && ! TaskUtil.isWeekendDay(date,project.getWeekend())) {
 				
 				for ( ProjectTask task : eligibleTasks) {
 					Date taskDate = PaymentUtil.getTaskDate(task);

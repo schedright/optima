@@ -12,7 +12,6 @@
 		<class>com.softpoint.optima.db.ProjectPayment</class>
 		<class>com.softpoint.optima.db.ProjectTask</class>
 		<class>com.softpoint.optima.db.TaskDependency</class>
-		<class>com.softpoint.optima.db.WeekendDay</class>
 		<class>com.softpoint.optima.db.Settings</class>
 		<class>com.softpoint.optima.db.PlanProject</class>
 		<class>com.softpoint.optima.db.ProjectLight</class>

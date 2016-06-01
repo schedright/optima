@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.softpoint.optima.db.DaysOff;
 import com.softpoint.optima.db.ProjectTask;
-import com.softpoint.optima.db.WeekendDay;
 
 public class TaskUtil {
 
@@ -18,7 +17,7 @@ public class TaskUtil {
 		while (countDown>0) {
 			Date date = start.getTime() ;
 			start.add(Calendar.DATE, 1);
-			if ( TaskUtil.isDayOff(date, task.getProject().getDaysOffs()) || TaskUtil.isWeekendDay(date, task.getProject().getWeekendDays())) {
+			if ( TaskUtil.isDayOff(date, task.getProject().getDaysOffs()) || TaskUtil.isWeekendDay(date, task.getProject().getWeekend())) {
 				totalDays ++;
 				continue;
 			} else {
@@ -50,19 +49,17 @@ public class TaskUtil {
 	 * @param weekendDays
 	 * @return
 	 */
-	public static boolean isWeekendDay(Date date, WeekendDay weekend) {
+	public static boolean isWeekendDay(Date date, String weekend) {
 		if (weekend == null) return false;
-		int weekendDays = weekend.getWeekendDaysId(); 
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		int dayOfTheWeek = calendar.get(Calendar.DAY_OF_WEEK);
-		if (weekendDays == 1 && (dayOfTheWeek == Calendar.SATURDAY || dayOfTheWeek == Calendar.SUNDAY) || weekendDays == 2
-				&& (dayOfTheWeek == Calendar.FRIDAY || dayOfTheWeek == Calendar.SATURDAY) || weekendDays == 3
-				&& (dayOfTheWeek == Calendar.THURSDAY || dayOfTheWeek == Calendar.FRIDAY)) {
-			return true;
-		} else {
-			return false;
+		int dayOfTheWeek = calendar.get(Calendar.DAY_OF_WEEK-1); //Sun 1, Mon 2 ... 
+		if (weekend.length()>=dayOfTheWeek) {
+			if (weekend.charAt(dayOfTheWeek)=='1') {
+				return true;
+			}
 		}
+		return false;
 	}
 	
 	public static int daysBetween(Date start, Date end) {

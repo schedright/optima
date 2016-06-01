@@ -9,7 +9,6 @@ import com.softpoint.optima.db.DaysOff;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.TaskDependency;
-import com.softpoint.optima.db.WeekendDay;
 
 public class ProjectWrapper {
 	Project project;
@@ -31,7 +30,7 @@ public class ProjectWrapper {
 	Map<ProjectTask,TaskTreeNode> allTreeNodesMap;
 	List<TaskTreeNode> allTasks;
 	Boolean finished;
-	private WeekendDay projectWeekends;
+	private String projectWeekends;
 	private List<DaysOff> projectVacations;
 	int totalTasks;
 	public ProjectWrapper(Project project) {
@@ -42,7 +41,7 @@ public class ProjectWrapper {
 		rootTasks = new ArrayList<TaskTreeNode>();
 		completedTasks = new ArrayList<TaskTreeNode>();
 		allTasks = new ArrayList<TaskTreeNode>();
-		projectWeekends = project.getWeekendDays();
+		projectWeekends = project.getWeekend();
 		projectVacations = project.getDaysOffs();
 		
 		allTreeNodesMap = new HashMap<ProjectTask,TaskTreeNode>();
@@ -87,7 +86,7 @@ public class ProjectWrapper {
 	}
 	
 
-	public WeekendDay getProjectWeekends() {
+	public String getProjectWeekends() {
 		return projectWeekends;
 	}
 

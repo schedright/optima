@@ -1061,7 +1061,7 @@ public class PortfolioSolver {
 	}
 
 	public static boolean isIffDay(Project project, Date date) {
-		return PaymentUtil.isDayOff(date, project.getDaysOffs()) || PaymentUtil.isWeekendDay(date, project.getWeekendDays());
+		return PaymentUtil.isDayOff(date, project.getDaysOffs()) || TaskUtil.isWeekendDay(date, project.getWeekend());
 	}
 
 	public static long differenceInDays(Date start, Date end) {
