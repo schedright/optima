@@ -531,7 +531,7 @@ public class PortfolioSolver {
 					
 					// left overs doesn't move, and we dont need to push any
 					// task further than outside the period
-					if (leftOverTasks.contains(task) || !task.getCalculatedTaskStart().before(p1End) || task.getCalculatedTaskStart().before(p1Start)) {
+					if (leftOverTasks.contains(task) || !task.getCalculatedTaskStart().before(p1End) || task.getCalculatedTaskStart().before(p1Start) || task.getTask().getStatus()!=ProjectTask.STATUS_NOT_STARTED) {
 						continue;
 					}
 					if (!task.getCalculatedTaskStart().before(p1End)) {
