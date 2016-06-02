@@ -53,9 +53,9 @@ public class TaskUtil {
 		if (weekend == null) return false;
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		int dayOfTheWeek = calendar.get(Calendar.DAY_OF_WEEK-1); //Sun 1, Mon 2 ... 
+		int dayOfTheWeek = calendar.get(Calendar.DAY_OF_WEEK); //Sun 1, Mon 2 ... 
 		if (weekend.length()>=dayOfTheWeek) {
-			if (weekend.charAt(dayOfTheWeek)=='1') {
+			if (weekend.charAt(dayOfTheWeek-1)=='1') {
 				return true;
 			}
 		}

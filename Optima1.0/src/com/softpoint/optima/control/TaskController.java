@@ -36,7 +36,7 @@ public class TaskController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse create(HttpSession session, int projectId, String taskName, String taskDescription, int duration, double uniformDailyCost, double uniformDailyincome,
-			Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate) throws OptimaException {
+			Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate, int status, int lag) throws OptimaException {
 
 		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 
@@ -51,6 +51,8 @@ public class TaskController {
 		projectTask.setUniformDailyIncome(new BigDecimal(uniformDailyincome));
 		projectTask.setTaskDescription(taskDescription);
 		projectTask.setTaskName(taskName);
+		projectTask.setStatus(status);
+		projectTask.setLag(lag);
 
 		try {
 
@@ -83,7 +85,7 @@ public class TaskController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse update(HttpSession session, int taskId, int projectId, String taskName, String taskDescription, int duration, double uniformDailyCost,
-			double uniformDailyincome, Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate) throws OptimaException {
+			double uniformDailyincome, Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate, int status, int lag) throws OptimaException {
 
 		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 
@@ -108,6 +110,9 @@ public class TaskController {
 			projectTask.setUniformDailyIncome(new BigDecimal(uniformDailyincome));
 			projectTask.setTaskDescription(taskDescription);
 			projectTask.setTaskName(taskName);
+			projectTask.setStatus(status);
+			projectTask.setLag(lag);
+
 			projectTask.setProject(project);
 			controller.merge(projectTask);
 
@@ -419,7 +424,7 @@ public class TaskController {
 				Date nextTaskStartDate = nextTask.getCalendarStartDate();
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(task.getCalendarStartDate());
-				cal.add(Calendar.DATE, task.getCalenderDuration());
+				cal.add(Calendar.DATE, task.getCalenderDuration() + task.getLag());
 				if (nextTaskStartDate == null || nextTaskStartDate.before(cal.getTime())) {
 					Date newDate = adjustStart(project, cal.getTime());
 					nextTask.setCalendarStartDate(newDate);

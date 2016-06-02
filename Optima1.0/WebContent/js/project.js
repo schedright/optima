@@ -151,6 +151,23 @@ $(function() {
       $("#sDateTentative").val(tenStartDate);
       $("#sDateScheduled").val(scStartDate);
       $("#sDateActual").val(actStartDate);
+      
+      var status = 1;
+      var lag = 0;
+      if (d.status) {
+        status = d.status;
+        if (typeof status!='number' || (status<1 || status>3)) {
+          status=1;
+        }
+      }
+      if (d.lag) {
+        lag = d.lag;
+        if (typeof lag!='number' || lag<0) {
+          lag = 0;
+        }
+      }
+      $("#statusId").val(status);
+      $("#lagId").val(lag);
 
       $("#projTasksDialog").data("task", d).dialog('option', 'title', 'Update Task').dialog('open');
 
@@ -284,6 +301,11 @@ $(function() {
           bValid = false;
         }
 
+        if (!/^[0-9]+$/.test($("#lagId").val())) {
+          $("#lagId").addClass("ui-state-error");
+          bValid = false;
+        }
+        
         var dailyCostTxt = $("#dailyCostTxt").val();
         if (dailyCostTxt == null || dailyCostTxt.length == 0) {
           dailyCostTxt = "0"
@@ -327,7 +349,7 @@ $(function() {
                   $("#sDateTentative").val());
             }
             // task
-            var updCall = rpcClient.taskService.update(task.taskId, projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate);
+            var updCall = rpcClient.taskService.update(task.taskId, projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate, $("#statusId").val(), $("#lagId").val());
 
             if (updCall.result == 0) {
               $(this).dialog("close");
@@ -342,7 +364,8 @@ $(function() {
               d = new Date(
                   $("#sDateTentative").val());
             }
-            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate)
+
+            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate,$("#statusId").val(), $("#lagId").val())
 
             if (call.result == 0) {
               $(this).dialog("close");

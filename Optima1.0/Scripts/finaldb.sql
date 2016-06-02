@@ -259,9 +259,8 @@ update project set weekend='0000110' where weekend_days_id=3;
 alter table project drop foreign key project_ibfk_6;
 alter table project drop column weekend_days_id;
 
-insert into weekend_days (weekend_days) values ('SAT-SUN');
-insert into weekend_days (weekend_days) values ('FRI-SAT');
-insert into weekend_days (weekend_days) values ('THU-FRI');
+alter table project_task add column status INT default 1; -- 1 not started, 2 started, 3 finished
+alter table project_task add column lag INT default 0;
 
 commit;
 

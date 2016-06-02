@@ -17,7 +17,11 @@ import java.util.List;
 @Table(name="project_task")
 public class ProjectTask implements Serializable  {
 	private static final long serialVersionUID = 1L;
-
+	public static int STATUS_NOT_STARTED = 1;
+	public static int STATUS_STARTED = 2;
+	public static int STATUS_FINISHED = 3;
+	
+	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="task_id")
@@ -42,7 +46,13 @@ public class ProjectTask implements Serializable  {
 
 	@Column(name="guid")
 	private String taskGuid;
-	
+
+	@Column(name="lag")
+	private Integer lag;
+
+	@Column(name="status")
+	private Integer status;
+
 	@Column(name="task_description")
 	private String taskDescription;
 
@@ -221,6 +231,22 @@ public class ProjectTask implements Serializable  {
 
 	public void setTaskGuid(String taskGuid) {
 		this.taskGuid = taskGuid;
+	}
+
+	public Integer getLag() {
+		return lag;
+	}
+
+	public void setLag(Integer lag) {
+		this.lag = lag;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
 	}
 	
 	
