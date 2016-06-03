@@ -968,13 +968,20 @@
 
                 var cellWidth = tools.getCellSize();
                 var barMarg = tools.getProgressBarMargin() || 0;
-                var bar = $('<div class="bar"><div class="fn-label"' + title + '>' + label + '</div></div>')
+                var bar = null
+                var child = "";
+                if (days==0) {
+                  child =  '<div class="diamond"' + title + '></div>';
+                } else {
+                  child =  '<div class="fn-label"' + title + '>' + label + '</div>';
+                }
+                bar = $('<div class="bar">' + child + '</div>')
                         .addClass(cls)
                         .css({
                             width: ((cellWidth * days) - barMarg) + 5
                         })
                         .data("dataObj", dataObj);
-
+                
                 if (desc) {
                     bar
                       .mouseover(function (e) {

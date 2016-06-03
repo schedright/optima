@@ -153,7 +153,12 @@ $(function() {
         var reader = new FileReader();
         reader.onload = function() {
           result = window.btoa(reader.result);
-          rpcClient.projectService.importPrimaveraFile(result);
+          var call = rpcClient.projectService.importPrimaveraFile(result);
+          if (call.result == 0) {
+            location.reload();
+          } else {
+            showMessage("Imprort Project", 'Error:' + result.message, 'error');
+          }
         }
         reader.readAsBinaryString(fileInput[0].files[0]);
         /*

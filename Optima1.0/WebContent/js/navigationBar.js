@@ -30,7 +30,8 @@ $(document).ready(function() {
     $('#sidebar').removeClass('visible');
   });
 
-  var updateLinks = function(link1, link2) {
+  var updateLinks = function(link1,
+      link2) {
     var link = link1 + link2;
     $("#financingNavBar").children().get(0).parentNode.removeChild($("#financingNavBar").children().get(0));
     $("#financingNavBar").append("<a href=\"finData.jsp?" + link + "\">Constraint/Schedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
@@ -40,33 +41,30 @@ $(document).ready(function() {
 
     $("#financialNavBar").children().get(0).parentNode.removeChild($("#financialNavBar").children().get(0));
     $("#financialNavBar").append("<a href=\"financials.jsp?" + link + "\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
-    
-    if (link1=='portfolioId=') {
-      rpcClient.portfolioService.findLight(function(result , exception) {
-        if (result.result == 0) {
-          $('#financingNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
-          $('#cashflowNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
-          $('#financialNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
-        }
-      } , link2);
-      
-    } else {
-      rpcClient.projectService.findLight(function(result , exception) {
-        if (result.result == 0) {
-          var name = "";
-          if (result.data.portfolio) {
-            name = "Enterprise: " + result.data.portfolio.portfolioName;
-          } else {
-            name =  "Project: " + result.data.projectName;
-          }
 
-          $('#financingNavBar').attr('title', name);
-          $('#cashflowNavBar').attr('title',  name);
-          $('#financialNavBar').attr('title', name);
-          
-        } 
-      } , link2);
-      
+    if (link1 == 'portfolioId=') {
+      var result = rpcClient.portfolioService.findLight(link2);
+      if (result.result == 0 && result.data) {
+        $('#financingNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
+        $('#cashflowNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
+        $('#financialNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
+        return true;
+      }
+    } else {
+      var result = rpcClient.projectService.findLight(link2);
+      if (result.result == 0 && result.data) {
+        var name = "";
+        if (result.data.portfolio) {
+          name = "Enterprise: " + result.data.portfolio.portfolioName;
+        } else {
+          name = "Project: " + result.data.projectName;
+        }
+
+        $('#financingNavBar').attr('title', name);
+        $('#cashflowNavBar').attr('title', name);
+        $('#financialNavBar').attr('title', name);
+        return true;
+      }
     }
   }
   window.updateLinks = updateLinks;
@@ -89,11 +87,13 @@ $(document).ready(function() {
         }
       }
       if (portId) {
-        updateLinks("portfolioId=" , portId);
-        linksUpdated = true;
+        if (updateLinks("portfolioId=", portId)) {
+          linksUpdated = true;
+        }
       } else if (projId) {
-        updateLinks("projectId=" , projId);
-        linksUpdated = true;
+        if (updateLinks("projectId=", projId)) {
+          linksUpdated = true;
+        }
       }
     }
     if (!linksUpdated) {
@@ -110,7 +110,7 @@ $(document).ready(function() {
               if (i != portfolioIndex) {
                 continue;
               }
-              updateLinks("portfolioId=" , data.list[i].portfolioId);
+              updateLinks("portfolioId=", data.list[i].portfolioId);
             }
 
           }
