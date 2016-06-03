@@ -234,6 +234,9 @@ public class ProjectTask implements Serializable  {
 	}
 
 	public Integer getLag() {
+		if (lag==null) {
+			return 0;
+		}
 		return lag;
 	}
 
@@ -247,6 +250,11 @@ public class ProjectTask implements Serializable  {
 
 	public void setStatus(Integer status) {
 		this.status = status;
+	}
+
+	@Override
+	public String toString() {
+		return "ProjectTask [taskName=" + taskName + "]";
 	}
 	
 	

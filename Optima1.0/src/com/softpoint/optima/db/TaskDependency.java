@@ -54,5 +54,10 @@ public class TaskDependency implements Serializable {
 	public void setDependent(ProjectTask dependent) {
 		this.dependent = dependent;
 	}
+
+	@Override
+	public String toString() {
+		return "TaskDependency [dependency=" + dependency + ", dependent=" + dependent + "]";
+	}
 	
 }

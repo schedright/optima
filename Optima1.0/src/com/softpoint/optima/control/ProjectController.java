@@ -1117,7 +1117,7 @@ public class ProjectController {
 		}
 	}
 
-	public String importPrimaveraFile(HttpServletRequest request, HttpSession session, String data) {
+	public ServerResponse importPrimaveraFile(HttpServletRequest request, HttpSession session, String data) {
 		File zipFile = null; 
 		File extractFolder = null;
 		try {
@@ -1148,6 +1148,7 @@ public class ProjectController {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return new ServerResponse("ERROR", String.format("Error importing project : %s", e.getMessage()), e);
 		} finally {
 			zipFile.delete();
 			try {
@@ -1155,6 +1156,6 @@ public class ProjectController {
 			} catch (IOException e) {
 			}
 		}
-		return "";
+		return new ServerResponse("0", PortfolioSolver.SUCCESS,"");
 	}
 }

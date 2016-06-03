@@ -385,7 +385,7 @@ public class TaskController {
 	 * @param session
 	 * @param projectId
 	 */
-	protected void adjustStartDateBasedOnTaskDependency(HttpSession session, int projectId , boolean resetFirst) {
+	public void adjustStartDateBasedOnTaskDependency(HttpSession session, int projectId , boolean resetFirst) {
 		EntityController<ProjectTask> taskController = new EntityController<ProjectTask>(session.getServletContext(), false);
 
 		try {
