@@ -207,7 +207,7 @@ $(function() {
       }
 
       pData[rowCount] = {};
-      pData[rowCount]["day"] = "Portoflio Totals:";
+      pData[rowCount]["day"] = "Enterprise Totals:";
       rowCount++;
       currentCashOutRow = rowCount;
       pData[rowCount] = {};
@@ -290,7 +290,7 @@ $(function() {
     if (solutionResponse.result == 0 && solutionResponse.data && solutionResponse.data == 'TRUE') {
       var result = rpcClient.portfolioService.isInvalidSolution(portfolioId);
       if (result) {
-        showMessage('Portfolio has changed', 'The portfolio has changed after last solve, you might need to re-solve again', 'info');
+        showMessage('Enterprise has changed', 'The enterprise has changed after last solve, you might need to re-solve again', 'info');
 
       }
     }

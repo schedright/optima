@@ -260,7 +260,8 @@ alter table project drop foreign key project_ibfk_6;
 alter table project drop column weekend_days_id;
 
 alter table project_task add column status INT default 1; -- 1 not started, 2 started, 3 finished
-alter table project_task add column lag INT default 0;
+
+alter table task_dependency add column lag INT default 0;
 
 commit;
 

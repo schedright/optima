@@ -47,9 +47,6 @@ public class ProjectTask implements Serializable  {
 	@Column(name="guid")
 	private String taskGuid;
 
-	@Column(name="lag")
-	private Integer lag;
-
 	@Column(name="status")
 	private Integer status;
 
@@ -231,17 +228,6 @@ public class ProjectTask implements Serializable  {
 
 	public void setTaskGuid(String taskGuid) {
 		this.taskGuid = taskGuid;
-	}
-
-	public Integer getLag() {
-		if (lag==null) {
-			return 0;
-		}
-		return lag;
-	}
-
-	public void setLag(Integer lag) {
-		this.lag = lag;
 	}
 
 	public Integer getStatus() {

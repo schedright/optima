@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +19,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.control.EntityController;
+import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.control.ProjectController;
 import com.softpoint.optima.control.TaskController;
+import com.softpoint.optima.db.DaysOff;
 import com.softpoint.optima.db.PortfolioLight;
 import com.softpoint.optima.db.PrimaveraProject;
 import com.softpoint.optima.db.Project;
@@ -86,6 +90,7 @@ public class PrimaveraManager {
 				Map<String, ProjectTask> guid2taskMap = new HashMap<String, ProjectTask>();
 				Map<String, ProjectTask> existingGuid2TaskMap = new HashMap<String, ProjectTask>();
 				List<TaskDependency> newDependencies = new ArrayList<TaskDependency>();
+				List<TaskDependency> updatedDependencies = new ArrayList<TaskDependency>();
 				if (primaveraProject.getProject().getProjectTasks() != null) {
 					for (ProjectTask tsk : primaveraProject.getProject().getProjectTasks()) {
 						if (tsk.getTaskGuid() != null) {
@@ -94,94 +99,11 @@ public class PrimaveraManager {
 					}
 				}
 				
-				Map<String, Double> activityCost = getTasksCost(project);
-				Map<String, ProjectTask> guid2TaskMap = new HashMap<String,ProjectTask>();
-				Map<String, ProjectTask> objectId2TaskMap = new HashMap<String,ProjectTask>();
-				
-				Node projE = project.getFirstChild();
-				while (projE != null) {
-					if (projE instanceof Element) {
-						if ("activity".equals(((Element) projE).getTagName().toLowerCase())) {
-							// a task, handle it here
-							Element taskNode = (Element) projE;
-							String ttype = getElementChildAttributeValue(taskNode, "type");
-							String objectId = getElementChildAttributeValue(taskNode, "objectid");
-							Double cost = activityCost.get(objectId);
-							if (cost==null) {
-								cost = (double) 0;
-							}
-							String tduration = getElementChildAttributeValue(taskNode, "plannedduration");
-							int duration = Integer.valueOf(tduration) / 8;
-							
-							if ("wbs summary".equals(ttype.toLowerCase())) {
-								cost += getActivityExpense(project,objectId);
-								double overhead = cost;
-								overhead /= duration;
-								primaveraProject.getProject().setOverheadPerDay(BigDecimal.valueOf(overhead));
-								projE = projE.getNextSibling();
-								continue;
-							}
-							
-							String tname = getElementChildAttributeValue(taskNode, "name");
-							
-							String tguid = getElementChildAttributeValue(taskNode, "guid");
-//							String temp2 = getElementChildAttributeValue(taskNode, "plannedstartdate");
-//							Date tStart = formatter.parse(temp2);
-//							temp2 = getElementChildAttributeValue(taskNode, "plannedfinishdate");
-//							Date tEnd = formatter.parse(temp2);
-							ProjectTask task = existingGuid2TaskMap.get(tguid);
-							if (task == null) {
-								task = new ProjectTask();
-								task.setProject(primaveraProject.getProject());
-								guid2taskMap.put(tguid, task);
-								task.setTaskGuid(tguid);
-								task.setUniformDailyIncome(BigDecimal.ZERO);
-								task.setTaskDescription("");
-								task.setLag(0);
-							}
-							task.setTaskName(tname);
-							//task.setTentativeStartDate(tStart);
-							task.setDuration(duration);
-							if (cost!=null && duration!=0) {
-								task.setUniformDailyCost(BigDecimal.valueOf(cost/duration));
-							}
-							guid2TaskMap.put(tguid, task);
-							objectId2TaskMap.put(objectId, task);
-						}
-					}
-					projE = projE.getNextSibling();
-				}
-				projE = project.getFirstChild();
-				while (projE != null) {
-					if (projE instanceof Element) {
-						if ("relationship".equals(((Element) projE).getTagName().toLowerCase())) {
-							String src = getElementChildAttributeValue(projE, "predecessoractivityobjectid");
-							String tgt = getElementChildAttributeValue(projE, "successoractivityobjectid");
-							if (src!=null && tgt!=null) {
-								ProjectTask srcTsk = objectId2TaskMap.get(src);
-								ProjectTask tgtTsk = objectId2TaskMap.get(tgt);
-								if (srcTsk!=null && tgtTsk!=null) {
-									boolean exist = false;
-									if (srcTsk.getAsDependency()!=null) {
-										for (TaskDependency dep:srcTsk.getAsDependency()) {
-											if (dep.getDependent()==tgtTsk) {
-												exist = true;
-												break;
-											}
-										}
-									}
-									if (!exist) {
-										TaskDependency taskDependency = new TaskDependency();
-										taskDependency.setDependency(srcTsk);
-										taskDependency.setDependent(tgtTsk);
-										newDependencies.add(taskDependency);
-									}
-								}
-							}
-						}
-					}
-					projE = projE.getNextSibling();
-				}
+				importTasks(project, primaveraProject, guid2taskMap, existingGuid2TaskMap, newDependencies, updatedDependencies);
+
+				SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+				List<DaysOff> vacations = ImportVacations(primaveraProject, doc, formatter2);
 
 				try {
 	                byte[] bytes = Files.readAllBytes(xmlFile.toPath());
@@ -208,6 +130,14 @@ public class PrimaveraManager {
 				for (TaskDependency dep:newDependencies) {
 					taskDependencyController.persist(dep);
 				}
+				for (TaskDependency dep:updatedDependencies) {
+					taskDependencyController.merge(dep);
+				}
+				EntityController<DaysOff> vacController = new EntityController<DaysOff>(session.getServletContext());
+				for (DaysOff dayo:vacations) {
+					vacController.persist(dayo);
+				}
+				
 				TaskController controller = new TaskController();
 				controller.adjustStartDateBasedOnTaskDependency(session, primaveraProject.getProject().getProjectId(), true);
 				
@@ -215,6 +145,166 @@ public class PrimaveraManager {
 				ProjectController.refreshJPAClass(session, ProjectLight.class);
 			}
 		}
+	}
+
+	private static void importTasks(Node project, PrimaveraProject primaveraProject, Map<String, ProjectTask> guid2taskMap, Map<String, ProjectTask> existingGuid2TaskMap, List<TaskDependency> newDependencies,
+			List<TaskDependency> updatedDependencies) {
+		Map<String, Double> activityCost = getTasksCost(project);
+		Map<String, ProjectTask> guid2TaskMap = new HashMap<String,ProjectTask>();
+		Map<String, ProjectTask> objectId2TaskMap = new HashMap<String,ProjectTask>();
+		
+		Node projE = project.getFirstChild();
+		while (projE != null) {
+			if (projE instanceof Element) {
+				if ("activity".equals(((Element) projE).getTagName().toLowerCase())) {
+					// a task, handle it here
+					Element taskNode = (Element) projE;
+					String ttype = getElementChildAttributeValue(taskNode, "type");
+					String objectId = getElementChildAttributeValue(taskNode, "objectid");
+					Double cost = activityCost.get(objectId);
+					if (cost==null) {
+						cost = (double) 0;
+					}
+					String tduration = getElementChildAttributeValue(taskNode, "plannedduration");
+					int duration = Integer.valueOf(tduration) / 8;
+					
+					if ("wbs summary".equals(ttype.toLowerCase())) {
+						cost += getActivityExpense(project,objectId);
+						double overhead = cost;
+						overhead /= duration;
+						primaveraProject.getProject().setOverheadPerDay(BigDecimal.valueOf(overhead));
+						projE = projE.getNextSibling();
+						continue;
+					}
+					
+					String tname = getElementChildAttributeValue(taskNode, "name");
+					
+					String tguid = getElementChildAttributeValue(taskNode, "guid");
+//							String temp2 = getElementChildAttributeValue(taskNode, "plannedstartdate");
+//							Date tStart = formatter.parse(temp2);
+//							temp2 = getElementChildAttributeValue(taskNode, "plannedfinishdate");
+//							Date tEnd = formatter.parse(temp2);
+					ProjectTask task = existingGuid2TaskMap.get(tguid);
+					if (task == null) {
+						task = new ProjectTask();
+						task.setProject(primaveraProject.getProject());
+						guid2taskMap.put(tguid, task);
+						task.setTaskGuid(tguid);
+						task.setUniformDailyIncome(BigDecimal.ZERO);
+						task.setTaskDescription("");
+					}
+					task.setTaskName(tname);
+					//task.setTentativeStartDate(tStart);
+					task.setDuration(duration);
+					if (cost!=null && duration!=0) {
+						task.setUniformDailyCost(BigDecimal.valueOf(cost/duration));
+					}
+					guid2TaskMap.put(tguid, task);
+					objectId2TaskMap.put(objectId, task);
+				}
+			}
+			projE = projE.getNextSibling();
+		}
+		importTaskDependencies(project, newDependencies, updatedDependencies, objectId2TaskMap);
+	}
+
+	private static void importTaskDependencies(Node project, List<TaskDependency> newDependencies, List<TaskDependency> updatedDependencies, Map<String, ProjectTask> objectId2TaskMap) {
+		Node projE;
+		projE = project.getFirstChild();
+		while (projE != null) {
+			if (projE instanceof Element) {
+				if ("relationship".equals(((Element) projE).getTagName().toLowerCase())) {
+					String src = getElementChildAttributeValue(projE, "predecessoractivityobjectid");
+					String tgt = getElementChildAttributeValue(projE, "successoractivityobjectid");
+					String lags = getElementChildAttributeValue(projE, "lag");
+					int lag = 0;
+					if (lags!=null) {
+						try { 
+							lag = Integer.valueOf(lags) / 8;
+						} catch (Exception e) {
+						}
+					}
+
+					if (src!=null && tgt!=null) {
+						ProjectTask srcTsk = objectId2TaskMap.get(src);
+						ProjectTask tgtTsk = objectId2TaskMap.get(tgt);
+						if (srcTsk!=null && tgtTsk!=null) {
+							boolean exist = false;
+							if (srcTsk.getAsDependency()!=null) {
+								for (TaskDependency dep:srcTsk.getAsDependency()) {
+									if (dep.getDependent()==tgtTsk) {
+										dep.setLag(lag);
+										exist = true;
+										updatedDependencies.add(dep);
+										break;
+									}
+								}
+							}
+							if (!exist) {
+								TaskDependency taskDependency = new TaskDependency();
+								taskDependency.setDependency(srcTsk);
+								taskDependency.setDependent(tgtTsk);
+								taskDependency.setLag(lag);
+								newDependencies.add(taskDependency);
+							}
+						}
+					}
+				}
+			}
+			projE = projE.getNextSibling();
+		}
+	}
+
+	private static List<DaysOff> ImportVacations(PrimaveraProject primaveraProject, Document doc, SimpleDateFormat formatter) {
+		try {
+			List<DaysOff> vacations = new ArrayList<DaysOff>();
+			
+			Node vacs = browseToNode(doc, "Calendar\\HolidayOrExceptions");
+			if (vacs!=null) {
+				Node child = vacs.getFirstChild();
+				while (child != null) {
+					if (child instanceof Element && "holidayorexception".equals(((Element)child).getTagName().toLowerCase())) {
+						Node date = null;
+						Node worktime = null;
+						
+						Node sc = child.getFirstChild();
+						while (sc!=null) {
+							if (sc instanceof Element) {
+								String n = (((Element)sc).getTagName().toLowerCase());
+								if ("date".equals(n)) {
+									date = sc;
+								} else if ("worktime".equals(n)) {
+									worktime = sc;
+								}
+							}
+							sc = sc.getNextSibling();
+						}
+						
+						if (date!=null && worktime!=null) {
+							String dateString = date.getTextContent();
+							if (worktime.getAttributes().getNamedItem("xsi:nil") != null) {
+								String key = worktime.getAttributes().getNamedItem("xsi:nil").getNodeValue();
+								if ("true".equals(key.toLowerCase())) {
+									Date dateObj = formatter.parse(dateString);
+									
+									DaysOff dayOff = new DaysOff();
+									dayOff.setDayOff(dateObj);
+									dayOff.setDayoffType("VACATION");
+									dayOff.setProject(primaveraProject.getProject());
+									vacations.add(dayOff);
+								}
+							}
+
+						}
+					}
+					child = child.getNextSibling();
+				}
+			}
+			return vacations;
+		} catch (Exception e) {
+
+		}
+		return Collections.emptyList();
 	}
 
 	private static Map<String, Integer> weekDays = new HashMap<String, Integer>();
@@ -233,6 +323,9 @@ public class PrimaveraManager {
 		String[] pathes = path.split("\\\\");
 		Node root = doc.getDocumentElement();
 		for (int i = 0; i < pathes.length; i++) {
+			if (root == null) {
+				break;
+			}
 			String nodeName = pathes[i].toLowerCase();
 			Node child = root.getFirstChild();
 			while (child != null) {

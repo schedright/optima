@@ -28,6 +28,9 @@ public class TaskDependency implements Serializable {
 	@JoinColumn(name="dependant_task_id")
 	private ProjectTask dependent;
 
+	@Column(name="lag")
+	private Integer lag;
+
     public TaskDependency() {
     }
 
@@ -58,6 +61,17 @@ public class TaskDependency implements Serializable {
 	@Override
 	public String toString() {
 		return "TaskDependency [dependency=" + dependency + ", dependent=" + dependent + "]";
+	}
+
+	public Integer getLag() {
+		if (lag==null) {
+			return 0;
+		}
+		return lag;
+	}
+
+	public void setLag(Integer lag) {
+		this.lag = lag;
 	}
 	
 }

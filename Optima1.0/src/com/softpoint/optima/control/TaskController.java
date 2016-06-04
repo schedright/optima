@@ -36,7 +36,7 @@ public class TaskController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse create(HttpSession session, int projectId, String taskName, String taskDescription, int duration, double uniformDailyCost, double uniformDailyincome,
-			Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate, int status, int lag) throws OptimaException {
+			Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate, int status) throws OptimaException {
 
 		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 
@@ -52,7 +52,6 @@ public class TaskController {
 		projectTask.setTaskDescription(taskDescription);
 		projectTask.setTaskName(taskName);
 		projectTask.setStatus(status);
-		projectTask.setLag(lag);
 
 		try {
 
@@ -85,7 +84,7 @@ public class TaskController {
 	 * @throws OptimaException
 	 */
 	public ServerResponse update(HttpSession session, int taskId, int projectId, String taskName, String taskDescription, int duration, double uniformDailyCost,
-			double uniformDailyincome, Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate, int status, int lag) throws OptimaException {
+			double uniformDailyincome, Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate, int status) throws OptimaException {
 
 		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 
@@ -111,7 +110,6 @@ public class TaskController {
 			projectTask.setTaskDescription(taskDescription);
 			projectTask.setTaskName(taskName);
 			projectTask.setStatus(status);
-			projectTask.setLag(lag);
 
 			projectTask.setProject(project);
 			controller.merge(projectTask);
@@ -412,6 +410,15 @@ public class TaskController {
 		}
 	}
 
+	public static int getLag(ProjectTask source, ProjectTask target) {
+		for(TaskDependency dep : source.getAsDependency()) {
+			if (dep.getDependent()==target) {
+				return dep.getLag();
+			}
+		}; 
+		return 0;
+	}
+	
 	protected void processTask(ProjectTask task, Project project, EntityController<ProjectTask> controller) throws EntityControllerException {
 		// Bug#1 Shifting is not working correctly when changing weekends! -- BassemVic
 		//System.out.println(task.getTaskId());
@@ -424,7 +431,7 @@ public class TaskController {
 				Date nextTaskStartDate = nextTask.getCalendarStartDate();
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(task.getCalendarStartDate());
-				cal.add(Calendar.DATE, task.getCalenderDuration() + task.getLag());
+				cal.add(Calendar.DATE, task.getCalenderDuration() + getLag(task, nextTask));
 				if (nextTaskStartDate == null || nextTaskStartDate.before(cal.getTime())) {
 					Date newDate = adjustStart(project, cal.getTime());
 					nextTask.setCalendarStartDate(newDate);

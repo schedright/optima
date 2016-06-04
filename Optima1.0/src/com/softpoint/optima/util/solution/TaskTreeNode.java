@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.softpoint.optima.control.TaskController;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.util.PaymentUtil;
 import com.softpoint.optima.util.TaskUtil;
@@ -122,7 +123,8 @@ public class TaskTreeNode {
 			Date taskStart = task.getEffectiveTentativeStartDate();
 			// first move the task based on dependencies
 			for (TaskTreeNode pNode : parents) {
-				Date e = TaskUtil.addDays(pNode.getCalculatedTaskEnd(), 1 + pNode.getTask().getLag());
+				int lag = TaskController.getLag(pNode.getTask(), task);
+				Date e = TaskUtil.addDays(pNode.getCalculatedTaskEnd(), 1 + lag);
 				while (PaymentUtil.isDayOff(e, projectW.getProjectVacations())
 						|| TaskUtil.isWeekendDay(e, projectW.getProjectWeekends())) {
 					e = TaskUtil.addDays(e, 1);
