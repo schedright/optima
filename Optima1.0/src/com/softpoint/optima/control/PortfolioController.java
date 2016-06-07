@@ -278,9 +278,9 @@ public class PortfolioController {
 
 					int oldDuration = TaskUtil.calculateTaskDuration(task);
 					if (lastDate == null) {
-						lastDate = addDayes(task.getTentativeStartDate(), oldDuration - 1);
+						lastDate = addDayes(task.getEffectiveTentativeStartDate(), oldDuration - 1);
 					} else {
-						Date newDate = addDayes(task.getTentativeStartDate(), oldDuration - 1);
+						Date newDate = addDayes(task.getEffectiveTentativeStartDate(), oldDuration - 1);
 						if (lastDate.before(newDate)) {
 							lastDate = newDate;
 						}
@@ -381,7 +381,7 @@ public class PortfolioController {
 					} else {
 						sb.append(">,");
 					}
-					sb.append(task.getTaskDescription()).append(",").append(format.format(task.getTentativeStartDate()))
+					sb.append(task.getTaskDescription()).append(",").append(format.format(task.getEffectiveTentativeStartDate()))
 							.append(",").append(format.format(task.getScheduledStartDate())).append("\r");
 
 					if (lastDate == null) {

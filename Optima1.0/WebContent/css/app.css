@@ -83,7 +83,7 @@ select option {
 
 .fn-gantt .leftPanel {
 	float: left;
-	width: 115px;
+	width: 240px;
 	overflow: hidden;
 	border-right: 1px solid #DDD;
 	position: relative;
@@ -102,7 +102,7 @@ select option {
 .fn-gantt .leftPanel .fn-label {
 	display: inline-block;
 	color: #484A4D;
-	width: 110px;
+	width: 235px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
@@ -122,7 +122,7 @@ select option {
 }
 
 .fn-gantt .leftPanel .name {
-	width: 110px;
+	width: 235px;
 	font-weight: 700;
 }
 

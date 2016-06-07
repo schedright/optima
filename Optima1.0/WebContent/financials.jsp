@@ -4,11 +4,13 @@
 <%@ include file="header.html"%>
 
 <div
-	style="border: 20px solid transparent; border-bottom-width: 0px; border-right-width: 0px; border-top-width: 45px; position: absolute; top: 0; height: 100%; width: 100%; box-sizing: border-box; overflow-y: auto"
+	style="border: 20px solid transparent;border-left-width:0px; border-bottom-width: 0px; border-right-width: 0px; border-top-width: 45px; position: absolute; top: 0; height: 100%; width: 100%; box-sizing: border-box; overflow-y: auto"
 	id="main">
 
 	<div class="form-section" id="financialDetails">
 		<div id="currentSolution" class="form-section">
+			<button id="exportSolutionToCSV" style="margin-bottom:10px">Export to
+				CSV</button>
 			<div class="solutionContainer">
 				<div id="schedResults">
 					<div id="loader-overlay"></div>

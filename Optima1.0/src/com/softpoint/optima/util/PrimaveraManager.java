@@ -19,9 +19,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.control.EntityController;
-import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.control.ProjectController;
 import com.softpoint.optima.control.TaskController;
 import com.softpoint.optima.db.DaysOff;

@@ -94,6 +94,9 @@ public class Project implements Serializable {
 	}
 
 	public BigDecimal getAdvancedPaymentPercentage() {
+		if (this.advancedPaymentPercentage==null) {
+			return BigDecimal.ZERO;
+		}
 		return this.advancedPaymentPercentage;
 	}
 

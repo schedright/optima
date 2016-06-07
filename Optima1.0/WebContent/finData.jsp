@@ -77,11 +77,11 @@
 				<form id="addUserForm" autocomplete="off">
 					<fieldset>
 						<label for="financeAmount">Fund Amount</label> <input
-							type="text" id="financeAmount" name="financeAmount" class="" />
+							type="text" id="financeAmount" name="financeAmount" class="" style="width:100%;margin-top:3px;margin-bottom:6px" />
 						<label for="interestRate">Interest Rate</label> <input type="text"
-							id="interestRate" name="interestRate" class="" /> <label
+							id="interestRate" name="interestRate" class="" style="width:100%;margin-top:3px;margin-bottom:6px"/> <label
 							for="financeDate">End Date</label> <input type="text"
-							id="financeDate" name="financeDate" class="" />
+							id="financeDate" name="financeDate" class="" style="width:100%;margin-top:3px;margin-bottom:6px"/>
 					</fieldset>
 				</form>
 			</div>

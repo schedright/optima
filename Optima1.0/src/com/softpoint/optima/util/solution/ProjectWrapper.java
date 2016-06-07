@@ -1,6 +1,7 @@
 package com.softpoint.optima.util.solution;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,9 +97,14 @@ public class ProjectWrapper {
 
 	public int getProjectDuratoin() {
 		int maxDuration = Integer.MIN_VALUE;
+		Date projectStart = project.getPropusedStartDate();
 		for (TaskTreeNode task:rootTasks) {
-			if (maxDuration < task.getDurationWithChildren()) {
-				maxDuration = task.getDurationWithChildren();
+			Date ts = task.getCalculatedTaskStart();
+			int shift = (int) PortfolioSolver.differenceInDays(projectStart, ts);
+			
+			int temp = task.getDurationWithChildren() + shift;
+			if (maxDuration < temp) {
+				maxDuration = temp;
 			}
 		}
 		return maxDuration;
