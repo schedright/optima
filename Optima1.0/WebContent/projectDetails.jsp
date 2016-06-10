@@ -4,11 +4,11 @@
 <%@ include file="header.html"%>
 
 <div class="mainContainer">
-	<div id="main" style="width: 100%;" class="main-body">
+	<div id="main" style="width: 100%;top:0px" class="main-body">
 
-		<div id="tasksGantt" class="gantt tasksgantt" style="height: 420px"></div>
-		
-		<div id="projectTabs">
+		<div id="tasksGantt" class="gantt tasksgantt" style="height: 420px;position:absolute;top:35px"></div>
+
+		<div id="projectTabs" >
 
 			<div id="loader-overlay"></div>
 
@@ -37,10 +37,10 @@
 				<%@ include file="views/projectFinancialPeriods.html"%>
 			</div>
 		</div>
-				<div id="projectButtons" class="ui-dialog-buttonset">
-					<button id="resetSchedulingBtn">Reset Project Scheduling</button>
-					<button id="saveProjectBtn">Save Project</button>
-				</div>
+		<div id="projectButtons" class="ui-dialog-buttonset">
+			<button id="resetSchedulingBtn" style="width:200px">Reset Project Scheduling</button>
+			<button id="saveProjectBtn" style="width:200px">Save Project</button>
+		</div>
 	</div>
 </div>
 <script src="js/formutils.js">

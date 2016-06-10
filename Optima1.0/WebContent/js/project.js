@@ -1,5 +1,6 @@
-$(function() {
+  $('#depsTabs').tabs();
 
+$(function() {
   $(document).tooltip({
     items : "#mainAllTasks li, #allTasks li",
     content : function() {
@@ -151,18 +152,18 @@ $(function() {
       $("#sDateTentative").val(tenStartDate);
       $("#sDateScheduled").val(scStartDate);
       $("#sDateActual").val(actStartDate);
-      
+
       var status = 1;
       var lag = 0;
       if (d.status) {
         status = d.status;
-        if (typeof status!='number' || (status<1 || status>3)) {
-          status=1;
+        if (typeof status != 'number' || (status < 1 || status > 3)) {
+          status = 1;
         }
       }
       if (d.lag) {
         lag = d.lag;
-        if (typeof lag!='number' || lag<0) {
+        if (typeof lag != 'number' || lag < 0) {
           lag = 0;
         }
       }
@@ -200,10 +201,16 @@ $(function() {
 
       if (task == null) {// new task
 
-        $('#divTasksDepends').hide();
+        // $('#divTasksDepends').hide();
+        $($("#depsTabs").find("li")[1]).hide()
+
+        $("#depsTabs").tabs({
+          active : 0
+        });
 
       } else {// in case of update task
-        $('#divTasksDepends').show();
+        $($("#depsTabs").find("li")[1]).show()
+        // $('#divTasksDepends').show();
 
         var allTaskCall = rpcClient.taskService.findAllByProjectForCertainTask(projectId, task.taskId);
         if (allTaskCall.result == 0) {
@@ -359,7 +366,7 @@ $(function() {
                   $("#sDateTentative").val());
             }
 
-            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate,$("#statusId").val())
+            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate, $("#statusId").val())
 
             if (call.result == 0) {
               $(this).dialog("close");
@@ -461,10 +468,18 @@ $(function() {
           var retainedPercentageValue = parseFloat(retainedPercentageTxt) / 100;
           var advancedPaymentPercentageValue = parseFloat(advancedPaymentPercentage) / 100;
           var weekend = '';
-          var weList = ['#we_sun', '#we_mon', '#we_tue', '#we_wed', '#we_thu', '#we_fri', '#we_sat'];
-          for (var i=0;i<7;i++) {
-            var checked =  $(weList[i]).prop("checked");
-            weekend += (checked)?'1':'0';
+          var weList = [
+              '#we_sun',
+              '#we_mon',
+              '#we_tue',
+              '#we_wed',
+              '#we_thu',
+              '#we_fri',
+              '#we_sat'
+          ];
+          for (var i = 0; i < 7; i++) {
+            var checked = $(weList[i]).prop("checked");
+            weekend += (checked) ? '1' : '0';
           }
           var call = rpcClient.projectService.update(
               projectId,
@@ -533,16 +548,24 @@ $(function() {
         $("#pFinishDateTxt").val(fmt2.format(new Date(
             pData.proposedFinishDate.time)));
       }
-      
-      var weList = ['#we_sun', '#we_mon', '#we_tue', '#we_wed', '#we_thu', '#we_fri', '#we_sat'];
-      if (pData.weekend && pData.weekend.length==7) {
-        for (var i=0;i<7;i++) {
-          var checked = pData.weekend[i]=='1';
-           $(weList[i]).prop("checked",checked);
+
+      var weList = [
+          '#we_sun',
+          '#we_mon',
+          '#we_tue',
+          '#we_wed',
+          '#we_thu',
+          '#we_fri',
+          '#we_sat'
+      ];
+      if (pData.weekend && pData.weekend.length == 7) {
+        for (var i = 0; i < 7; i++) {
+          var checked = pData.weekend[i] == '1';
+          $(weList[i]).prop("checked", checked);
         }
-        
+
       }
-      
+
       if (pData.weekendDays != null) {
         $("#weDays").val(pData.weekendDays.weekendDaysId).prop('selected', true);
       } else {
@@ -739,7 +762,6 @@ $(function() {
   $(window).resize(windowResizeFunc);
   windowResizeFunc();
 
-  // Calendar Section end
 });
 
 /*

@@ -688,11 +688,17 @@ important
 	margin: 20px 100px;
 	position:absolute;
 	bottom:0px;
-	right:0px
+	right:0px;
+	z-index:100001;
 }
 
 #projectTabs {
 	/* width: 960px; */
+	top:455px;
+	width:100%;
+	bottom:0px;
+	position:absolute;
+	z-index:100000;
 	
 }
 
@@ -1049,7 +1055,9 @@ div#users-contain table td, div#users-contain table th {
 	padding: .6em 10px;
 	text-align: left;
 }
-
+.ui-dialog {
+	z-index:5555555;
+}
 .ui-dialog .ui-state-error {
 	padding: .3em;
 }
@@ -1318,13 +1326,13 @@ h2 {
 	left: -250px;
 	top: 0px;
 	transition: left 0.3s linear;
-	z-index: 15000;
+	z-index: 555555;
 }
 
 #sidebar.visible {
 	left: 0px;
 	transition: left 0.3s linear;
-	z-index : 15000;
+	z-index : 555555;
 }
 
 #sidebar ul {

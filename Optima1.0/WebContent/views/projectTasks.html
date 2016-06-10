@@ -1,10 +1,11 @@
-<div id="tasksList"  class="form-section">
+<div id="tasksList" class="form-section">
 	<div class="two-columns">
 
 		<label>Available Tasks</label>
-		<ul id="mainAllTasks" data-role="listview" data-inset="true"  class="draggable"></ul>
+		<ul id="mainAllTasks" data-role="listview" data-inset="true"
+			class="draggable"></ul>
 	</div>
-	<div  class="two-columns" style="margin-top:15px;width:30%">
+	<div class="two-columns" style="margin-top: 15px; width: 30%">
 		<button id="addTaskBtn" class="taskButton">Add</button>
 		<br />
 		<button id="deleteTaskBtn" class="taskButton">Delete</button>
@@ -17,100 +18,102 @@
 
 
 <div id="projTasksDialog">
+	<div id="depsTabs">
+		<div id="loader-overlay"></div>
 
+		<ul>
+			<li><a href="#Details">Details</a></li>
+			<li><a href="#Deps">Dependencies</a></li>
+		</ul>
 
-	<div class="form-section">
+		<div id="Details">
+			<div class="form-section">
+				<div class="two-columns">
 
-		<div class="two-columns">
+					<label>Task Name</label> <input type="text" id="taskNameTxt"
+						name="taskNameTxt"
+						placeholder="Enter Task Name, from 3 to 256 characters" autofocus />
 
-			<label>Task Name</label> <input type="text" id="taskNameTxt" name="taskNameTxt" placeholder="Enter Task Name, from 3 to 256 characters"/>
+				</div>
+
+				<div class="two-columns right">
+
+					<label>Status</label> <select id="statusId" class="dropdown">
+
+						<option value="1">Not Started</option>
+
+						<option value="2">Started</option>
+
+						<option value="3">Finished</option>
+
+					</select>
+
+				</div>
+			</div>
+
+			<div class="form-section" style="width:90%">
+				<label>Task Description</label>
+
+				<textarea id="taskDescTxt" name="taskDescTxt"></textarea>
+			</div>
+
+			<div class="form-section">
+				<div class="three-columns">
+
+					<label>Duration (Days)</label> <input type="text" id="durationTxt"
+						class="spin" name="durationTxt" />
+
+				</div>
+				<div class="three-columns">
+					<label>Uniform daily cost ($)</label> <input type="text"
+						id="dailyCostTxt" name="dailyCostTxt" />
+				</div>
+				<div class="three-columns">
+					<label>Uniform daily income ($)</label> <input type="text"
+						id="dailyIncomeTxt" name="dailyIncomeTxt" />
+				</div>
+			</div>
+
+			<div class="form-section">
+				<div class="three-columns">
+					<label>Start Date (Tentative)</label> <input type="text"
+						id="sDateTentative" name="sDateTentative" class="datepicker" />
+				</div>
+				<div class="three-columns">
+					<label>Start Date (Scheduled)</label> <input type="text"
+						id="sDateScheduled" name="sDateScheduled" readonly />
+				</div>
+
+				<div class="three-columns">
+					<label>Start Date (Actual)</label> <input type="text"
+						id="sDateActual" name="sDateActual" class="datepicker" />
+				</div>
+
+			</div>
 
 		</div>
+		<div id="Deps">
+			<div id="divTasksDepends" class="form-section"
+				style="width: 100%; height: 100%">
+				<div class="two-columns">
+					<label>All Tasks</label>
+					<ul id="allTasks" class="sortable">
 
+					</ul>
+				</div>
+				<div id="listConnect"></div>
+				<div class="two-columns">
+					<label>Dependencies</label>
+					<ul id="dependencies" class="sortable">
 
-		<div class="two-columns right">
+					</ul>
+				</div>
 
-			<label>Duration (Days)</label> <input type="text" id="durationTxt" class="spin"
-				name="durationTxt" />
-
+			</div>
 		</div>
+
 	</div>
 
-	<div class="form-section">
-		<div class="two-columns">
-
-			<label>Task Description</label>
-
-			<textarea id="taskDescTxt" name="taskDescTxt"></textarea>
-
-		</div>
-	</div>
-
-	<div class="form-section">
-		<div class="two-columns">
-			<label>Status</label> 
-				<select id="statusId" class="dropdown">
-
-				<option value="1">Not Started</option>
-
-				<option value="2">Started</option>
-
-				<option value="3">Finished</option>
-
-			</select>
-		</div>
-
-	</div>
-
-
-	<div class="form-section">
-		<div class="two-columns">
-			<label>Uniform daily cost ($)</label> <input type="text" id="dailyCostTxt"
-				name="dailyCostTxt" />
-		</div>
-		<div class="two-columns right">
-			<label>Uniform daily income ($)</label> <input type="text" id="dailyIncomeTxt"
-				name="dailyIncomeTxt" />
-		</div>
-
-
-	</div>
-
-
-	<div class="form-section">
-		<div class="three-columns">
-			<label>Start Date (Tentative)</label> <input type="text" id="sDateTentative"
-				name="sDateTentative" class="datepicker" />
-		</div>
-		<div class="three-columns">
-			<label>Start Date (Scheduled)</label> <input type="text" id="sDateScheduled"
-				name="sDateScheduled" readonly />
-		</div>
-
-		<div class="three-columns">
-			<label>Start Date (Actual)</label> <input type="text" id="sDateActual"
-				name="sDateActual" class="datepicker" />
-		</div>
-
-
-	</div>
-
-	<div id="divTasksDepends" class="form-section">
-		<div class="two-columns">
-			<label>All Tasks</label>
-			<ul id="allTasks" class="sortable">
-			
-			</ul>
-		</div>
-		<div id="listConnect"></div>
-		<div class="two-columns">
-			<label>Dependencies</label>
-			<ul id="dependencies" class="sortable">
-
-			</ul>
-		</div>
-
-	</div>
 
 </div>
 
