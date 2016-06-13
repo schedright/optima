@@ -444,11 +444,6 @@ public class TaskController {
 		controller.mergeTransactionMerge(task);
 	}
 
-	private static Date skipOffDays() {
-		
-		return null;
-	}
-	
 	/**
 	 * @param project
 	 * @param task

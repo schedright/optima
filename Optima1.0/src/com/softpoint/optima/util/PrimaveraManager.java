@@ -31,7 +31,7 @@ import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.TaskDependency;
 
 public class PrimaveraManager {
-	public static void importPrimaveraFile(File xmlFile, HttpSession session) throws Exception {
+	public void importPrimaveraFile(File xmlFile, HttpSession session) throws Exception {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(xmlFile);
@@ -145,7 +145,7 @@ public class PrimaveraManager {
 		}
 	}
 
-	private static void importTasks(Node project, PrimaveraProject primaveraProject, Map<String, ProjectTask> guid2taskMap, Map<String, ProjectTask> existingGuid2TaskMap, List<TaskDependency> newDependencies,
+	private  void importTasks(Node project, PrimaveraProject primaveraProject, Map<String, ProjectTask> guid2taskMap, Map<String, ProjectTask> existingGuid2TaskMap, List<TaskDependency> newDependencies,
 			List<TaskDependency> updatedDependencies) {
 		Map<String, Double> activityCost = getTasksCost(project);
 		Map<String, ProjectTask> guid2TaskMap = new HashMap<String,ProjectTask>();
@@ -206,7 +206,7 @@ public class PrimaveraManager {
 		importTaskDependencies(project, newDependencies, updatedDependencies, objectId2TaskMap);
 	}
 
-	private static void importTaskDependencies(Node project, List<TaskDependency> newDependencies, List<TaskDependency> updatedDependencies, Map<String, ProjectTask> objectId2TaskMap) {
+	private  void importTaskDependencies(Node project, List<TaskDependency> newDependencies, List<TaskDependency> updatedDependencies, Map<String, ProjectTask> objectId2TaskMap) {
 		Node projE;
 		projE = project.getFirstChild();
 		while (projE != null) {
@@ -253,7 +253,7 @@ public class PrimaveraManager {
 		}
 	}
 
-	private static List<DaysOff> ImportVacations(PrimaveraProject primaveraProject, Document doc, SimpleDateFormat formatter) {
+	private  List<DaysOff> ImportVacations(PrimaveraProject primaveraProject, Document doc, SimpleDateFormat formatter) {
 		try {
 			List<DaysOff> vacations = new ArrayList<DaysOff>();
 			
@@ -317,7 +317,7 @@ public class PrimaveraManager {
 		weekDays.put("saturday", 6);
 	}
 
-	private static Node browseToNode(Document doc, String path) {
+	private  Node browseToNode(Document doc, String path) {
 		String[] pathes = path.split("\\\\");
 		Node root = doc.getDocumentElement();
 		for (int i = 0; i < pathes.length; i++) {
@@ -338,7 +338,7 @@ public class PrimaveraManager {
 		return root;
 	}
 
-	private static int getWeekendIndex(Node node) {
+	private  int getWeekendIndex(Node node) {
 		if (node instanceof Element) {
 			Element standardWorkHours = (Element) node;
 			if ("standardworkhours".equals(standardWorkHours.getTagName().toLowerCase())) {
@@ -370,7 +370,7 @@ public class PrimaveraManager {
 		return -1;
 	}
 
-	private static String getWeekend(Document doc) {
+	private  String getWeekend(Document doc) {
 		String weekends = "0000000";
 
 		try {
@@ -390,7 +390,7 @@ public class PrimaveraManager {
 		return weekends;
 	}
 
-	private static List<Node> getProjects(Document doc) {
+	private  List<Node> getProjects(Document doc) {
 		List<Node> projects = new ArrayList<Node>();
 		Node child = doc.getDocumentElement().getFirstChild();
 		while (child != null) {
@@ -402,7 +402,7 @@ public class PrimaveraManager {
 		return projects;
 	}
 
-	private static String getElementChildAttributeValue(Node project, String attributeName) {
+	private  String getElementChildAttributeValue(Node project, String attributeName) {
 		String value = "";
 		try {
 			Node child = project.getFirstChild();
@@ -422,7 +422,7 @@ public class PrimaveraManager {
 		return value;
 	}
 
-	private static PrimaveraProject getPrimaveraProject(HttpSession session, String guid) {
+	private  PrimaveraProject getPrimaveraProject(HttpSession session, String guid) {
 		EntityController<PrimaveraProject> controller = new EntityController<PrimaveraProject>(session.getServletContext());
 		try {
 			List<PrimaveraProject> projects = controller.findAllQuery(PrimaveraProject.class, String.format("SELECT o FROM %s o where o.projectGuid=\'%s\'", PrimaveraProject.class.getName(), guid));
@@ -435,7 +435,7 @@ public class PrimaveraManager {
 		return null;
 	}
 	
-	private static Map<String, Double> getTasksCost(Node project) {
+	private  Map<String, Double> getTasksCost(Node project) {
 		Map<String,Double> tasksCost = new HashMap<String,Double>();
 		
 		Node child = project.getFirstChild();
@@ -459,7 +459,7 @@ public class PrimaveraManager {
 		return tasksCost;
 	}
 	
-	private static Double getActivityExpense(Node project, String objId) {
+	private  Double getActivityExpense(Node project, String objId) {
 		Double ret = (double) 0;
 
 		Node child = project.getFirstChild();

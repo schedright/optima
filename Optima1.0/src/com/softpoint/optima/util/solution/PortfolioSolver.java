@@ -629,7 +629,7 @@ public class PortfolioSolver {
 			if (logGenerator != null && shiftedTask!=null) {
 				shortVersion = getShortVersion(result, projectW, eligibleTasks, p1Start, p1End, iterationIndex, shiftedTask);
 				Date psd = projectW.getProject().getPropusedStartDate();
-				Date ped = TaskUtil.addDays(psd, projectW.getProjectDuratoin());
+				/*Date ped = */TaskUtil.addDays(psd, projectW.getProjectDuratoin());
 				writeShortVersionToHTMLLogFile(logGenerator, iterationIndex, shortVersion);
 			}
 

@@ -193,7 +193,7 @@ public class ProjectController {
 		}
 	}
 
-	public static EntityManager refreshJPAClass(HttpSession session, Class clazz) {
+	public static EntityManager refreshJPAClass(HttpSession session, Class<?> clazz) {
 		EntityManagerFactory factory = (EntityManagerFactory) session.getServletContext().getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
 		EntityManager manager = factory.createEntityManager();
 		manager.getEntityManagerFactory().getCache().evict(clazz);
@@ -1142,7 +1142,8 @@ public class ProjectController {
 			});
 			
 			for (File f:files) {
-				PrimaveraManager.importPrimaveraFile(f, session);
+				PrimaveraManager primaveraManager = new PrimaveraManager();
+				primaveraManager.importPrimaveraFile(f, session);
 			}
 
 		} catch (Exception e) {

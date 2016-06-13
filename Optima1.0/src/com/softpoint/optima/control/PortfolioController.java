@@ -45,7 +45,6 @@ import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.struct.DailyCashFlowMapEntity;
 import com.softpoint.optima.struct.Period;
-import com.softpoint.optima.struct.PeriodCashout;
 import com.softpoint.optima.struct.ProjectPaymentDetail;
 import com.softpoint.optima.struct.SchedulePeriod;
 import com.softpoint.optima.util.PaymentUtil;
@@ -1699,7 +1698,7 @@ public class PortfolioController {
 			end.setTime(endDate);
 
 			{// add dates vertically, try not to show many
-				int daysCount = daysBetween(startDate, endDate);
+//				int daysCount = daysBetween(startDate, endDate);
 				SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
 				Calendar start = Calendar.getInstance();
 				start.setTime(startDate);
