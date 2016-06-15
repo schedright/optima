@@ -5,7 +5,7 @@
 <div class="mainContainer enterprise">
 	<div id="main" style="width: 100%;"
 		class="main-body">
-		<div id="toolbarContainer" style="width: 100%;height:40px">
+		<div id="toolbarContainer" style="width: 100%;height:40px;padding-top:6px;">
 		<select id="portfolioSelect" class="portfolioSelect">
 		</select>
 		<div class="portfolioButtonsContainer">

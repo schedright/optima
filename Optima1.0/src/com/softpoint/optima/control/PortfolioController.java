@@ -270,16 +270,16 @@ public class PortfolioController {
 					totalIncome += task.getUniformDailyIncome().doubleValue() * task.getDuration();
 
 					taskDetails.put("name", task.getTaskName());
-					taskDetails.put("original", format.format(task.getEffectiveTentativeStartDate()));
+					taskDetails.put("original", format.format(task.calculateEffectiveTentativeStartDate()));
 					if (solved) {
 						taskDetails.put("final", format.format(task.getScheduledStartDate()));
 					}
 
 					int oldDuration = TaskUtil.calculateTaskDuration(task);
 					if (lastDate == null) {
-						lastDate = addDayes(task.getEffectiveTentativeStartDate(), oldDuration - 1);
+						lastDate = addDayes(task.calculateEffectiveTentativeStartDate(), oldDuration - 1);
 					} else {
-						Date newDate = addDayes(task.getEffectiveTentativeStartDate(), oldDuration - 1);
+						Date newDate = addDayes(task.calculateEffectiveTentativeStartDate(), oldDuration - 1);
 						if (lastDate.before(newDate)) {
 							lastDate = newDate;
 						}
@@ -375,12 +375,12 @@ public class PortfolioController {
 					totalIncome += task.getUniformDailyIncome().doubleValue() * task.getDuration();
 
 					sb.append(",");
-					if (task.getEffectiveTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
+					if (task.calculateEffectiveTentativeStartDate().compareTo(task.getScheduledStartDate()) == 0) {
 						sb.append("✔,");
 					} else {
 						sb.append(">,");
 					}
-					sb.append(task.getTaskDescription()).append(",").append(format.format(task.getEffectiveTentativeStartDate()))
+					sb.append(task.getTaskDescription()).append(",").append(format.format(task.calculateEffectiveTentativeStartDate()))
 							.append(",").append(format.format(task.getScheduledStartDate())).append("\r");
 
 					if (lastDate == null) {

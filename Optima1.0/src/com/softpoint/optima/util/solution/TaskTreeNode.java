@@ -120,7 +120,7 @@ public class TaskTreeNode {
 	 */
 	public Date getCalculatedTaskEnd() {
 		if (calculatedTaskEnd == null) {
-			Date taskStart = task.getEffectiveTentativeStartDate();
+			Date taskStart = task.calculateEffectiveTentativeStartDate();
 			// first move the task based on dependencies
 			for (TaskTreeNode pNode : parents) {
 				int lag = TaskController.getLag(pNode.getTask(), task);

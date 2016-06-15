@@ -179,7 +179,7 @@ public class ProjectSolutionDetails {
 				return currentTask.getScheduledStartDate();
 			}
 		} else {
-			return currentTask.getEffectiveTentativeStartDate();
+			return currentTask.calculateEffectiveTentativeStartDate();
 		}
 	}
 
@@ -281,7 +281,7 @@ public class ProjectSolutionDetails {
 			return PortfolioController.addDayes( task.getScheduledStartDate() != null?task.getScheduledStartDate():task.getCalendarStartDate(), task.getCalenderDuration() - 1);
 		} else {
 			Calendar cal = Calendar.getInstance();
-			cal.setTime(task.getEffectiveTentativeStartDate());
+			cal.setTime(task.calculateEffectiveTentativeStartDate());
 			List<DaysOff> daysOff = project.getDaysOffs();
 			String weekEnds = project.getWeekend();
 			int duration = task.getDuration();

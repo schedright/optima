@@ -29,7 +29,7 @@
 					type="text" id="pFinishDateTxt" name="pFinishDateTxt"
 					class="datepicker" />
 				<div style="padding-top: 15px">
-					<button id="savePlanDatesBtn">Save Finance Period</button>
+					<button id="savePlanDatesBtn" style="padding:0.4em 1em;color: #555555">Save Plan Period</button>
 				</div>
 
 			</div>
@@ -48,7 +48,7 @@
 					<label>Included Projects</label>
 					<ul id="includedProjects" class="sortable">
 					</ul>
-					<button id="refreshPlanBtn" style="margin-top: 10px">Refresh
+					<button id="refreshPlanBtn" style="margin-top: 10px;padding:0.4em 1em;color: #555555">Refresh
 						Plan</button>
 				</div>
 

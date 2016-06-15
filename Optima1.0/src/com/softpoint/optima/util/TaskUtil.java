@@ -13,7 +13,7 @@ public class TaskUtil {
 		int totalDays = 0;
 		int countDown = task.getDuration();
 		Calendar start = Calendar.getInstance();
-		start.setTime(task.getEffectiveTentativeStartDate());
+		start.setTime(task.calculateEffectiveTentativeStartDate());
 		while (countDown>0) {
 			Date date = start.getTime() ;
 			start.add(Calendar.DATE, 1);

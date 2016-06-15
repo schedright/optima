@@ -80,7 +80,7 @@
 							type="text" id="financeAmount" name="financeAmount" class="" style="width:100%;margin-top:3px;margin-bottom:6px" />
 						<label for="interestRate">Interest Rate</label> <input type="text"
 							id="interestRate" name="interestRate" class="" style="width:100%;margin-top:3px;margin-bottom:6px"/> <label
-							for="financeDate">End Date</label> <input type="text"
+							for="financeDate" style="margin-bottom:-5px">End Date</label> <input type="text"
 							id="financeDate" name="financeDate" class="" style="width:100%;margin-top:3px;margin-bottom:6px"/>
 					</fieldset>
 				</form>

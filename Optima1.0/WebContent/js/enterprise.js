@@ -190,7 +190,7 @@ $(function() {
           return false;
         }
       }
-      showMessage('Delete Portfolio', 'The selected portfolio will be deleted permanently!', 'warning', buttons);
+      showMessage('Delete Enterprise', 'The selected Enterprise will be deleted permanently!', 'warning', buttons);
 
     }
   });

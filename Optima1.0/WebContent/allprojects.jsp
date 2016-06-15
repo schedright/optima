@@ -5,7 +5,7 @@
 <div class="mainContainer">
 	<div id="main" style="width: 100%;"
 		class="main-body">
-		<div id="toolbarContainer" style="width: 100%;height:40px">
+		<div id="toolbarContainer" style="width: 100%;height:40px;padding-top:6px;">
 		<input type="text" name="searchBox" id="searchBox" style="width: 200px;margin-top:5px" class="text ui-widget-content ui-corner-all" placeholder="filter projects" autocomplete="off"/>
 		<div class="toolbarButtonsContainer">
 			<button id="addProject" class="allProjects_add" title="Add New Project"></button>

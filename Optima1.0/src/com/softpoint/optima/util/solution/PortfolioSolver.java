@@ -624,7 +624,9 @@ public class PortfolioSolver {
 				payments = cloneMap(bestPamymentClone);
 				iterationIndex++;
 			}
-			numberOfDaysSinceLastRequest.put(projectW, (Integer) bestResult.get(DAYSSINCELASTREQUEST2));
+			if (bestResult!=null) {
+				numberOfDaysSinceLastRequest.put(projectW, (Integer) bestResult.get(DAYSSINCELASTREQUEST2));
+			}
 			
 			if (logGenerator != null && shiftedTask!=null) {
 				shortVersion = getShortVersion(result, projectW, eligibleTasks, p1Start, p1End, iterationIndex, shiftedTask);

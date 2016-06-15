@@ -657,7 +657,7 @@ important
 }
 
 #ui-datepicker-div {
-	z-index: 10000 !important;
+	z-index: 11000 !important;
 }
 
 .taskButton {
@@ -698,7 +698,7 @@ important
 	width:100%;
 	bottom:0px;
 	position:absolute;
-	z-index:100000;
+	z-index:2000;
 	
 }
 
@@ -1056,7 +1056,7 @@ div#users-contain table td, div#users-contain table th {
 	text-align: left;
 }
 .ui-dialog {
-	z-index:5555555;
+	z-index:10000;
 }
 .ui-dialog .ui-state-error {
 	padding: .3em;
@@ -1326,13 +1326,13 @@ h2 {
 	left: -250px;
 	top: 0px;
 	transition: left 0.3s linear;
-	z-index: 555555;
+	z-index: 5000;
 }
 
 #sidebar.visible {
 	left: 0px;
 	transition: left 0.3s linear;
-	z-index : 555555;
+	z-index : 5000;
 }
 
 #sidebar ul {

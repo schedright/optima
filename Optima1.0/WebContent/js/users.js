@@ -201,7 +201,6 @@ $(function() {
 							}
 						},
 						close : function() {
-							allFields.val("").removeClass("ui-state-error");
 						}
 					});
 })

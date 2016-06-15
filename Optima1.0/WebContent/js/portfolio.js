@@ -205,8 +205,8 @@ $(document).ready( function() {
 						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "list\" class=\"listPortfolioBtn\" title=\"List View\"></div>";
 						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "grid\" class=\"gridPortfolioBtn\" title=\"Grid View\"></div>";
 						 
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "delete\" class=\"deletePortfolioBtn\" title=\"Delete Portfolio\"></div>";
-						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "edit\" class=\"editPortfolioBtn\" title=\"Edit Portfolio\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "delete\" class=\"deletePortfolioBtn\" title=\"Delete Enterprise\"></div>";
+						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "edit\" class=\"editPortfolioBtn\" title=\"Edit Enterprise\"></div>";
 						 projectsHtml += "<div id=\"portfolio" + data.list[i].portfolioId + "add\" class=\"addPortfolioBtn\" title=\"Add Project\"></div>";
 						 projectsHtml += "<div class=\"clear\"></div>";
 						 if (projects.list.length != 0 ) {
@@ -341,9 +341,9 @@ $(document).ready( function() {
 					$("#portfolio" + data.list[i].portfolioId + "delete").data("portfolio" , data.list[i]).click(function () {
 						var portfolioId = $(this).data('portfolio').portfolioId;
 				    	 if ($("deletePortConfirmDialog").length == 0) {
-					    	$("body").append( "	<div id=\"deletePortConfirmDialog\" title=\"Delete portfolio?\"> " 
+					    	$("body").append( "	<div id=\"deletePortConfirmDialog\" title=\"Delete Enterprise?\"> " 
 					    			+ " <p><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin: 0 7px 20px 0;\"> "
-					    			+ "</span> This portfolio with all its projects will be permanently deleted and cannot be recovered. Are you sure?</p>"
+					    			+ "</span> This Enterprise with all its projects will be permanently deleted and cannot be recovered. Are you sure?</p>"
 					    	 		+ "</div>"); 
 					    	
 					    	$( "#deletePortConfirmDialog").data("portfolioId" , portfolioId ).dialog({

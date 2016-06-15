@@ -100,7 +100,7 @@ public class TaskController {
 			projectTask.setActualStartDate(actualStartDate);
 			projectTask.setDuration(duration);
 			projectTask.setScheduledStartDate(scheduledStartDate);
-			if (!projectTask.getEffectiveTentativeStartDate().equals(tentativeStartDate)) {
+			if (!projectTask.calculateEffectiveTentativeStartDate().equals(tentativeStartDate)) {
 				projectTask.setCalendarStartDate(null);
 			}
 			projectTask.setTentativeStartDate(tentativeStartDate);
@@ -484,7 +484,7 @@ public class TaskController {
 		for (ProjectTask task : project.getProjectTasks()) {
 			if (task.getAsDependent() == null || task.getAsDependent().isEmpty()) {
 				rootTasks.add(task);
-				task.setCalendarStartDate(adjustStart(project,task.getEffectiveTentativeStartDate()));
+				task.setCalendarStartDate(adjustStart(project,task.calculateEffectiveTentativeStartDate()));
 				controller.merge(task);
 			}
 		}
