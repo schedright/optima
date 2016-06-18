@@ -241,7 +241,7 @@ public class PortfolioController {
 
 			// if all tasks have scheduled start date it means that it is
 			// already been solved before
-			SimpleDateFormat format = new SimpleDateFormat("dd MMM, yyyy");
+			SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
 
 			List<Map<String, Object>> allSolution = new ArrayList<Map<String, Object>>();
 			for (Project project : projects) {

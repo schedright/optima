@@ -492,7 +492,7 @@ function export2Excel(portfolioId){
 	
 	if (cashFlowdateRangeCall.result == 0){
 	    
-	    var fmt = new DateFmt("%w %d-%n-%y");
+	    var fmt = new DateFmt("%n %d, %y");
 	    
 	    cfcols = [{ headertext: "Day", datatype: "String", datafield: "time",  width : "120"}
 	    		,{ headertext: "Project", datatype: "String", datafield: "projectCode",  width : "100"}];

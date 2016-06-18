@@ -3,9 +3,7 @@ $(function() {
   var portfolioId = 0;
   var projectId = 0;
 
-  
   $('#accordion').tabs();
-
 
   for ( var i in getURLVariables()) {
     if (i == "portfolioId") {
@@ -14,36 +12,38 @@ $(function() {
       projectId = getURLVariables()[i];
     }
   }
-  
+
   if (portfolioId) {
-    rpcClient.portfolioService.findLight(function(result , exception) {
+    rpcClient.portfolioService.findLight(function(result,
+        exception) {
       if (result.result == 0) {
         $('#titleDiv').html("Enterprise: " + result.data.portfolioName);
       }
-    } , portfolioId);
+    }, portfolioId);
   } else if (projectId) {
-    rpcClient.projectService.findLight(function(result , exception) {
+    rpcClient.projectService.findLight(function(result,
+        exception) {
       if (result.result == 0) {
         if (result.data.portfolio) {
           $('#titleDiv').html("Enterprise: " + result.data.portfolio.portfolioName);
         } else {
           $('#titleDiv').html("Project: " + result.data.projectName);
         }
-      } 
-    } , projectId);
+      }
+    }, projectId);
 
   } else {
     $('#titleDiv').html('Cash Flow');
   }
 
-  var allResults = rpcClient.portfolioService.getPortfolioCashFlowDataNew2(portfolioId,projectId);
+  var allResults = rpcClient.portfolioService.getPortfolioCashFlowDataNew2(portfolioId, projectId);
   var dataView = new Slick.Data.DataView();
 
   if (allResults.result == 0) {
     var fmt = new DateFmt(
-        "%w %d-%n-%y");
+        "%n %d, %y");
     var fmt2 = new DateFmt(
-        "%d/%m/%y");
+        "%n %d, %y");
 
     var pColumns = [
       {
@@ -199,7 +199,7 @@ $(function() {
 
         }
 
-        var svgGraphCall = rpcClient.portfolioService.getCashFlowSVGGraph(portfolioId,projectId)
+        var svgGraphCall = rpcClient.portfolioService.getCashFlowSVGGraph(portfolioId, projectId)
         if (svgGraphCall.result && svgGraphCall.data) {
           $("#cashflowChartDiv").html('');
           $("#cashflowChartDiv").append(svgGraphCall.data);
@@ -286,7 +286,7 @@ $(function() {
   }
 
   setTimeout(function() {
-    var solutionResponse = rpcClient.portfolioService.hasSolution(portfolioId,projectId);
+    var solutionResponse = rpcClient.portfolioService.hasSolution(portfolioId, projectId);
     if (solutionResponse.result == 0 && solutionResponse.data && solutionResponse.data == 'TRUE') {
       var result = rpcClient.portfolioService.isInvalidSolution(portfolioId);
       if (result) {
@@ -314,18 +314,18 @@ function DateFmt(fstr) {
   this.formatString = fstr;
 
   var mthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
+      "January",
+      "February",
+      "March",
+      "April",
       "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
   ];
   var dayNames = [
       "Sun",

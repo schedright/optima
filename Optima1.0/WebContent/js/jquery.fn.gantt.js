@@ -424,7 +424,13 @@
                 var range = null;
                 // Days of the week have a class of one of
                 // `sn` (Sunday), `sa` (Saturday), or `wd` (Weekday)
-                var dowClass = [" sn", " wd", " wd", " wd", " wd", " wd", " sa"];
+                var dowClass = null;
+                if (settings.weekdays_classes) {
+                  dowClass = settings.weekdays_classes;
+                } else {
+                  dowClass = [" sn", " wd", " wd", " wd", " wd", " wd", " sa"];
+                }
+                  
                 //TODO: was someone planning to allow styles to stretch to the bottom of the chart?
                 //var gridDowClass = [" sn", "", "", "", "", "", " sa"];
 

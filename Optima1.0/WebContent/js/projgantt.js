@@ -1,7 +1,7 @@
 function getGanttSource() {
 	var tasksSource = [];
 	var projects = plansList.data.list;
-	var fmt = new DateFmt("%d-%m-%y");
+	var fmt = new DateFmt("%n %d, %y");
 
 	for (var i=0;i<projects.length;i++) {
 		var proj = projects[i].map;

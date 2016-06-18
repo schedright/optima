@@ -1,3 +1,5 @@
+window.weekdays = null;
+
 function getGanttSource() {
 
 	var projectId = null;
@@ -13,9 +15,22 @@ function getGanttSource() {
 		var result = rpcClient.taskService.findAllByProject(projectId);
 		if (result.result == 0) {
 			var taskData = result.data;
-			var fmt = new DateFmt("%d-%m-%y");
+			var fmt = new DateFmt("%n %d, %y");
 			for (var i = 0; i < taskData.list.length; i++) {
-				
+				if (i==0) {
+				  //get the weekend
+				  var we = taskData.list[i].project.weekend;
+				  if (typeof we == 'string' && we.length==7) {
+				    window.weekdays = [];
+				    for (var x=0;x<7;x++) {
+				      if (we[x]=='0') {
+				        window.weekdays.push(' wd');
+				      } else {
+				        window.weekdays.push(' sa');
+				      }
+				    }
+				  }
+				}
 				var startDate = taskData.list[i].calendarStartDate;
 				if (startDate == null) {
 					startDate =	taskData.list[i].actualStartDate;
@@ -102,6 +117,8 @@ $("#tasksGantt").gantt({
 
 	scrollToToday : true,
 
+	weekdays_classes : window.weekdays,
+	
 	onItemClick : function(data) {
 
 		// Open edit task dialog

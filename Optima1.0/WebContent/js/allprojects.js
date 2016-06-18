@@ -1,7 +1,7 @@
 $('#titleDiv').html('Projects');
 var allProjects = rpcClient.projectService.findAllLight();
 var dateFormatter = new DateFmt(
-    "%d/%m/%y");
+    "%n %d, %y");
 
 var prepareProjectData = function(search) {
   if (search) {

@@ -9,7 +9,7 @@
 
 	<div class="form-section" id="financialDetails">
 		<div id="currentSolution" class="form-section">
-			<button id="exportSolutionToCSV" style="margin-bottom:10px">Export to
+			<button id="exportSolutionToCSV" style="margin-bottom:10px;position:absolute;top:60px;left:20px;z-index:10">Export to
 				CSV</button>
 			<div class="solutionContainer">
 				<div id="schedResults">

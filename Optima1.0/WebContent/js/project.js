@@ -54,7 +54,8 @@ $(function() {
   $('input.datepicker').datepicker({
     showOn : "button",
     buttonImage : "images/calendar.png",
-    buttonImageOnly : true
+    buttonImageOnly : true,
+    dateFormat: 'MM dd, yy'
   });
 
   $('textarea').resizable();
@@ -123,7 +124,7 @@ $(function() {
 
       var d = taskCall.data;
       var fmt2 = new DateFmt(
-          "%m/%d/%y");
+          "%n %d, %y");
       if (d.tentativeStartDate != null) {
         var tenStartDate = new Date(
             d.tentativeStartDate.time);
@@ -539,7 +540,7 @@ $(function() {
       $("#projectDescTxt").val(pData.projectDescription);
 
       var fmt2 = new DateFmt(
-          "%m/%d/%y");
+          "%n %d, %y");
       if (pData.propusedStartDate != null) {
         $("#pStartDateTxt").val(fmt2.format(new Date(
             pData.propusedStartDate.time)));
@@ -636,7 +637,7 @@ $(function() {
   // Calendar Section
   var daysOffList = rpcClient.daysOffService.findAllByProject(projectId);
   var fmt = new DateFmt(
-      "%w %d-%n-%y");
+      "%n %d, %y");
   if (daysOffList.result == 0) {
     daysList = daysOffList.data.list;
     for (var i = 0; i < daysList.length; i++) {
@@ -656,7 +657,6 @@ $(function() {
     height : 250,
     width : 450,
     modal : true,
-    dialogClass : "ZIndex900",
     show : {
       effect : "blind",
       duration : 300
@@ -671,7 +671,8 @@ $(function() {
         showOn : "button",
         buttonImage : "images/calendar.png",
         buttonImageOnly : true,
-        numberOfMonths : 3
+        numberOfMonths : 3,
+        dateFormat: 'MM dd, yy'
       });
     },
     buttons : {
@@ -827,18 +828,18 @@ function DateFmt(fstr) {
   this.formatString = fstr;
 
   var mthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
+      "January",
+      "February",
+      "March",
+      "April",
       "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
   ];
   var dayNames = [
       "Sun",

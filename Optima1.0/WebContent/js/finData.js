@@ -100,10 +100,10 @@ $(function() {
   var result = rpcClient.financeService.findAllByPortfolio(portfolioId, projectId);
   if (result.result == 0) {
     var fmt = new DateFmt(
-        "%w %d-%n-%y");
+        "%n %d, %y");
     var financesList = result.data.list;
     var dateFormatter = new DateFmt(
-        "%d/%m/%y");
+        "%n %d, %y");
 
     for (var i = 0; i < financesList.length; i++) {
       var theDate = new Date(
@@ -137,18 +137,18 @@ $(function() {
     this.formatString = fstr;
 
     var mthNames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
+        "January",
+        "February",
+        "March",
+        "April",
         "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec"
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
     ];
     var dayNames = [
         "Sun",
@@ -467,8 +467,9 @@ function solveIt(portfolioId,
      * showMessage("Schedule",'Error:' + result.message,'error');
      * 
      * $("#currentSolution").css('display',''); $("#schedResults").html(''); $("#schedResults").append("<p style='margin-left:65px'><a
-     * href='financials.jsp?portfolioId=" + portfolioId +"'>You currently have a solution check Results and Cash Flow.</a></p>"); showMessage("Schedule",'Portfolio solved
-     * successfully.','success'); } else { showMessage("Schedule",'Error:' + result.message,'error'); $("#currentSolution").css('display','none'); }
+     * href='financials.jsp?portfolioId=" + portfolioId +"'>You currently have a solution check Results and Cash Flow.</a></p>");
+     * showMessage("Schedule",'Portfolio solved successfully.','success'); } else { showMessage("Schedule",'Error:' + result.message,'error');
+     * $("#currentSolution").css('display','none'); }
      */
   }, projectID, "", priorityOrder);
 };
