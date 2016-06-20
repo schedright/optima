@@ -97,6 +97,9 @@ public class TaskTreeNode {
 	}
 	
 	private void clearStartAndEndDateRecursive(TaskTreeNode taskTreeNode) {
+		if (taskTreeNode.calculatedTaskStart==null && taskTreeNode.calculatedTaskEnd==null) {
+			return;
+		}
 		taskTreeNode.calculatedTaskStart = null;
 		taskTreeNode.calculatedTaskEnd = null;
 		for (TaskTreeNode child:taskTreeNode.getChildren()) {
@@ -109,9 +112,11 @@ public class TaskTreeNode {
 	}
 
 	private void clearDurationWithChildrenRecursive(TaskTreeNode taskTreeNode) {
-		taskTreeNode.durationWithChildren = -1;
-		for (TaskTreeNode parent:taskTreeNode.getParents()) {
-			clearDurationWithChildrenRecursive(parent);
+		if (taskTreeNode.durationWithChildren!=-1) {
+			taskTreeNode.durationWithChildren = -1;
+			for (TaskTreeNode parent:taskTreeNode.getParents()) {
+				clearDurationWithChildrenRecursive(parent);
+			}
 		}
 	}
 	/*

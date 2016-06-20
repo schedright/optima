@@ -224,14 +224,18 @@ $(function() {
             $("#allTasks").append(li);
             // }
           }
-
+          var tasksMap = {};
+          for (var p=0;p<task.project.projectTasks.list.length;p++) {
+            var t = task.project.projectTasks.list[p];
+            tasksMap[t.taskId] = t.taskName;
+          }
           var depList = task.asDependent.list;
 
           for (var i = 0; i < depList.length; i++) {
 
-            var li = $('<li></li>').addClass('ui-state-default').attr('id', depList[i].dependency.taskId).text(depList[i].dependency.taskName);
-            li.attr('title', depList[i].dependency.taskName);
-            li.attr('description', depList[i].dependency.taskDescription);
+            var li = $('<li></li>').addClass('ui-state-default').attr('id', depList[i].dependency).text(tasksMap[depList[i].dependency]);
+            li.attr('title', tasksMap[depList[i].dependency]);
+            li.attr('description', tasksMap[depList[i].dependency].taskDescription);
             $("#dependencies").append(li);
 
           }

@@ -230,7 +230,7 @@ public class PrimaveraManager {
 							boolean exist = false;
 							if (srcTsk.getAsDependency()!=null) {
 								for (TaskDependency dep:srcTsk.getAsDependency()) {
-									if (dep.getDependent()==tgtTsk) {
+									if (dep.getDependent()==tgtTsk.getTaskId()) {
 										dep.setLag(lag);
 										exist = true;
 										updatedDependencies.add(dep);
@@ -240,8 +240,8 @@ public class PrimaveraManager {
 							}
 							if (!exist) {
 								TaskDependency taskDependency = new TaskDependency();
-								taskDependency.setDependency(srcTsk);
-								taskDependency.setDependent(tgtTsk);
+								taskDependency.setDependency(srcTsk.getTaskId());
+								taskDependency.setDependent(tgtTsk.getTaskId());
 								taskDependency.setLag(lag);
 								newDependencies.add(taskDependency);
 							}

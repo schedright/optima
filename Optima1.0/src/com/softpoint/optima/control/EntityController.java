@@ -191,11 +191,13 @@ public class EntityController<E> {
 
 	
 	EntityManager transactionManager;
+	int taskCount = 0;
 	public void mergeTransactionStart() throws EntityControllerException {
 		try { 
 			EntityManagerFactory factory = (EntityManagerFactory)servletContext.getAttribute(JsonRpcInitializer.__ENTITY_FACTORY);
 			transactionManager = autoClose?factory.createEntityManager():localManager;
 			transactionManager.getTransaction().begin();
+			taskCount=0;
 		} catch (Throwable t) {
 			t.printStackTrace();
 			throw new EntityControllerException("DB005 find - " + t.getMessage() , t);
@@ -227,6 +229,11 @@ public class EntityController<E> {
 	public E mergeTransactionMerge(E e) throws EntityControllerException {
 		try { 
 			e = transactionManager.merge(e);
+			taskCount++;
+			if (taskCount==100) {
+				mergeTransactionClose();
+				mergeTransactionStart();
+			}
 			return e;
 		} catch (Throwable t) {
 			t.printStackTrace();

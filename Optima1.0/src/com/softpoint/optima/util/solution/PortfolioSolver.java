@@ -204,7 +204,11 @@ public class PortfolioSolver {
 		return current.doubleValue();
 	}
 
-	public void updateTask(EntityController<ProjectTask> taskController, TaskTreeNode task) throws EntityControllerException {
+	public void updateTask(EntityController<ProjectTask> taskController, TaskTreeNode task, Set<TaskTreeNode> commitedTasks) throws EntityControllerException {
+		if (commitedTasks.contains(task)) {
+			return;
+		}
+		commitedTasks.add(task);
 		Date d1 = task.getCalculatedTaskStart();
 		Date d2 = task.getCalculatedTaskEnd();
 
@@ -217,7 +221,7 @@ public class PortfolioSolver {
 
 		}
 		for (TaskTreeNode child : task.getChildren()) {
-			updateTask(taskController, child);
+			updateTask(taskController, child, commitedTasks);
 		}
 	}
 
@@ -227,10 +231,11 @@ public class PortfolioSolver {
 			if (i == null) {
 				i = 0;
 			}
+			Set<TaskTreeNode> commitedTasks = new HashSet<TaskTreeNode>();
 			for (TaskTreeNode task : project.rootTasks) {
 				i++;
 				solStatus.put(DONE, i);
-				updateTask(taskController, task);
+				updateTask(taskController, task,commitedTasks);
 			}
 
 		} catch (EntityControllerException e) {
@@ -680,7 +685,17 @@ public class PortfolioSolver {
 		return String.format(SHORT_TEMPLATE, iteration, tasks, dates, d, rc, cc, rn, rc - cc, f);
 	}
 
-	Date getMaxProjectEnd(TaskTreeNode task) {
+	Date getMaxProjectEnd(ProjectWrapper p) {
+		Date maxDate = null;
+		for (TaskTreeNode tsk:p.getAllTasks()) {
+			if (maxDate==null || maxDate.before(tsk.getCalculatedTaskEnd())) {
+				maxDate = tsk.getCalculatedTaskEnd();
+			}
+		}
+		return maxDate;
+/*		if (maxDate!=null) {
+			return date.after(maxDate);
+		}
 		if (task.getChildren().size() == 0) {
 			return task.getCalculatedTaskEnd();
 		} else {
@@ -693,14 +708,14 @@ public class PortfolioSolver {
 			}
 			return ret;
 		}
-	}
+*/	}
 
 	Boolean isAfterProjectEnd(ProjectWrapper projectW, Date date) {
-		for (TaskTreeNode tsk : projectW.getRootTasks()) {
-			if (date.after(getMaxProjectEnd(tsk))) {
+//		for (TaskTreeNode tsk : projectW.getRootTasks()) {
+			if (date.after(getMaxProjectEnd(projectW))) {
 				return true;
 			}
-		}
+//		}
 		return false;
 	}
 

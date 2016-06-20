@@ -73,7 +73,7 @@ public class ProjectWrapper {
 			
 			List<TaskDependency> dependencies = tsk.getAsDependency();
 			for (TaskDependency dep:dependencies) {
-				ProjectTask tsk2 = dep.getDependent();
+				ProjectTask tsk2 = project.findTask(dep.getDependent());
 				addTaskNodes(tsk2);
 				TaskTreeNode tsk2Node = allTreeNodesMap.get(tsk2);
 				node.children.add(tsk2Node);

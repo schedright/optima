@@ -19,14 +19,12 @@ public class TaskDependency implements Serializable {
 	private int dependencyId;
 
 	//bi-directional many-to-one association to ProjectTask
-    @ManyToOne
-	@JoinColumn(name="dependency_task_id")
-	private ProjectTask dependency;
+	@Column(name="dependency_task_id")
+	private int dependency;
 
 	//bi-directional many-to-one association to ProjectTask
-    @ManyToOne
-	@JoinColumn(name="dependant_task_id")
-	private ProjectTask dependent;
+	@Column(name="dependant_task_id")
+	private int dependent;
 
 	@Column(name="lag")
 	private Integer lag;
@@ -42,19 +40,19 @@ public class TaskDependency implements Serializable {
 		this.dependencyId = dependencyId;
 	}
 
-	public ProjectTask getDependency() {
+	public int getDependency() {
 		return this.dependency;
 	}
 
-	public void setDependency(ProjectTask dependency) {
+	public void setDependency(int dependency) {
 		this.dependency = dependency;
 	}
 	
-	public ProjectTask getDependent() {
+	public int getDependent() {
 		return this.dependent;
 	}
 
-	public void setDependent(ProjectTask dependent) {
+	public void setDependent(int dependent) {
 		this.dependent = dependent;
 	}
 
@@ -74,4 +72,15 @@ public class TaskDependency implements Serializable {
 		this.lag = lag;
 	}
 	
+/*	public ProjectTask findTask(Project p, int id) {
+		ProjectTask tsk = null;
+		for (ProjectTask t:p.getProjectTasks()) {
+			if (t.getTaskId()==id) {
+				tsk=t;
+				break;
+			}
+		}
+		return tsk;
+	}
+*/	
 }

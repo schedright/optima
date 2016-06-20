@@ -87,11 +87,13 @@ public class ProjectTask implements Serializable  {
 	private Project project;
 
 	//bi-directional many-to-one association to TaskDependency
-	@OneToMany(mappedBy="dependency", fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	@OneToMany(fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	@JoinColumn(name="dependency_task_id",referencedColumnName="task_id")
 	private List<TaskDependency> asDependency;
 
 	//bi-directional many-to-one association to TaskDependency
-	@OneToMany(mappedBy="dependent" , fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	@OneToMany(fetch=FetchType.EAGER, cascade = CascadeType.REFRESH)
+	@JoinColumn(name="dependant_task_id",referencedColumnName="task_id")
 	private List<TaskDependency> asDependent;
 
     public ProjectTask() {

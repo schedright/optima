@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import org.jabsorb.client.HTTPSession;
+
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Project;
@@ -35,8 +37,8 @@ public class TaskController {
 	 * @return
 	 * @throws OptimaException
 	 */
-	public ServerResponse create(HttpSession session, int projectId, String taskName, String taskDescription, int duration, double uniformDailyCost, double uniformDailyincome,
-			Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate, int status) throws OptimaException {
+	public ServerResponse create(HttpSession session, int projectId, String taskName, String taskDescription, int duration, double uniformDailyCost, double uniformDailyincome, Date tentativeStartDate, Date scheduledStartDate,
+			Date actualStartDate, int status) throws OptimaException {
 
 		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 
@@ -61,7 +63,7 @@ public class TaskController {
 			projectTask.setProject(project);
 
 			controller.persist(projectTask);
-			adjustStartDateBasedOnTaskDependency(session, projectId , false);
+			adjustStartDateBasedOnTaskDependency(session, projectId, false);
 			return new ServerResponse("0", "Success", projectTask);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -83,8 +85,8 @@ public class TaskController {
 	 * @return
 	 * @throws OptimaException
 	 */
-	public ServerResponse update(HttpSession session, int taskId, int projectId, String taskName, String taskDescription, int duration, double uniformDailyCost,
-			double uniformDailyincome, Date tentativeStartDate, Date scheduledStartDate, Date actualStartDate, int status) throws OptimaException {
+	public ServerResponse update(HttpSession session, int taskId, int projectId, String taskName, String taskDescription, int duration, double uniformDailyCost, double uniformDailyincome, Date tentativeStartDate, Date scheduledStartDate,
+			Date actualStartDate, int status) throws OptimaException {
 
 		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 
@@ -104,7 +106,7 @@ public class TaskController {
 				projectTask.setCalendarStartDate(null);
 			}
 			projectTask.setTentativeStartDate(tentativeStartDate);
-			
+
 			projectTask.setUniformDailyCost(new BigDecimal(uniformDailyCost));
 			projectTask.setUniformDailyIncome(new BigDecimal(uniformDailyincome));
 			projectTask.setTaskDescription(taskDescription);
@@ -114,48 +116,36 @@ public class TaskController {
 			projectTask.setProject(project);
 			controller.merge(projectTask);
 
-			adjustStartDateBasedOnTaskDependency(session, projectId , false);
+			adjustStartDateBasedOnTaskDependency(session, projectId, false);
 			return new ServerResponse("0", "Success", projectTask);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
-			return new ServerResponse("TASK0002", String.format("Error updating projectTask for Project %s: %s", project != null ? project.getProjectName() : "", e.getMessage()),
-					e);
+			return new ServerResponse("TASK0002", String.format("Error updating projectTask for Project %s: %s", project != null ? project.getProjectName() : "", e.getMessage()), e);
 		}
 	}
-	
-	
+
 	/*
-	 * public ServerResponse resetTaskScheduling(HttpSession session, int taskId
-	 * ) throws OptimaException { EntityController<ProjectTask> controller = new
-	 * EntityController<ProjectTask>(session.getServletContext());
+	 * public ServerResponse resetTaskScheduling(HttpSession session, int taskId ) throws OptimaException { EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 	 * 
 	 * ProjectTask projectTask = null; try {
 	 * 
-	 * //System.out.println("Resetting"); projectTask =
-	 * controller.find(ProjectTask.class, taskId);
-	 * projectTask.setScheduledStartDate(null);
-	 * projectTask.setCalendarStartDate(null);
-	 * projectTask.setCalenderDuration(0); controller.merge(projectTask);
-	 * adjustStartDateBasedOnTaskDependency(session,
-	 * projectTask.getProject().getProjectId() , false); return new
-	 * ServerResponse("0", "Success", null); } catch (EntityControllerException
-	 * e) { e.printStackTrace(); return new ServerResponse("TASK0002-3",
-	 * String.format("Error resetting scheduling for task %d: %s", taskId,
-	 * e.getMessage()), e); }
+	 * //System.out.println("Resetting"); projectTask = controller.find(ProjectTask.class, taskId); projectTask.setScheduledStartDate(null); projectTask.setCalendarStartDate(null); projectTask.setCalenderDuration(0);
+	 * controller.merge(projectTask); adjustStartDateBasedOnTaskDependency(session, projectTask.getProject().getProjectId() , false); return new ServerResponse("0", "Success", null); } catch (EntityControllerException e) {
+	 * e.printStackTrace(); return new ServerResponse("TASK0002-3", String.format("Error resetting scheduling for task %d: %s", taskId, e.getMessage()), e); }
 	 * 
 	 * }
-	 */	public ServerResponse updateStartDate(HttpSession session, int taskId ,  Date scheduledStartDate ) throws OptimaException {
+	 */ public ServerResponse updateStartDate(HttpSession session, int taskId, Date scheduledStartDate) throws OptimaException {
 
 		EntityController<ProjectTask> controller = new EntityController<ProjectTask>(session.getServletContext());
 
 		ProjectTask projectTask = null;
 		try {
-			
+
 			// Set the projectTask
 			projectTask = controller.find(ProjectTask.class, taskId);
 			projectTask.setScheduledStartDate(scheduledStartDate);
 			controller.merge(projectTask);
-			adjustStartDateBasedOnTaskDependency(session, projectTask.getProject().getProjectId() , false);
+			adjustStartDateBasedOnTaskDependency(session, projectTask.getProject().getProjectId(), false);
 			return new ServerResponse("0", "Success", projectTask);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -176,7 +166,7 @@ public class TaskController {
 			controller.remove(ProjectTask.class, taskId);
 
 			if (task != null) {
-				adjustStartDateBasedOnTaskDependency(session, task.getProject().getProjectId() , false);
+				adjustStartDateBasedOnTaskDependency(session, task.getProject().getProjectId(), false);
 			}
 			return new ServerResponse("0", "Success", null);
 		} catch (EntityControllerException e) {
@@ -246,33 +236,29 @@ public class TaskController {
 	 * @param taskId
 	 * @return
 	 * @throws OptimaException
-	 *             This function should return only the tasks on which
-	 *             task(taskId) could depend
+	 *             This function should return only the tasks on which task(taskId) could depend
 	 */
 
 	public ServerResponse findAllByProjectForCertainTask(HttpSession session, int projectId, int taskId) throws OptimaException {
 		try {
 
-	
 			EntityController<Project> projectcontroller = new EntityController<Project>(session.getServletContext());
 			Project project = projectcontroller.find(Project.class, projectId);
 
 			EntityController<ProjectTask> ProjectTaskcontroller = new EntityController<ProjectTask>(session.getServletContext());
 			ProjectTask currentTask = ProjectTaskcontroller.find(ProjectTask.class, taskId);
 
-			 
-			List<ProjectTask> projectTasksTemp = new ArrayList<>(project.getProjectTasks()) ;
-			
+			List<ProjectTask> projectTasksTemp = new ArrayList<>(project.getProjectTasks());
+
 			projectTasksTemp.remove(currentTask);
-	
 
 			for (TaskDependency depRelations : currentTask.getAsDependent()) {
-				projectTasksTemp.remove(depRelations.getDependency());
+				projectTasksTemp.remove(project.findTask(depRelations.getDependency()));
 			}
-					
-			projectTasksTemp = removeForwardDependencies(projectTasksTemp , currentTask);
+
+			projectTasksTemp = removeForwardDependencies(session, projectTasksTemp, currentTask);
 			return new ServerResponse("0", "Success", projectTasksTemp);
-			
+
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
 			return new ServerResponse("TASK0006", String.format("Error finding task dependencies : %s", e.getMessage()), e);
@@ -283,16 +269,13 @@ public class TaskController {
 	 * @param projectTasksTemp
 	 * @param currentTask
 	 */
-	private List<ProjectTask> removeForwardDependencies(List<ProjectTask> projectTasksTemp, ProjectTask currentTask) {
+	private List<ProjectTask> removeForwardDependencies(HttpSession session, List<ProjectTask> projectTasksTemp, ProjectTask currentTask) {
 		for (TaskDependency depRelations : currentTask.getAsDependency()) {
-			projectTasksTemp.remove(depRelations.getDependent());
-			projectTasksTemp = removeForwardDependencies(projectTasksTemp, depRelations.getDependent());
+			projectTasksTemp.remove(currentTask.getProject().findTask(depRelations.getDependent()));
+			projectTasksTemp = removeForwardDependencies(session, projectTasksTemp, currentTask.getProject().findTask(depRelations.getDependent()));
 		}
 		return projectTasksTemp;
 	}
-	
-	
-	
 
 	/**
 	 * @param session
@@ -317,12 +300,12 @@ public class TaskController {
 			// the project as well as the dependencies
 			EntityController<TaskDependency> taskDependencyController = new EntityController<TaskDependency>(session.getServletContext());
 			TaskDependency taskDependency = new TaskDependency();
-			taskDependency.setDependency(taskOne);
-			taskDependency.setDependent(taskTwo);
+			taskDependency.setDependency(taskOne.getTaskId());
+			taskDependency.setDependent(taskTwo.getTaskId());
 
 			// Persist the taskDependency using the controller
 			taskDependencyController.persist(taskDependency);
-			adjustStartDateBasedOnTaskDependency(session, taskOne.getProject().getProjectId() , false);
+			adjustStartDateBasedOnTaskDependency(session, taskOne.getProject().getProjectId(), false);
 
 			return new ServerResponse("0", "Success", taskDependency);
 		} catch (EntityControllerException e) {
@@ -339,10 +322,12 @@ public class TaskController {
 	 */
 	public ServerResponse removeTaskDependency(HttpSession session, int taskDependencyId) throws OptimaException {
 		EntityController<TaskDependency> controller = new EntityController<TaskDependency>(session.getServletContext());
+		EntityController<ProjectTask> tcontroller = new EntityController<ProjectTask>(session.getServletContext());
 		try {
 			TaskDependency dependency = controller.find(TaskDependency.class, taskDependencyId);
 			controller.remove(TaskDependency.class, taskDependencyId);
-			adjustStartDateBasedOnTaskDependency(session, dependency.getDependency().getProject().getProjectId() , false);
+			ProjectTask task = tcontroller.find(ProjectTask.class, dependency.getDependency());
+			adjustStartDateBasedOnTaskDependency(session, task.getProject().getProjectId(), false);
 			return new ServerResponse("0", "Success", null);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -364,13 +349,13 @@ public class TaskController {
 
 			List<TaskDependency> dependencies = dependentTask.getAsDependent();
 			for (TaskDependency dependency : dependencies) {
-				if (dependency.getDependency().getTaskId() == dependencyTaskId) {
+				if (dependency.getDependency() == dependencyTaskId) {
 					EntityController<TaskDependency> depTaskcontroller = new EntityController<TaskDependency>(session.getServletContext());
 					depTaskcontroller.remove(TaskDependency.class, dependency.getDependencyId());
 					return new ServerResponse("0", "Success", null);
 				}
 			}
-			adjustStartDateBasedOnTaskDependency(session, dependentTask.getProject().getProjectId() , false);
+			adjustStartDateBasedOnTaskDependency(session, dependentTask.getProject().getProjectId(), false);
 			return new ServerResponse("TASK0010", String.format("Task Dependency is not defined"), null);
 
 		} catch (EntityControllerException e) {
@@ -383,7 +368,7 @@ public class TaskController {
 	 * @param session
 	 * @param projectId
 	 */
-	public void adjustStartDateBasedOnTaskDependency(HttpSession session, int projectId , boolean resetFirst) {
+	public void adjustStartDateBasedOnTaskDependency(HttpSession session, int projectId, boolean resetFirst) {
 		EntityController<ProjectTask> taskController = new EntityController<ProjectTask>(session.getServletContext(), false);
 
 		try {
@@ -392,13 +377,17 @@ public class TaskController {
 				Project project = controller.find(Project.class, projectId);
 				taskController.dml(ProjectTask.class, "Update ProjectTask t set t.calendarStartDate = null , t.scheduledStartDate = null where t.project = ?1", project);
 			}
-			
+
 			// We need to reread the project here in all cases.
 			Project project = controller.find(Project.class, projectId);
 			List<ProjectTask> rootTasks = getRootTasks(project, taskController);
 			taskController.mergeTransactionStart();
+			List<ProjectTask> tasksToSave = new ArrayList<ProjectTask>();
 			for (ProjectTask task : rootTasks) {
-				processTask(task, project, taskController);
+				processTask(session, task, project, taskController, tasksToSave);
+			}
+			for (ProjectTask t : tasksToSave) {
+				taskController.mergeTransactionMerge(t);
 			}
 			taskController.mergeTransactionClose();
 		} catch (EntityControllerException e) {
@@ -411,37 +400,43 @@ public class TaskController {
 	}
 
 	public static int getLag(ProjectTask source, ProjectTask target) {
-		for(TaskDependency dep : source.getAsDependency()) {
-			if (dep.getDependent()==target) {
+		for (TaskDependency dep : source.getAsDependency()) {
+			if (dep.getDependent() == target.getTaskId()) {
 				return dep.getLag();
 			}
-		}; 
+		}
+		;
 		return 0;
 	}
-	
-	protected void processTask(ProjectTask task, Project project, EntityController<ProjectTask> controller) throws EntityControllerException {
+
+	protected void processTask(HttpSession session, ProjectTask task, Project project, EntityController<ProjectTask> controller, List<ProjectTask> tasksToSave) throws EntityControllerException {
 		// Bug#1 Shifting is not working correctly when changing weekends! -- BassemVic
-		//System.out.println(task.getTaskId());
-		//task = controller.find(ProjectTask.class, task.getTaskId());
-		
+		// System.out.println(task.getTaskId());
+		// task = controller.find(ProjectTask.class, task.getTaskId());
+
 		calculateCalederDuration(project, task);
-		for (TaskDependency dependency : task.getAsDependency()) {
-			ProjectTask nextTask = dependency.getDependent();
-			if (nextTask != null) {
-				Date nextTaskStartDate = nextTask.getCalendarStartDate();
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(task.getCalendarStartDate());
-				cal.add(Calendar.DATE, task.getCalenderDuration() + getLag(task, nextTask));
-				if (nextTaskStartDate == null || nextTaskStartDate.before(cal.getTime())) {
-					Date newDate = adjustStart(project, cal.getTime());
-					nextTask.setCalendarStartDate(newDate);
-					nextTask.setTentativeStartDate(newDate);
-					controller.mergeTransactionMerge(nextTask);
+		// controller.mergeTransactionMerge(task);
+		if (!tasksToSave.contains(task)) {
+			tasksToSave.add(task);
+			for (TaskDependency dependency : task.getAsDependency()) {
+				ProjectTask nextTask = project.findTask(dependency.getDependent());
+				if (nextTask != null) {
+					Date nextTaskStartDate = nextTask.getCalendarStartDate();
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(task.getCalendarStartDate());
+					cal.add(Calendar.DATE, task.getCalenderDuration() + getLag(task, nextTask));
+					if (nextTask.getCalendarStartDate() == null || nextTask.getCalendarStartDate().before(cal.getTime())) {
+						Date newDate = adjustStart(project, cal.getTime());
+						if (nextTaskStartDate == null || nextTaskStartDate.before(newDate)) {
+							nextTask.setCalendarStartDate(newDate);
+							nextTask.setTentativeStartDate(newDate);
+							// controller.mergeTransactionMerge(nextTask);
+						}
+					}
+					processTask(session, project.findTask(dependency.getDependent()), project, controller, tasksToSave);
 				}
-				processTask(dependency.getDependent(), project, controller);
 			}
 		}
-		controller.mergeTransactionMerge(task);
 	}
 
 	/**
@@ -449,7 +444,7 @@ public class TaskController {
 	 * @param task
 	 */
 	protected void calculateCalederDuration(Project project, ProjectTask task) {
-		task.setCalenderDuration(getDuration(project,task.getCalendarStartDate(),task.getDuration()));
+		task.setCalenderDuration(getDuration(project, task.getCalendarStartDate(), task.getDuration()));
 
 	}
 
@@ -459,8 +454,7 @@ public class TaskController {
 		int duration = originalDuration;
 		int calendarDuration = 0;
 		while (duration > 0) {
-			if ( PaymentUtil.isDayOff(startDate, project.getDaysOffs())
-					||  TaskUtil.isWeekendDay(startDate, project.getWeekend())) {
+			if (PaymentUtil.isDayOff(startDate, project.getDaysOffs()) || TaskUtil.isWeekendDay(startDate, project.getWeekend())) {
 				calendarDuration++;
 			} else {
 				duration--;
@@ -468,12 +462,10 @@ public class TaskController {
 			}
 			calendar.add(Calendar.DATE, 1);
 			startDate = calendar.getTime();
-			
 
 		}
 		return calendarDuration;
 	}
-	
 
 	/**
 	 * @param project
@@ -484,34 +476,34 @@ public class TaskController {
 		for (ProjectTask task : project.getProjectTasks()) {
 			if (task.getAsDependent() == null || task.getAsDependent().isEmpty()) {
 				rootTasks.add(task);
-				task.setCalendarStartDate(adjustStart(project,task.calculateEffectiveTentativeStartDate()));
+				task.setCalendarStartDate(adjustStart(project, task.calculateEffectiveTentativeStartDate()));
 				controller.merge(task);
 			}
 		}
 		return rootTasks;
 	}
-	
+
 	/**
 	 * adjust the calendar start to
+	 * 
 	 * @return
 	 */
 	private static Date adjustStart(Project project, Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		while (true) {
-			if ( !PaymentUtil.isDayOff(date, project.getDaysOffs())
-					&&   !TaskUtil.isWeekendDay(date, project.getWeekend())) {
+			if (!PaymentUtil.isDayOff(date, project.getDaysOffs()) && !TaskUtil.isWeekendDay(date, project.getWeekend())) {
 				return date;
-			} 
+			}
 
 			calendar.add(Calendar.DATE, 1);
 			date = calendar.getTime();
 		}
 	}
-	
-	public ServerResponse resetScheduling(HttpSession session , int projectId) {
-			adjustStartDateBasedOnTaskDependency(session, projectId, true);
-			return new ServerResponse("0", "Success", null);
+
+	public ServerResponse resetScheduling(HttpSession session, int projectId) {
+		adjustStartDateBasedOnTaskDependency(session, projectId, true);
+		return new ServerResponse("0", "Success", null);
 	}
 
 }

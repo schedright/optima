@@ -43,7 +43,7 @@ $(function() {
     var fmt = new DateFmt(
         "%n %d, %y");
     var fmt2 = new DateFmt(
-        "%n %d, %y");
+        "%d/%m/%y");
 
     var pColumns = [
       {

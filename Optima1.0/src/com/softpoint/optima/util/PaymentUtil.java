@@ -1489,10 +1489,10 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 			return false;
 		}
 		for (TaskDependency dependecy : dependecies) {
-			if (dependecy.getDependency().getTaskId() == taskB.getTaskId()) {
+			if (dependecy.getDependency() == taskB.getTaskId()) {
 				return true;
 			} else {
-				return isDependent(dependecy.getDependency(), taskB);
+				return isDependent(taskA.getProject().findTask(dependecy.getDependency()), taskB);
 			}
 		}
 		return false;
@@ -1518,7 +1518,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 	public static void processTask(ProjectTask task, Project project)  {
 		calculateCalederDuration(project, task);
 		for (TaskDependency dependency : task.getAsDependency()) {
-			ProjectTask nextTask = dependency.getDependent();
+			ProjectTask nextTask = project.findTask(dependency.getDependent());
 			if (nextTask != null) {
 				Date nextTaskStartDate = nextTask.getCalendarStartDate();
 				Calendar cal = Calendar.getInstance();
@@ -1536,7 +1536,7 @@ public static Period findFinanceSchedule(HttpSession session , Date date, int po
 					}
 					nextTask.setCalendarStartDate(cal.getTime());
 				}
-				processTask(dependency.getDependent(), project);
+				processTask(project.findTask(dependency.getDependent()), project);
 			}
 		}
 	

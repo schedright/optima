@@ -1,10 +1,28 @@
 package com.softpoint.optima.db;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 /**
  * The persistent class for the project database table.
@@ -260,4 +278,16 @@ public class Project implements Serializable {
 		this.portfolioFinances = portfolioFinances;
 	}
 
+	
+	@Transient
+	private Map<Integer,ProjectTask> id2taskMap;
+	public ProjectTask findTask(int id) {
+		if (id2taskMap==null) {
+			id2taskMap = new HashMap<Integer,ProjectTask>();
+			for (ProjectTask t:getProjectTasks()) {
+				id2taskMap.put(t.getTaskId(), t);
+			}
+		}
+		return id2taskMap.get(id);
+	}
 }
