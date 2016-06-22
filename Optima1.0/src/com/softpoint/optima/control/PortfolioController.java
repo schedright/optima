@@ -335,7 +335,17 @@ public class PortfolioController {
 	}
 
 	public static int daysBetween(Date d1, Date d2) {
-		return (int) ((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+		int res = (int) ((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+		
+		//a hack to fix the leap year missing day
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(d1);
+		cal.add(Calendar.DATE, res-1);
+		while (cal.getTime().before(d2)) {
+			res++;
+			cal.add(Calendar.DATE, 1);
+		}
+		return res;
 	}
 
 	public ServerResponse getSolutionAsCSV(HttpSession session, int portfolioId, int projectId) throws OptimaException {
