@@ -235,7 +235,7 @@ public class PortfolioSolver {
 			for (TaskTreeNode task : project.rootTasks) {
 				i++;
 				solStatus.put(DONE, i);
-				updateTask(taskController, task,commitedTasks);
+				updateTask(taskController, task, commitedTasks);
 			}
 
 		} catch (EntityControllerException e) {
@@ -458,6 +458,20 @@ public class PortfolioSolver {
 			solStatus.remove(SOLVER);
 			solStatus.put(STATUS, SUCCESS);
 			solStatus.put(DONE, totalTask);
+
+			try {
+				new Thread() {
+					public void run() {
+						for (ProjectWrapper p : allProjects) {
+							ProjectSolutionDetails details = new ProjectSolutionDetails(false, p.getProject());
+							details.savePaymentToDB(session);
+						}
+					}
+				}.start();
+			} catch (Exception e) {
+
+			}
+
 			return "SOLVED";
 		} finally {
 			// for any unexpected return
@@ -472,10 +486,12 @@ public class PortfolioSolver {
 		HashMap<Date, Double> clone = new HashMap<Date, Double>(original);
 		return clone;
 	}
+
 	Map<ProjectWrapper, Integer> cloneP2IMap(Map<ProjectWrapper, Integer> original) {
 		HashMap<ProjectWrapper, Integer> clone = new HashMap<ProjectWrapper, Integer>(original);
 		return clone;
 	}
+
 	private Map<String, Object> getPeriodSolutionPerProject(ProjectWrapper projectW, List<TaskTreeNode> eligibleTasks, List<TaskTreeNode> leftOverTasks, DayDetails currentProjectDayDetails, Date p1Start, Date p1End, Date p2End) {
 		DayDetails tempDayDetails = new DayDetails(currentProjectDayDetails);
 		Map<Date, Double> pamymentClone = cloneMap(payments);
@@ -533,10 +549,10 @@ public class PortfolioSolver {
 				boolean shiftHappens = false;
 				shiftedTask = null;
 				for (TaskTreeNode task : eligibleTasks) {
-					
+
 					// left overs doesn't move, and we dont need to push any
 					// task further than outside the period
-					if (leftOverTasks.contains(task) || !task.getCalculatedTaskStart().before(p1End) || task.getCalculatedTaskStart().before(p1Start) || task.getTask().getStatus()!=ProjectTask.STATUS_NOT_STARTED) {
+					if (leftOverTasks.contains(task) || !task.getCalculatedTaskStart().before(p1End) || task.getCalculatedTaskStart().before(p1Start) || task.getTask().getStatus() != ProjectTask.STATUS_NOT_STARTED) {
 						continue;
 					}
 					if (!task.getCalculatedTaskStart().before(p1End)) {
@@ -585,7 +601,7 @@ public class PortfolioSolver {
 										bestIsFeasible = resultFeasible;
 									}
 								}
-							} else if(!bestIsFeasible && !resultFeasible) {
+							} else if (!bestIsFeasible && !resultFeasible) {
 								if (bestP1Cost > p1EndDetails.getPeriodCost()) {
 									newIsBetter = true;
 									bestIsFeasible = resultFeasible;
@@ -629,17 +645,16 @@ public class PortfolioSolver {
 				payments = cloneMap(bestPamymentClone);
 				iterationIndex++;
 			}
-			if (bestResult!=null) {
+			if (bestResult != null) {
 				numberOfDaysSinceLastRequest.put(projectW, (Integer) bestResult.get(DAYSSINCELASTREQUEST2));
 			}
-			
-			if (logGenerator != null && shiftedTask!=null) {
+
+			if (logGenerator != null && shiftedTask != null) {
 				shortVersion = getShortVersion(result, projectW, eligibleTasks, p1Start, p1End, iterationIndex, shiftedTask);
 				Date psd = projectW.getProject().getPropusedStartDate();
-				/*Date ped = */TaskUtil.addDays(psd, projectW.getProjectDuratoin());
+				/* Date ped = */TaskUtil.addDays(psd, projectW.getProjectDuratoin());
 				writeShortVersionToHTMLLogFile(logGenerator, iterationIndex, shortVersion);
 			}
-
 
 		}
 		if (logGenerator != null) {
@@ -687,35 +702,23 @@ public class PortfolioSolver {
 
 	Date getMaxProjectEnd(ProjectWrapper p) {
 		Date maxDate = null;
-		for (TaskTreeNode tsk:p.getAllTasks()) {
-			if (maxDate==null || maxDate.before(tsk.getCalculatedTaskEnd())) {
+		for (TaskTreeNode tsk : p.getAllTasks()) {
+			if (maxDate == null || maxDate.before(tsk.getCalculatedTaskEnd())) {
 				maxDate = tsk.getCalculatedTaskEnd();
 			}
 		}
 		return maxDate;
-/*		if (maxDate!=null) {
-			return date.after(maxDate);
-		}
-		if (task.getChildren().size() == 0) {
-			return task.getCalculatedTaskEnd();
-		} else {
-			Date ret = null;
-			for (TaskTreeNode child : task.getChildren()) {
-				Date d = getMaxProjectEnd(child);
-				if (ret == null || ret.before(d)) {
-					ret = d;
-				}
-			}
-			return ret;
-		}
-*/	}
+		/*
+		 * if (maxDate!=null) { return date.after(maxDate); } if (task.getChildren().size() == 0) { return task.getCalculatedTaskEnd(); } else { Date ret = null; for (TaskTreeNode child : task.getChildren()) { Date d =
+		 * getMaxProjectEnd(child); if (ret == null || ret.before(d)) { ret = d; } } return ret; }
+		 */ }
 
 	Boolean isAfterProjectEnd(ProjectWrapper projectW, Date date) {
-//		for (TaskTreeNode tsk : projectW.getRootTasks()) {
-			if (date.after(getMaxProjectEnd(projectW))) {
-				return true;
-			}
-//		}
+		// for (TaskTreeNode tsk : projectW.getRootTasks()) {
+		if (date.after(getMaxProjectEnd(projectW))) {
+			return true;
+		}
+		// }
 		return false;
 	}
 
@@ -988,10 +991,10 @@ public class PortfolioSolver {
 			report.setIterationDates("");
 			report.finishTask();
 		} catch (Exception e) {
-			
+
 		}
 	}
-	
+
 	private void writeTrialToHTMLLogFile(PeriodLogGeneratorNew report, int iteration, String shortVersion, Date from, Date to, ProjectWrapper projectW, Date projectEnd, Map<String, Object> result, TaskTreeNode shiftedTask) {
 
 		DayDetails p1StartDetails = (DayDetails) result.get(P1_START);

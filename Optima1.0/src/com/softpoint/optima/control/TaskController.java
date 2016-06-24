@@ -8,14 +8,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
-import org.jabsorb.client.HTTPSession;
-
 import com.softpoint.optima.OptimaException;
 import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.TaskDependency;
 import com.softpoint.optima.util.PaymentUtil;
+import com.softpoint.optima.util.ProjectSolutionDetails;
 import com.softpoint.optima.util.TaskUtil;
 
 /**
@@ -368,7 +367,7 @@ public class TaskController {
 	 * @param session
 	 * @param projectId
 	 */
-	public void adjustStartDateBasedOnTaskDependency(HttpSession session, int projectId, boolean resetFirst) {
+	public void adjustStartDateBasedOnTaskDependency(final HttpSession session, int projectId, boolean resetFirst) {
 		EntityController<ProjectTask> taskController = new EntityController<ProjectTask>(session.getServletContext(), false);
 
 		try {
@@ -390,6 +389,19 @@ public class TaskController {
 				taskController.mergeTransactionMerge(t);
 			}
 			taskController.mergeTransactionClose();
+			
+			try {
+				final Project p  = project;
+				new Thread() {
+					public void run() {
+						ProjectSolutionDetails details = new ProjectSolutionDetails(false, p);
+						details.savePaymentToDB(session);
+					}
+				}.start();
+			} catch (Exception e) {
+
+			}
+
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
 		} finally {
@@ -416,25 +428,23 @@ public class TaskController {
 
 		calculateCalederDuration(project, task);
 		// controller.mergeTransactionMerge(task);
-		if (!tasksToSave.contains(task)) {
-			tasksToSave.add(task);
-			for (TaskDependency dependency : task.getAsDependency()) {
-				ProjectTask nextTask = project.findTask(dependency.getDependent());
-				if (nextTask != null) {
-					Date nextTaskStartDate = nextTask.getCalendarStartDate();
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(task.getCalendarStartDate());
-					cal.add(Calendar.DATE, task.getCalenderDuration() + getLag(task, nextTask));
-					if (nextTask.getCalendarStartDate() == null || nextTask.getCalendarStartDate().before(cal.getTime())) {
-						Date newDate = adjustStart(project, cal.getTime());
-						if (nextTaskStartDate == null || nextTaskStartDate.before(newDate)) {
-							nextTask.setCalendarStartDate(newDate);
-							nextTask.setTentativeStartDate(newDate);
-							// controller.mergeTransactionMerge(nextTask);
-						}
+		tasksToSave.add(task);
+		for (TaskDependency dependency : task.getAsDependency()) {
+			ProjectTask nextTask = project.findTask(dependency.getDependent());
+			if (nextTask != null) {
+				Date nextTaskStartDate = nextTask.getCalendarStartDate();
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(task.getCalendarStartDate());
+				cal.add(Calendar.DATE, task.getCalenderDuration() + getLag(task, nextTask));
+				if (nextTask.getCalendarStartDate() == null || nextTask.getCalendarStartDate().before(cal.getTime())) {
+					Date newDate = adjustStart(project, cal.getTime());
+					if (nextTaskStartDate == null || nextTaskStartDate.before(newDate)) {
+						nextTask.setCalendarStartDate(newDate);
+						nextTask.setTentativeStartDate(newDate);
+						// controller.mergeTransactionMerge(nextTask);
 					}
-					processTask(session, project.findTask(dependency.getDependent()), project, controller, tasksToSave);
 				}
+				processTask(session, project.findTask(dependency.getDependent()), project, controller, tasksToSave);
 			}
 		}
 	}

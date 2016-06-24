@@ -132,6 +132,11 @@ public class ProjectSolutionDetails {
 				if (!date.after(lastTaskDate) && !date.before(projectStart)) {
 					tasksCost += project.getOverheadPerDay().doubleValue();
 				}
+				if (project.getProposedFinishDate()!=null && project.getDelayPenaltyAmount()!=null) {
+					if (date.after(project.getProposedFinishDate()) && !date.after(lastTaskDate)) {
+						tasksCost += project.getDelayPenaltyAmount().doubleValue();
+					}
+				}
 
 				entity.setCashout(tasksCost);
 				if (lastDayEntity.getBalance() < 0) {
@@ -229,7 +234,7 @@ public class ProjectSolutionDetails {
 
 			int diffInDays = (project.getPropusedStartDate()!=null && lte!=null)? PortfolioController.daysBetween(project.getPropusedStartDate(), lte):0;
 			int daysInLastPeriod = diffInDays % requestPeriod;
-			int daysRemainingInThePeriod = daysInLastPeriod == 0 ? 0 : requestPeriod - daysInLastPeriod;
+			int daysRemainingInThePeriod = daysInLastPeriod == 0 ? 0 : (requestPeriod - daysInLastPeriod + 1);
 			int shift = daysRemainingInThePeriod + paymentPeriod ;
 
 			// for example
