@@ -19,7 +19,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.softpoint.optima.OptimaException;
+import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.control.EntityController;
+import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.control.ProjectController;
 import com.softpoint.optima.control.TaskController;
 import com.softpoint.optima.db.DaysOff;
@@ -27,11 +30,14 @@ import com.softpoint.optima.db.PortfolioLight;
 import com.softpoint.optima.db.PrimaveraProject;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectLight;
+import com.softpoint.optima.db.ProjectPayment;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.TaskDependency;
 
 public class PrimaveraManager {
-	public void importPrimaveraFile(File xmlFile, HttpSession session) throws Exception {
+	public String importPrimaveraFile(File xmlFile, HttpSession session) throws Exception {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<ul>");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(xmlFile);
@@ -70,9 +76,12 @@ public class PrimaveraManager {
 					primaveraProject.setProjectGuid(guid);
 				}
 				if (primaveraProject.getProject() == null) {
+					sb.append("<li>Creating new project \"" + name + "\"</li>");
 					Project proj = new Project();
 					primaveraProject.setProject(proj);
 					primaveraProject.getProject().setProjectCode(name);
+				} else {
+					sb.append("<li>Updating existing project \"" + name + "\"</li>");
 				}
 
 				primaveraProject.getProject().setProjectName(name);
@@ -97,7 +106,8 @@ public class PrimaveraManager {
 					}
 				}
 				
-				importTasks(project, primaveraProject, guid2taskMap, existingGuid2TaskMap, newDependencies, updatedDependencies);
+				Map<String, ProjectTask> objectId2TaskMap = new HashMap<String,ProjectTask>();
+				importTasks(project, primaveraProject, guid2taskMap, existingGuid2TaskMap,objectId2TaskMap);
 
 				SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -110,13 +120,27 @@ public class PrimaveraManager {
 	            } catch (Exception e) {
 	            }
 				
+				if (!guid2taskMap.isEmpty()) {
+					sb.append("<li>Creating " + guid2taskMap.values().size() + " new task</li>");
+				}
+				
 				if (existingProject) {
+					int updated = ((primaveraProject.getProject().getProjectTasks()==null)?0:primaveraProject.getProject().getProjectTasks().size()) - guid2taskMap.values().size();
+					if (updated>0) {
+						sb.append("<li>Updating " + updated + " task</li>");
+					}
 					primController.merge(primaveraProject);
 					taskController.mergeTransactionStart();
-					for (ProjectTask t : guid2taskMap.values()) {
-						taskController.mergeTransactionMerge(t);
+					for (ProjectTask t : primaveraProject.getProject().getProjectTasks()) {
+						if (!guid2taskMap.values().contains(t)) {
+							taskController.mergeTransactionMerge(t);
+						}
 					}
 					taskController.mergeTransactionClose();
+					//then save the new added tasks
+					for (ProjectTask t : guid2taskMap.values()) {
+						taskController.persist(t);
+					}
 				} else {
 					projectController.persist(primaveraProject.getProject());
 					primController.persist(primaveraProject);
@@ -124,6 +148,16 @@ public class PrimaveraManager {
 						taskController.persist(t);
 					}
 				}
+				
+				if (existingProject) {
+					int depCount = getDependenciesCountByProjectId(session, primaveraProject.getProject().getProjectId());
+					if (depCount>0) {
+						sb.append("<Li>Removed " + depCount + " dependencies and they will be updated from the imported file</li>");
+					}
+					removeDependenciesByProjectId(session,primaveraProject.getProject().getProjectId());
+				}
+				importTaskDependencies(project, newDependencies, updatedDependencies, objectId2TaskMap);
+				
 				EntityController<TaskDependency> taskDependencyController = new EntityController<TaskDependency>(session.getServletContext());
 				for (TaskDependency dep:newDependencies) {
 					taskDependencyController.persist(dep);
@@ -131,6 +165,11 @@ public class PrimaveraManager {
 				for (TaskDependency dep:updatedDependencies) {
 					taskDependencyController.merge(dep);
 				}
+				int depCount = getDependenciesCountByProjectId(session, primaveraProject.getProject().getProjectId());
+				if (depCount>0) {
+					sb.append("<Li>Created " + depCount + " dependency</li>");
+				}
+
 				EntityController<DaysOff> vacController = new EntityController<DaysOff>(session.getServletContext());
 				for (DaysOff dayo:vacations) {
 					vacController.persist(dayo);
@@ -143,13 +182,36 @@ public class PrimaveraManager {
 				ProjectController.refreshJPAClass(session, ProjectLight.class);
 			}
 		}
+		sb.append("</ul>");
+		return sb.toString();
 	}
 
-	private  void importTasks(Node project, PrimaveraProject primaveraProject, Map<String, ProjectTask> guid2taskMap, Map<String, ProjectTask> existingGuid2TaskMap, List<TaskDependency> newDependencies,
-			List<TaskDependency> updatedDependencies) {
+	public static void removeDependenciesByProjectId(HttpSession session , int projectId) throws OptimaException {
+		EntityController<TaskDependency> controller = new EntityController<TaskDependency>(session.getServletContext());
+		try {
+			controller.dml(TaskDependency.class, "delete FROM task_dependency where dependant_task_id in (select task_id from project_task where project_id=?1)" , projectId);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static int getDependenciesCountByProjectId(HttpSession session , int projectId) throws OptimaException {
+		EntityController<TaskDependency> controller = new EntityController<TaskDependency>(session.getServletContext());
+		try {
+			Object res = controller.nativeQuery("select count(*) FROM task_dependency where dependant_task_id in (select task_id from project_task where project_id=?1)" , projectId);
+			if (res instanceof List && ((List)res).size()==1) {
+				return ((Long)((List)res).get(0)).intValue();
+			}
+			return 0;
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	private  void importTasks(Node project, PrimaveraProject primaveraProject, Map<String, ProjectTask> guid2taskMap, Map<String, ProjectTask> existingGuid2TaskMap, Map<String, ProjectTask> objectId2TaskMap) {
 		Map<String, Double> activityCost = getTasksCost(project);
 		Map<String, ProjectTask> guid2TaskMap = new HashMap<String,ProjectTask>();
-		Map<String, ProjectTask> objectId2TaskMap = new HashMap<String,ProjectTask>();
 		
 		Node projE = project.getFirstChild();
 		while (projE != null) {
@@ -203,7 +265,6 @@ public class PrimaveraManager {
 			}
 			projE = projE.getNextSibling();
 		}
-		importTaskDependencies(project, newDependencies, updatedDependencies, objectId2TaskMap);
 	}
 
 	private  void importTaskDependencies(Node project, List<TaskDependency> newDependencies, List<TaskDependency> updatedDependencies, Map<String, ProjectTask> objectId2TaskMap) {

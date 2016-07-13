@@ -1120,6 +1120,7 @@ public class ProjectController {
 	public ServerResponse importPrimaveraFile(HttpServletRequest request, HttpSession session, String data) {
 		File zipFile = null; 
 		File extractFolder = null;
+		String st = "";
 		try {
 			// save the zip file to a temp place
 			byte[] bytes = Base64.getDecoder().decode(data);
@@ -1140,10 +1141,9 @@ public class ProjectController {
 					return filename.endsWith(".xml");
 				}
 			});
-			
 			for (File f:files) {
 				PrimaveraManager primaveraManager = new PrimaveraManager();
-				primaveraManager.importPrimaveraFile(f, session);
+				st += primaveraManager.importPrimaveraFile(f, session);
 			}
 
 		} catch (Exception e) {
@@ -1157,6 +1157,6 @@ public class ProjectController {
 			} catch (IOException e) {
 			}
 		}
-		return new ServerResponse("0", PortfolioSolver.SUCCESS,"");
+		return new ServerResponse("0", PortfolioSolver.SUCCESS,st);
 	}
 }

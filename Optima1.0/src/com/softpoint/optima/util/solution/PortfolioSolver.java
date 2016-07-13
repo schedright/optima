@@ -729,6 +729,7 @@ public class PortfolioSolver {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(p1Start);
 		Date psd = projectW.getProject().getPropusedStartDate();
+		Date pfd = projectW.getProject().getProposedFinishDate();
 		int requestPeriod = projectW.getProject().getPaymentRequestPeriod();
 		int paymentPeriod = projectW.getProject().getCollectPaymentPeriod();
 		double advancedPercentage = projectW.getProject().getAdvancedPaymentPercentage().doubleValue();
@@ -789,6 +790,11 @@ public class PortfolioSolver {
 				Double O = projectW.getProject().getOverheadPerDay().doubleValue();
 				currentProjectDayDetails.addBalance(-O);
 				currentProjectDayDetails.addOverhead(O);
+			}
+			
+			if (!projectDone && pfd!=null && date.after(pfd)) {
+				Double p = projectW.getProject().getDelayPenaltyAmount().doubleValue();
+				currentProjectDayDetails.addBalance(-p);
 			}
 			// even if it is not feasible, we still calculate all the way to the
 			// end so we can find the best solution

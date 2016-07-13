@@ -155,7 +155,15 @@ $(function() {
           result = window.btoa(reader.result);
           var call = rpcClient.projectService.importPrimaveraFile(result);
           if (call.result == 0) {
-            location.reload();
+            var buttons = {
+                'Refresh' : function() {
+                  $(this).dialog("close");
+                  location.reload();
+
+                }
+              }
+              showMessage('Project import', call.data, 'warning', buttons);
+            
           } else {
             showMessage("Imprort Project", 'Error:' + result.message, 'error');
           }
