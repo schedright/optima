@@ -168,3 +168,21 @@
 		});
     	return htmlElement;
 	}
+
+  var utcDateOffset = new Date().getTimezoneOffset() * 60000;
+  function utcTime2LocalDate(time) {
+    return new Date(time + utcDateOffset);
+  };
+
+  function localTimeToUTCDate(time) {
+    return new Date(time - utcDateOffset);
+  };
+
+  function localDateToUTCDate(date) {
+    if (date) {
+      return new Date(date.getTime() - utcDateOffset);
+    } else {
+      return date;
+    }
+  };  
+    

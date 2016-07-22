@@ -3,7 +3,6 @@ $(function() {
 	var grid;
   var portfolioId = 0;
   var projectId = 0;
-  var currentDate = null;
   
   $("#accordion").accordion();
 
@@ -12,8 +11,6 @@ $(function() {
       portfolioId = getURLVariables()[i];
     } else if (i == "projectId") {
       projectId = getURLVariables()[i];
-    } else if (i == "currentDate") {
-      currentDate = new Date(getURLVariables()[i]);
     }
   }
   
@@ -37,10 +34,6 @@ $(function() {
   } else {
     $('#titleDiv').html('Financial Results');
   }
-
-	if (currentDate == null) {
-		currentDate = new Date();
-	}
 
 	var solutionResponse = rpcClient.portfolioService.getSolution(portfolioId,projectId);
 

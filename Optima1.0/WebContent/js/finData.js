@@ -106,10 +106,7 @@ $(function() {
         "%n %d, %y");
 
     for (var i = 0; i < financesList.length; i++) {
-      var theDate = new Date(
-          financesList[i].financeUntillDate.time);
-
-      var startDate = new Date(
+      var startDate = utcTime2LocalDate(
           financesList[i].financeUntillDate.time);
       formattedDate = dateFormatter.format(startDate);
       var title = formattedDate + "  -  " + financesList[i].financeAmount + "$ @ " + financesList[i].interestRate + "%";
@@ -304,7 +301,7 @@ $(function() {
         }
 
         if (bValid) {
-          var createFinanceResult = rpcClient.financeService.create(portfolioId, projectId, financeAmount, interestRate, financeDate);
+          var createFinanceResult = rpcClient.financeService.create(portfolioId, projectId, financeAmount, interestRate, localDateToUTCDate(financeDate));
 
           if (createFinanceResult.result == 0) {
             location.reload(true);

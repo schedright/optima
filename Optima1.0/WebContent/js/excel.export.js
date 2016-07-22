@@ -76,7 +76,7 @@
 							}
 							result += ">";
 							if (this.datafield == "tentativeStartDate") {
-								date = new Date(value[this.datafield].time);
+								date = utcTime2LocalDate(value[this.datafield].time);
 								result += date.toLocaleDateString("en-CA");
 							}
 							if (this.datafield == "project") {
@@ -342,7 +342,7 @@
 						}
 						else if(this.datafield.indexOf("Date") >= 0) {
 							
-							var d = new Date(dvalue[this.datafield].time);
+							var d = utcTime2LocalDate(dvalue[this.datafield].time);
 							//cText = d.toDateString();
 							var month = (d.getMonth() + 1)<10? '0' + (d.getMonth() + 1): d.getMonth() + 1;
 							cText = d.getFullYear() + "-" + month + "-" + d.getDate();// + 'T00:00:00.000Z';					

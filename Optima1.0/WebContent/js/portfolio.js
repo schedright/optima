@@ -497,8 +497,8 @@ function export2Excel(portfolioId){
 	    cfcols = [{ headertext: "Day", datatype: "String", datafield: "time",  width : "120"}
 	    		,{ headertext: "Project", datatype: "String", datafield: "projectCode",  width : "100"}];
 		
-	    var startDate = new Date(cashFlowdateRangeCall.data[0].time);
-		var endDate = new Date(cashFlowdateRangeCall.data[1].time);
+	    var startDate = utcTime2LocalDate(cashFlowdateRangeCall.data[0].time);
+		var endDate = utcTime2LocalDate(cashFlowdateRangeCall.data[1].time);
 		var runningDate = new Date(startDate);
 		while (runningDate <= endDate) {
 

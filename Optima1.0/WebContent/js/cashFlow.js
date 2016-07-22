@@ -55,11 +55,11 @@ $(function() {
     ];
     var pData = [];
     var rowCount = 0;
-    var startDate = new Date(
+    var startDate = utcTime2LocalDate(
         allResults.data.map.start.time);
-    var endDate = new Date(
+    var endDate = utcTime2LocalDate(
         allResults.data.map.end.time);
-    var runningDate = new Date(
+    var runningDate = utcTime2LocalDate(
         startDate);
     while (runningDate <= endDate) {
 

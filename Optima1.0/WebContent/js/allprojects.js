@@ -24,7 +24,7 @@ var prepareProjectData = function(search) {
         if (include) {
           var formattedDate = "";
           if (proj.propusedStartDate) {
-            var startDate = new Date(
+            var startDate = utcTime2LocalDate(
                 proj.propusedStartDate.time);
             formattedDate = dateFormatter.format(startDate);
           }

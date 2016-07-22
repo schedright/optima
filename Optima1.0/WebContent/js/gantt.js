@@ -43,6 +43,8 @@ function getGanttSource() {
 				}
 				if (startDate == null) {
 					startDate = new Date();
+				} else {
+				  startDate.time += utcDateOffset;
 				}
 				
 				var duration = taskData.list[i].calenderDuration;

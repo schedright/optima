@@ -7,8 +7,12 @@ function getGanttSource() {
 		var proj = projects[i].map;
 		var startDate = proj.Start;
 		var endDate = proj.End;
+		if (startDate && startDate.time && endDate && endDate.time) {
+	    startDate.time += utcDateOffset;
+	    endDate.time += utcDateOffset;
+		}
 		
-		var title  =proj.Project.projectName + '&#013;' + proj.Project.projectDescription + '&#013;' + fmt.format(new Date(startDate.time)) + " - " + fmt.format(new Date(endDate.time));
+		var title  =proj.Project.projectName + '&#013;' + proj.Project.projectDescription + '&#013;' + fmt.format(utcTime2LocalDate(startDate.time)) + " - " + fmt.format(utcTime2LocalDate(endDate.time));
 		tasksSource.push({
 			name : proj.Project.projectName,
 

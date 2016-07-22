@@ -126,21 +126,21 @@ $(function() {
       var fmt2 = new DateFmt(
           "%n %d, %y");
       if (d.tentativeStartDate != null) {
-        var tenStartDate = new Date(
+        var tenStartDate = utcTime2LocalDate(
             d.tentativeStartDate.time);
         tenStartDate = fmt2.format(tenStartDate);
       }
 
       var scStartDate = "";
       if (d.scheduledStartDate != null) {
-        scStartDate = new Date(
+        scStartDate = utcTime2LocalDate(
             d.scheduledStartDate.time);
         scStartDate = fmt2.format(scStartDate);
       }
 
       var actStartDate = "";
       if (d.actualStartDate != null) {
-        actStartDate = new Date(
+        actStartDate = utcTime2LocalDate(
             d.actualStartDate.time);
         actStartDate = fmt2.format(actStartDate);
       }
@@ -355,7 +355,7 @@ $(function() {
                   $("#sDateTentative").val());
             }
             // task
-            var updCall = rpcClient.taskService.update(task.taskId, projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate, $("#statusId").val());
+            var updCall = rpcClient.taskService.update(task.taskId, projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, localDateToUTCDate(d), localDateToUTCDate(scheduledStartDate), localDateToUTCDate(actualStartDate), $("#statusId").val());
 
             if (updCall.result == 0) {
               $(this).dialog("close");
@@ -371,7 +371,7 @@ $(function() {
                   $("#sDateTentative").val());
             }
 
-            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, d, scheduledStartDate, actualStartDate, $("#statusId").val())
+            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, localDateToUTCDate(d), localDateToUTCDate(scheduledStartDate), localDateToUTCDate(actualStartDate), $("#statusId").val())
 
             if (call.result == 0) {
               $(this).dialog("close");
@@ -491,8 +491,8 @@ $(function() {
               $("#projnameTxt").val(),
               $("#projCodeTxt").val(),
               $("#projectDescTxt").val(),
-              pStartDateTxt,
-              pFinishDateTxt,
+              localDateToUTCDate(pStartDateTxt),
+              localDateToUTCDate(pFinishDateTxt),
               overHeadPerDayTxt,
               $("#portfolioId").val(),
               weekend,
@@ -546,7 +546,7 @@ $(function() {
       var fmt2 = new DateFmt(
           "%n %d, %y");
       if (pData.propusedStartDate != null) {
-        $("#pStartDateTxt").val(fmt2.format(new Date(
+        $("#pStartDateTxt").val(fmt2.format(utcTime2LocalDate(
             pData.propusedStartDate.time)));
       }
       if (pData.proposedFinishDate != null) {
@@ -646,7 +646,7 @@ $(function() {
     daysList = daysOffList.data.list;
     for (var i = 0; i < daysList.length; i++) {
       var dayOff = daysList[i];
-      var theDate = new Date(
+      var theDate = utcTime2LocalDate(
           dayOff.dayOff.time);
 
       var li = $('<li></li>').addClass('ui-state-default').attr('id', dayOff.dayoffId).text(fmt.format(theDate));
@@ -688,7 +688,7 @@ $(function() {
           $(this).dialog("close");
           var dayOffDate = new Date(
               dayoff);
-          var createDayOffRequest = rpcClient.daysOffService.create(dayOffDate, "VACATION", projectId);
+          var createDayOffRequest = rpcClient.daysOffService.create(localDateToUTCDate(dayOffDate), "VACATION", projectId);
           if (createDayOffRequest.result == 0) {
             var dayOff = createDayOffRequest.data;
             var theDate = new Date(

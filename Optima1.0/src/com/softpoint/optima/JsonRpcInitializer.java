@@ -1,5 +1,7 @@
 package com.softpoint.optima;
 
+import java.util.TimeZone;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -27,7 +29,8 @@ public class JsonRpcInitializer implements ServletContextListener {
 	
 	
 	public void contextInitialized(ServletContextEvent event) {
-		
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+				
 		JSONRPCBridge globalBridge = JSONRPCBridge.getGlobalBridge();
 		JSONRPCBridge.getSerializer().setMarshallClassHints(false);
 		globalBridge.registerObject("optimaServer", new OptimaService() );
