@@ -504,6 +504,24 @@ public class ProjectController {
 						}
 					}
 					if (running < PortfolioSolver.MAX_RUNNING_SOLUTIONS) {
+						
+						//validate if we can run
+						String errorMessage = null;
+						if (project.getPropusedStartDate()==null) {
+							errorMessage = "Project must have a start date";
+						} else if (project.getProjectTasks()==null || project.getProjectTasks().size()==0) {
+							errorMessage = "Project must have at least one task";
+						} else if (project.getCollectPaymentPeriod()==0) {
+							errorMessage = "Project must have a collection payment period";
+						} else if (project.getPaymentRequestPeriod()==0) {
+							errorMessage = "Project must have a payment request period";
+						} else if (project.getAdvancedPaymentPercentage().doubleValue()==0.0 && (project.getPortfolioFinances()==null || project.getPortfolioFinances().size()==0)) {
+							errorMessage = "Project must have either advanced paymnent or some finance to be able to start";
+						}
+						if (errorMessage!=null) {
+							return new ServerResponse("0", "Failed", errorMessage);
+						}
+						
 						SolutionRunner runner = new SolutionRunner(project.getPortfolio(), projectsPriority, session);
 						ConcurrentMap<String, Object> x = new ConcurrentHashMap<String, Object>();
 						x.put(PortfolioSolver.SOLVER, runner);

@@ -459,6 +459,8 @@ function solveIt(portfolioId,
       }, 1000);
     } else if (result.result == 0 && result.message == 'Busy') {
       showMessage("Schedule", 'Error:' + result.data, 'error');
+    } else if (result.result == 0 && result.message == 'Failed') {
+      showMessage("Schedule", 'Error:' + result.data, 'error');
     }
     /*
      * showMessage("Schedule",'Error:' + result.message,'error');

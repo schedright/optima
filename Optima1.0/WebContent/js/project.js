@@ -318,7 +318,7 @@ $(function() {
         }
         ;
 
-        if (!/^-?\d*\.?\d*$/.test(dailyCostTxt)) {
+        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(dailyCostTxt)) {
           $("#dailyCostTxt").addClass("ui-state-error");
           bValid = false;
         }
@@ -328,7 +328,7 @@ $(function() {
         }
         ;
 
-        if (!/^-?\d*\.?\d*$/.test(dailyIncomeTxt)) {
+        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(dailyIncomeTxt)) {
           $("#dailyIncomeTxt").addClass("ui-state-error");
           bValid = false;
         }
@@ -422,7 +422,7 @@ $(function() {
         if (retainedPercentageTxt.match("\%$") == "%") {
           retainedPercentageTxt = retainedPercentageTxt.substr(0, retainedPercentageTxt.length - 1);
         }
-        if (!/^-?\d*\.?\d*$/.test(retainedPercentageTxt)) {
+        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(retainedPercentageTxt)) {
           $("#retainedPercentageTxt").addClass("ui-state-error");
           bValid = false;
         }
@@ -432,26 +432,34 @@ $(function() {
         if (advancedPaymentPercentage.match("\%$") == "%") {
           advancedPaymentPercentage = advancedPaymentPercentage.substr(0, advancedPaymentPercentage.length - 1);
         }
-        if (!/^-?\d*\.?\d*$/.test(advancedPaymentPercentage)) {
+        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(advancedPaymentPercentage)) {
           $("#advancedPaymentPercentage").addClass("ui-state-error");
           bValid = false;
         }
 
         var overHeadPerDayTxt = $("#overHeadPerDayTxt").val();
 
-        if (!/^-?\d*\.?\d*$/.test(overHeadPerDayTxt)) {
+        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(overHeadPerDayTxt)) {
           $("#overHeadPerDayTxt").addClass("ui-state-error");
           bValid = false;
         }
 
         var delayPenaltyTxt = $("#delayPenaltyTxt").val();
-        if (!/^-?\d*\.?\d*$/.test(delayPenaltyTxt)) {
+        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(delayPenaltyTxt)) {
           $("#delayPenaltyTxt").addClass("ui-state-error");
           bValid = false;
         }
 
         var collectPaymentPeriodTxt = $("#collectPaymentPeriodTxt").val();
+        if (!/^\+?(0|[1-9]\d*)$/.test(collectPaymentPeriodTxt)) {
+          $("#collectPaymentPeriodTxt").addClass("ui-state-error");
+          bValid = false;
+        }
         var payRequestsPeriodTxt = $("#payRequestsPeriodTxt").val();
+        if (!/^\+?(0|[1-9]\d*)$/.test(payRequestsPeriodTxt)) {
+          $("#payRequestsPeriodTxt").addClass("ui-state-error");
+          bValid = false;
+        }
 
         var pStartDateTxt = $("#pStartDateTxt").val();
         if (pStartDateTxt != null && pStartDateTxt.length != 0) {

@@ -322,7 +322,7 @@ $(function() {
           var call;
           if (projectId == null) {
 
-            call = rpcClient.projectService.create($("#projectName").val(), $("#projectCode").val(), $("#projectDescription").val(), null, null, 0.0, portfolioId, -1, 0, 0, 0, 0, 0, 0);
+            call = rpcClient.projectService.create($("#projectName").val(), $("#projectCode").val(), $("#projectDescription").val(), null, null, 0.0, 0, portfolioId, 0, 0, 0, 0, 0, 0);
 
           } else {
             call = rpcClient.projectService.updateShort(projectId, $("#projectName").val(), $("#projectCode").val(), $("#projectDescription").val(), portfolioId);
