@@ -169,18 +169,21 @@
     	return htmlElement;
 	}
 
-  var utcDateOffset = new Date().getTimezoneOffset() * 60000;
+  var utcDateOffset = function(time) {
+    return new Date(time).getTimezoneOffset() * 60000;
+  }
+  
   function utcTime2LocalDate(time) {
-    return new Date(time + utcDateOffset);
+    return new Date(time + utcDateOffset(time));
   };
 
   function localTimeToUTCDate(time) {
-    return new Date(time - utcDateOffset);
+    return new Date(time - utcDateOffset(time));
   };
 
   function localDateToUTCDate(date) {
     if (date) {
-      return new Date(date.getTime() - utcDateOffset);
+      return new Date(date.getTime() - utcDateOffset(date.getTime()));
     } else {
       return date;
     }

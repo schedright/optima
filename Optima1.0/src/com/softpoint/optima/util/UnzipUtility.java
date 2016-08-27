@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class UnzipUtility {
 	   /**
@@ -58,4 +60,28 @@ public class UnzipUtility {
         }
         bos.close();
     }
+    
+    public static void zip(String srcFiles, String zipFile, String internalFileName) throws IOException {
+
+    	 // input file 
+        FileInputStream in = new FileInputStream(srcFiles);
+
+        // out put file 
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
+
+        // name the file inside the zip  file 
+        out.putNextEntry(new ZipEntry(internalFileName)); 
+
+        // buffer size
+        byte[] b = new byte[1024];
+        int count;
+
+        while ((count = in.read(b)) > 0) {
+            out.write(b, 0, count);
+        }
+        out.close();
+        in.close();
+        
+    }
+    
 }

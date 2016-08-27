@@ -3,6 +3,12 @@ var allProjects = rpcClient.projectService.findAllLight();
 var dateFormatter = new DateFmt(
     "%n %d, %y");
 
+var primaviraProjectIds = rpcClient.projectService.getPrimaviraProjectIds();
+var primaviraProjectsMap = {};
+for (var i=0;i<primaviraProjectIds.list.length;i++) {
+  primaviraProjectsMap[primaviraProjectIds.list[i]] = true;
+}
+
 var prepareProjectData = function(search) {
   if (search) {
     search = search.toLowerCase();
@@ -46,10 +52,20 @@ var prepareProjectData = function(search) {
   }
   return result;
 }
-
-var enableButtons = function(enable) {
+var globals = {};
+var enableButtons = function(enable,rowId) {
   $('#editProject').prop("disabled", !enable);
   $('#deleteProject').prop("disabled", !enable);
+  if (enable && typeof rowId==='number') {
+      var item = globals.pGrid.getDataItem(rowId);
+      if (item && item.proj && item.proj.projectId) {
+        var projectId = item.proj.projectId;
+        if (!primaviraProjectsMap[projectId]) {
+          enable = false;
+        }
+    }
+  }
+  $('#exportProject').prop("disabled", !enable);
 }
 enableButtons(false);
 
@@ -96,6 +112,7 @@ $(function() {
         enableColumnReorder : true,
         forceFitColumns : true
       });
+  globals.pGrid = pGrid;
 
   $(window).resize(function() {
     pGrid.resizeCanvas();
@@ -106,7 +123,7 @@ $(function() {
     var cell = pGrid.getCellFromEvent(e);
     pGrid.setSelectedRows(cell.row);
     e.stopPropagation();
-    enableButtons(true);
+    enableButtons(true,cell.row);
   });
 
   pGrid.onDblClick.subscribe(function(e,
@@ -140,6 +157,40 @@ $(function() {
     $("#createOrEditProjectDialog").data("project", null).dialog("open");
   });
 
+  $('#exportProject').on('click', function(e) {
+    var row = pGrid.getSelectedRows();
+    if (row) {
+      var buttons = {
+          'Ok' : function() {
+            $(this).dialog("close");
+
+            var item = pGrid.getDataItem(row);
+            if (item && item.proj && item.proj.projectId) {
+                var projectId = item.proj.projectId;
+                var call = rpcClient.projectService.exportPrimaveraFile(projectId);
+                if (call) {
+                  var byteCharacters = atob(call);
+                  var array = new Uint8Array(byteCharacters.length);
+                  for (var i = 0; i < byteCharacters.length; i++){
+                      array[i] = byteCharacters.charCodeAt(i);
+                  }
+                  console.log('Data size: ' + byteCharacters.length);
+                  var blob = new Blob([array], { type: "application/zip" });
+                  console.log('BLOB SIZE: ' + byteCharacters.length);
+
+                  var date = new Date();
+                  saveAs(blob, item.proj.projectName + date + ".zip");            
+                }
+            }
+
+
+          }
+        }
+        showMessage('Project Export', "Only the tasks planned and finish dates will be updated.", 'info', buttons);
+
+    }
+  });
+  
   $('#importsProjects').on('click', function() {
     var fileInput = $('<input>').attr('type', 'file')
     var evt = document.createEvent("MouseEvents");

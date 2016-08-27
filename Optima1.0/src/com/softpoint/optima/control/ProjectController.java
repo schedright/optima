@@ -7,12 +7,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -58,6 +61,7 @@ public class ProjectController {
 
 	private static final String PLAN_START = "plan_start";
 	private static final String PLAN_END = "plan_end";
+	private static final List<Integer> ids = null;
 
 	/**
 	 * 
@@ -175,13 +179,13 @@ public class ProjectController {
 			}
 			controller.merge(project);
 			TaskController taskController = new TaskController();
-			for (Project p:portToReset.getProjects()) {
+			for (Project p : portToReset.getProjects()) {
 				taskController.adjustStartDateBasedOnTaskDependency(session, p.getProjectId(), true);
 			}
-			if (project.getPortfolio()!=portToReset) {
+			if (project.getPortfolio() != portToReset) {
 				taskController.adjustStartDateBasedOnTaskDependency(session, key, true);
 			}
-			
+
 			refreshJPAClass(session, Portfolio.class);
 			refreshJPAClass(session, PortfolioLight.class);
 			refreshJPAClass(session, ProjectLight.class);
@@ -210,11 +214,10 @@ public class ProjectController {
 			controller.merge(project);
 			TaskController taskController = new TaskController();
 			taskController.adjustStartDateBasedOnTaskDependency(session, key, true);
-			for (Project p:portToReset.getProjects()) {
+			for (Project p : portToReset.getProjects()) {
 				taskController.adjustStartDateBasedOnTaskDependency(session, p.getProjectId(), true);
 			}
 
-			
 			refreshJPAClass(session, Portfolio.class);
 			refreshJPAClass(session, PortfolioLight.class);
 			refreshJPAClass(session, ProjectLight.class);
@@ -736,8 +739,7 @@ public class ProjectController {
 	 * if (totalCostCurrent <= cashAvailable && cashAvailableNextPeriod - totalCostCurrent + expectedCashIn >= leftOverNextCost) { completed = true; } else {
 	 * 
 	 * List<TaskSolution> solutions = new LinkedList<>(); boolean noChange = true; for (ProjectTask task : currentEligibleSet) { task.setScheduledStartDate(null); Date taskDate = PaymentUtil.getTaskDate(task); Calendar calendar =
-	 * Calendar.getInstance(); calendar.setTime(taskDate); do { calendar.add(Calendar.DATE, 1); } while (PaymentUtil.isDayOff(calendar.getTime(), project.getDaysOffs()) || TaskUtil.isWeekendDay(calendar.getTime(),
-	 * project.getWeekend()));
+	 * Calendar.getInstance(); calendar.setTime(taskDate); do { calendar.add(Calendar.DATE, 1); } while (PaymentUtil.isDayOff(calendar.getTime(), project.getDaysOffs()) || TaskUtil.isWeekendDay(calendar.getTime(), project.getWeekend()));
 	 * 
 	 * // Bug#2 Not checking all the cases // if (to.equals(calendar.getTime()) || // to.after(calendar.getTime())) { noChange = false; task.setCalendarStartDate(calendar.getTime());
 	 * PaymentUtil.adjustStartDateBasedOnTaskDependency(project); updateScheduledState(project, taskStates);
@@ -1117,8 +1119,35 @@ public class ProjectController {
 		}
 	}
 
+	public String exportPrimaveraFile(HttpServletRequest request, HttpServletResponse response, HttpSession session, int data) {
+		PrimaveraManager pm = new PrimaveraManager();
+		try {
+			return pm.exportPrimaveraProject(data, session);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// Initialize response.
+		return null;
+	}
+	
+	public List<Integer> getPrimaviraProjectIds(HttpSession session) {
+		List<Integer> pids = new ArrayList<Integer>();
+		
+		EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
+		try {
+			List<Project> projects = controller.findAllQuery(Project.class, "select p.project from PrimaveraProject p");
+			for (Project p:projects) {
+				pids.add(p.getProjectId());
+			}
+		} catch (Exception e) {
+			
+		}
+		return pids;
+	}
+
 	public ServerResponse importPrimaveraFile(HttpServletRequest request, HttpSession session, String data) {
-		File zipFile = null; 
+		File zipFile = null;
 		File extractFolder = null;
 		String st = "";
 		try {
@@ -1141,7 +1170,7 @@ public class ProjectController {
 					return filename.endsWith(".xml");
 				}
 			});
-			for (File f:files) {
+			for (File f : files) {
 				PrimaveraManager primaveraManager = new PrimaveraManager();
 				st += primaveraManager.importPrimaveraFile(f, session);
 			}
@@ -1157,6 +1186,6 @@ public class ProjectController {
 			} catch (IOException e) {
 			}
 		}
-		return new ServerResponse("0", PortfolioSolver.SUCCESS,st);
+		return new ServerResponse("0", PortfolioSolver.SUCCESS, st);
 	}
 }

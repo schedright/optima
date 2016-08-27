@@ -8,8 +8,8 @@ function getGanttSource() {
 		var startDate = proj.Start;
 		var endDate = proj.End;
 		if (startDate && startDate.time && endDate && endDate.time) {
-	    startDate.time += utcDateOffset;
-	    endDate.time += utcDateOffset;
+	    startDate.time += utcDateOffset(startDate.time);
+	    endDate.time += utcDateOffset(endDate.time);
 		}
 		
 		var title  =proj.Project.projectName + '&#013;' + proj.Project.projectDescription + '&#013;' + fmt.format(utcTime2LocalDate(startDate.time)) + " - " + fmt.format(utcTime2LocalDate(endDate.time));
