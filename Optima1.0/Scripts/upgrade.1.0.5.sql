@@ -54,7 +54,7 @@ alter table Project add column last_updated timestamp default now() on update no
 alter table project_task add column last_updated timestamp default now() on update now() ;
 alter table portfolio_finance add column last_updated timestamp default now() on update now() ;
 alter table capicatl_plan_projects add column last_updated timestamp default now() on update now() ;
-alter table payment add column last_updated timestamp default now() on update now() ;
+alter table Payment add column last_updated timestamp default now() on update now() ;
 
 alter table project drop foreign key project_ibfk_1;
 alter table project drop foreign key project_ibfk_2;

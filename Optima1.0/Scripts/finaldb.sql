@@ -230,7 +230,7 @@ alter table portfolio_finance add column last_updated timestamp default now() on
 alter table days_off add column last_updated timestamp default now() on update now() ;
 
 
-alter table payment add column last_updated timestamp default now() on update now() ;
+alter table Payment add column last_updated timestamp default now() on update now() ;
 alter table capicatl_plan_projects add column last_updated timestamp default now() on update now() ;
 
 alter table portfolio_finance add column interest_rate numeric(16,13);

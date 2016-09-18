@@ -455,22 +455,23 @@ public class PortfolioSolver {
 			} catch (Exception e) {
 
 			}
-			solStatus.remove(SOLVER);
-			solStatus.put(STATUS, SUCCESS);
-			solStatus.put(DONE, totalTask);
 
 			try {
-				new Thread() {
-					public void run() {
+//				new Thread() {
+//					public void run() {
 						for (ProjectWrapper p : allProjects) {
 							ProjectSolutionDetails details = new ProjectSolutionDetails(false, p.getProject());
 							details.savePaymentToDB(session);
 						}
-					}
-				}.start();
+//					}
+//				}.start();
 			} catch (Exception e) {
 
 			}
+
+			solStatus.remove(SOLVER);
+			solStatus.put(STATUS, SUCCESS);
+			solStatus.put(DONE, totalTask);
 
 			return "SOLVED";
 		} finally {

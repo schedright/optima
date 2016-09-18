@@ -313,7 +313,7 @@ public class ProjectController {
 		try {
 			List<ProjectLight> projects = controller.findAll(ProjectLight.class);
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, projects);
-		} catch (EntityControllerException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new ServerResponse("PROJ0005", String.format("Error loading projects : %s", e.getMessage()), e);
 		}
@@ -505,6 +505,12 @@ public class ProjectController {
 					}
 					if (running < PortfolioSolver.MAX_RUNNING_SOLUTIONS) {
 						
+						boolean hasFinance = false;
+						if (project.getPortfolio()==null) {
+							hasFinance = project.getPortfolioFinances()!=null && project.getPortfolioFinances().size()>0;
+						} else {
+							hasFinance = project.getPortfolio().getPortfolioFinances()!=null && project.getPortfolio().getPortfolioFinances().size()>0;
+						}
 						//validate if we can run
 						String errorMessage = null;
 						if (project.getPropusedStartDate()==null) {
@@ -515,7 +521,7 @@ public class ProjectController {
 							errorMessage = "Project must have a collection payment period";
 						} else if (project.getPaymentRequestPeriod()==0) {
 							errorMessage = "Project must have a payment request period";
-						} else if (project.getAdvancedPaymentPercentage().doubleValue()==0.0 && (project.getPortfolioFinances()==null || project.getPortfolioFinances().size()==0)) {
+						} else if (project.getAdvancedPaymentPercentage().doubleValue()==0.0 && !hasFinance) {
 							errorMessage = "Project must have either advanced paymnent or some finance to be able to start";
 						}
 						if (errorMessage!=null) {
