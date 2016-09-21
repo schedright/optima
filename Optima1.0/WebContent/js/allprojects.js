@@ -199,12 +199,19 @@ $(function() {
 
     fileInput.change(function() {
       if (fileInput[0].files[0]) {
+        var filename = fileInput[0].files[0].name.toLowerCase();
+        if (!filename.endsWith('.zip') && !filename.endsWith('.xml')) {
+          showMessage("Imprort Project", 'can upload only a zip or xml files', 'error');
+          return;
+        }
+        
         var myFormData = new FormData();
         myFormData.append('pictureFile', fileInput[0].files[0]);
         var reader = new FileReader();
         reader.onload = function() {
+          var isZip = (filename.endsWith('.zip'))?true:false;
           result = window.btoa(reader.result);
-          var call = rpcClient.projectService.importPrimaveraFile(result);
+          var call = rpcClient.projectService.importPrimaveraFile(result,isZip);
           if (call.result == 0) {
             var buttons = {
                 'Refresh' : function() {

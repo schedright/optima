@@ -1170,25 +1170,31 @@ public class ProjectController {
 		return pids;
 	}
 
-	public ServerResponse importPrimaveraFile(HttpServletRequest request, HttpSession session, String data) {
+	public ServerResponse importPrimaveraFile(HttpServletRequest request, HttpSession session, String data, Boolean isZip) {
 		File zipFile = null;
 		File extractFolder = null;
 		String st = "";
 		try {
-			// save the zip file to a temp place
-			byte[] bytes = Base64.getDecoder().decode(data);
-			zipFile = File.createTempFile("primaveraImportFile", ".zip");
-			FileOutputStream fos = new FileOutputStream(zipFile.getAbsolutePath());
-			fos.write(bytes);
-			fos.close();
-
 			// extract to temp folder
 			extractFolder = File.createTempFile("extractPrimavera", "");
 			extractFolder.delete();
 			extractFolder.mkdirs();
 
-			UnzipUtility.unzip(zipFile.getAbsolutePath(), extractFolder.getAbsolutePath());
-
+			// save the zip file to a temp place
+			byte[] bytes = Base64.getDecoder().decode(data);
+			if (isZip) {
+				zipFile = File.createTempFile("primaveraImportFile", ".zip" );
+				FileOutputStream fos = new FileOutputStream(zipFile.getAbsolutePath());
+				fos.write(bytes);
+				fos.close();
+				UnzipUtility.unzip(zipFile.getAbsolutePath(), extractFolder.getAbsolutePath());
+			} else {
+				File f = new File(extractFolder.getAbsolutePath() + "/primaveraFile.xml");
+				FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
+				fos.write(bytes);
+				fos.close();
+			}
+			
 			File[] files = extractFolder.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String filename) {
 					return filename.endsWith(".xml");
@@ -1204,10 +1210,12 @@ public class ProjectController {
 			e.printStackTrace();
 			return new ServerResponse("ERROR", String.format("Error importing project : %s", e.getMessage()), e);
 		} finally {
-			zipFile.delete();
 			try {
 				FileUtils.deleteDirectory(extractFolder);
-			} catch (IOException e) {
+				if(zipFile!=null) {
+					zipFile.delete();
+				}
+			} catch (Exception e) {
 			}
 		}
 		return new ServerResponse("0", PortfolioSolver.SUCCESS, st);

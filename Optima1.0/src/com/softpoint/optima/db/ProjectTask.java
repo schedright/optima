@@ -179,6 +179,9 @@ public class ProjectTask implements Serializable  {
 	}
 
 	public BigDecimal getUniformDailyCost() {
+		if (this.uniformDailyCost==null) {
+			return BigDecimal.valueOf(0);
+		}
 		return this.uniformDailyCost;
 	}
 
@@ -187,6 +190,9 @@ public class ProjectTask implements Serializable  {
 	}
 
 	public BigDecimal getUniformDailyIncome() {
+		if (this.uniformDailyIncome==null) {
+			return BigDecimal.valueOf(0);
+		}
 		return this.uniformDailyIncome;
 	}
 

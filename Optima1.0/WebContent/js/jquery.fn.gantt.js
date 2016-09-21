@@ -733,7 +733,7 @@
 
                             var getDay = rday.getDay();
                             var day_class = dowClass[getDay];
-                            if (holidays.indexOf((new Date(rday.getFullYear(), rday.getMonth(), rday.getDate())).getTime()) > -1) {
+                            if (holidays.indexOf(rday) > -1) {
                                 day_class = "holiday";
                             }
 

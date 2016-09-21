@@ -1,157 +1,173 @@
 window.weekdays = null;
+window.holidays = null;
 
 function getGanttSource() {
 
-	var projectId = null;
-	for ( var i in getURLVariables()) {
-		if (i == "projectId") {
-			projectId = getURLVariables()[i];
-		}
-	}
-	tasksSource = [];
-	if (!projectId) {
-		showMessage("Update Project","No valid project id","Error on page - a project ID must be provided!!",'error');
-	} else {
-		var result = rpcClient.taskService.findAllByProject(projectId);
-		if (result.result == 0) {
-			var taskData = result.data;
-			var fmt = new DateFmt("%n %d, %y");
-			for (var i = 0; i < taskData.list.length; i++) {
-				if (i==0) {
-				  //get the weekend
-				  var we = taskData.list[i].project.weekend;
-				  if (typeof we == 'string' && we.length==7) {
-				    window.weekdays = [];
-				    for (var x=0;x<7;x++) {
-				      if (we[x]=='0') {
-				        window.weekdays.push(' wd');
-				      } else {
-				        window.weekdays.push(' sa');
-				      }
-				    }
-				  }
-				}
-				var startDate = taskData.list[i].calendarStartDate;
-				if (startDate == null) {
-					startDate =	taskData.list[i].actualStartDate;
-				}
-				if (startDate == null) {
-					startDate = taskData.list[i].scheduledStartDate;
-				}
-				if (startDate == null) {
-					startDate = taskData.list[i].tentativeStartDate;
-				}
-				if (startDate == null) {
-					startDate = new Date();
-				} else {
-				  startDate.time += utcDateOffset(startDate.time);
-				}
-				
-				var duration = taskData.list[i].calenderDuration;
-				if (duration == null) {
-					duration = taskData.list[i].duration;
-				}
-				
-				var endDate = startDate.time + (duration - 1) * 86400000;
+  var projectId = null;
+  for ( var i in getURLVariables()) {
+    if (i == "projectId") {
+      projectId = getURLVariables()[i];
+    }
+  }
+  tasksSource = [];
+  if (!projectId) {
+    showMessage("Update Project", "No valid project id", "Error on page - a project ID must be provided!!", 'error');
+  } else {
+    var result = rpcClient.taskService.findAllByProject(projectId);
+    if (result.result == 0) {
+      var taskData = result.data;
+      var fmt = new DateFmt(
+          "%n %d, %y");
+      for (var i = 0; i < taskData.list.length; i++) {
+        if (i == 0) {
+          // get the weekend
+          var we = taskData.list[i].project.weekend;
+          if (typeof we == 'string' && we.length == 7) {
+            window.weekdays = [];
+            for (var x = 0; x < 7; x++) {
+              if (we[x] == '0') {
+                window.weekdays.push(' wd');
+              } else {
+                window.weekdays.push(' sa');
+              }
+            }
+          }
 
-				var actualStartDate = new Date(startDate.time);
-				var title  = "";
-				if (duration==0) {
-				  title = taskData.list[i].taskName;
-				} else {
-	        title = taskData.list[i].taskName + '&#013;';
-	        if (taskData.list[i].taskDescription) {
-	          title += taskData.list[i].taskDescription + '&#013;'
-	        }
-	        title += fmt.format(new Date(startDate.time)) + " - " + fmt.format(new Date(endDate)) + '&#013;';
-	        title += "Duration: " + taskData.list[i].duration + ' Days&#013;';
-	        title += "Daily Cost: " + taskData.list[i].uniformDailyCost + '$&#013;';
-	        title += "Daily Income: " + taskData.list[i].uniformDailyIncome + '$&#013;';
-				}
-					//proj.Project.projectName + '&#013;' + proj.Project.projectDescription + '&#013;' + fmt.format(new Date(startDate.time)) + " - " + fmt.format(new Date(endDate.time));
-				tasksSource.push({
-					name : taskData.list[i].taskName,
+          var daysOff = taskData.list[i].project.daysOffs.list;
+          if (daysOff) {
+            window.holidays = [];
+            for (var i = 0; i < daysOff.length; i++) {
+              var t = daysOff[i].dayOff.time;
+              window.holidays[i] = utcTime2LocalDate(t);
+            }
+          }
+        }
+        var startDate = taskData.list[i].calendarStartDate;
+        if (startDate == null) {
+          startDate = taskData.list[i].actualStartDate;
+        }
+        if (startDate == null) {
+          startDate = taskData.list[i].scheduledStartDate;
+        }
+        if (startDate == null) {
+          startDate = taskData.list[i].tentativeStartDate;
+        }
+        if (startDate == null) {
+          startDate = new Date();
+        } else {
+          startDate.time += utcDateOffset(startDate.time);
+        }
 
-					desc : taskData.list[i].taskDescription,
+        var duration = taskData.list[i].calenderDuration;
+        if (duration == null) {
+          duration = taskData.list[i].duration;
+        }
 
-					values : [ {
+        var endDate = startDate.time + (duration - 1) * 86400000;
 
-						from : "/Date(" + actualStartDate.getTime() + ")/",
+        var actualStartDate = new Date(
+            startDate.time);
+        var title = "";
+        if (duration == 0) {
+          title = taskData.list[i].taskName;
+        } else {
+          title = taskData.list[i].taskName + '&#013;';
+          if (taskData.list[i].taskDescription) {
+            title += taskData.list[i].taskDescription + '&#013;'
+          }
+          title += fmt.format(new Date(
+              startDate.time)) + " - " + fmt.format(new Date(
+              endDate)) + '&#013;';
+          title += "Duration: " + taskData.list[i].duration + ' Days&#013;';
+          title += "Daily Cost: " + taskData.list[i].uniformDailyCost + '$&#013;';
+          title += "Daily Income: " + taskData.list[i].uniformDailyIncome + '$&#013;';
+        }
+        // proj.Project.projectName + '&#013;' + proj.Project.projectDescription + '&#013;' + fmt.format(new Date(startDate.time)) + " - " + fmt.format(new
+        // Date(endDate.time));
+        tasksSource.push({
+          name : taskData.list[i].taskName,
 
-						to : "/Date(" + endDate + ")/",
+          desc : taskData.list[i].taskDescription,
 
-						label : taskData.list[i].taskName,
+          values : [
+            {
 
-						customClass : "ganttRed",
+              from : "/Date(" + actualStartDate.getTime() + ")/",
 
-						dataObj : taskData.list[i].taskId,
-						
-						title : title
+              to : "/Date(" + endDate + ")/",
 
-					} ]
-				});
+              label : taskData.list[i].taskName,
 
-			}
-		} else {
-			Message("Cannot load project","Unable to load project: " + result.message,'error');
-		}
-	}
+              customClass : "ganttRed",
 
-	return tasksSource;
+              dataObj : taskData.list[i].taskId,
+
+              title : title
+
+            }
+          ]
+        });
+
+      }
+    } else {
+      Message("Cannot load project", "Unable to load project: " + result.message, 'error');
+    }
+  }
+
+  return tasksSource;
 
 }
 
-
 $("#tasksGantt").gantt({
 
-	source : getGanttSource(),
+  source : getGanttSource(),
 
-	navigate : "scroll",
+  navigate : "scroll",
 
-	maxScale : "months",
-	minScale : "days",
-	scale : "days",
-	excludeYears :  true,
-	  
-	waitText : "Please wait...",
+  maxScale : "months",
+  minScale : "days",
+  scale : "days",
+  excludeYears : true,
 
-	itemsPerPage : 1000,
+  waitText : "Please wait...",
 
-	scrollToToday : true,
+  itemsPerPage : 1000,
 
-	weekdays_classes : window.weekdays,
-	
-	onItemClick : function(data) {
+  scrollToToday : true,
 
-		// Open edit task dialog
+  weekdays_classes : window.weekdays,
+  holidays : window.holidays,
 
-	},
+  onItemClick : function(data) {
 
-	onAddClick : function(dt, rowId) {
+    // Open edit task dialog
 
-		$("#projTasksDialog").data("taskId", null).dialog('option',
-				'title', 'Add New Task').dialog('open');
+  },
 
-	},
+  onAddClick : function(dt,
+      rowId) {
 
-	onRender : function() {
+    $("#projTasksDialog").data("taskId", null).dialog('option', 'title', 'Add New Task').dialog('open');
 
-	}
+  },
+
+  onRender : function() {
+
+  }
 
 });
 
-
 function getURLVariables() {
-	var getVars = [];
-	var split = location.href.split('?')[1].split('&');
-	if (split != null) {
-		for ( var i in split) {
-			var parts = split[i].split('=');
-			getVars[parts[0]] = parts[1];
-		}
-	}
+  var getVars = [];
+  var split = location.href.split('?')[1].split('&');
+  if (split != null) {
+    for ( var i in split) {
+      var parts = split[i].split('=');
+      getVars[parts[0]] = parts[1];
+    }
+  }
 
-	return getVars;
+  return getVars;
 }
 
 /*
