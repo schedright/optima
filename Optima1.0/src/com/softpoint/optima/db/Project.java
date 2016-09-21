@@ -92,7 +92,7 @@ public class Project implements Serializable {
 
 	// bi-directional many-to-one association to ProjectTask
 	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
-	@OrderBy("calendarStartDate ASC,tentativeStartDate ASC")
+	@OrderBy("calendarStartDate ASC,tentativeStartDate ASC, duration ASC")
 	private List<ProjectTask> projectTasks;
 
 	//bi-directional many-to-one association to PortfolioFinance

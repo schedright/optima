@@ -288,7 +288,7 @@ $(function() {
   setTimeout(function() {
     var solutionResponse = rpcClient.portfolioService.hasSolution(portfolioId, projectId);
     if (solutionResponse.result == 0 && solutionResponse.data && solutionResponse.data == 'TRUE') {
-      var result = rpcClient.portfolioService.isInvalidSolution(portfolioId);
+      var result = rpcClient.portfolioService.isInvalidSolution(portfolioId, projectId);
       if (result) {
         showMessage('Enterprise has changed', 'The enterprise has changed after last solve, you might need to re-solve again', 'info');
 

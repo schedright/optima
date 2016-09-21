@@ -234,7 +234,7 @@ public class ProjectSolutionDetails {
 
 			int diffInDays = (project.getPropusedStartDate()!=null && lte!=null)? PortfolioController.daysBetween(project.getPropusedStartDate(), lte):0;
 			int daysInLastPeriod = diffInDays % requestPeriod;
-			int daysRemainingInThePeriod = daysInLastPeriod == 0 ? 0 : (requestPeriod - daysInLastPeriod + 1);
+			int daysRemainingInThePeriod = daysInLastPeriod == 0 ? 1 : (requestPeriod - daysInLastPeriod + 1);
 			int shift = daysRemainingInThePeriod + paymentPeriod ;
 
 			// for example
