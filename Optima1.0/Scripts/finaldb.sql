@@ -1,7 +1,3 @@
-drop schema optima;
-create schema optima;
-use optima;
-
 create table portfolio (
 portfolio_id INT NOT null AUTO_INCREMENT primary key, 
 portfolio_name varchar(32),
@@ -217,9 +213,11 @@ create table user_role (
   user_name         varchar(50) not null,
   role_name         varchar(50) not null,
   FOREIGN KEY (user_name) REFERENCES user(user_name)
-  ON UPDATE CASCADE ON DELETE CASCADE;
-
+  ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+INSERT INTO `user` VALUES (1,'testuser','testuser');
+INSERT INTO `user_role` VALUES (1,'testuser','admin'),(2,'testuser','optima');
 
 alter table portfolio add column solve_date timestamp;
 alter table project add column solve_date timestamp;
@@ -255,9 +253,6 @@ alter table project add column weekend varchar(10);
 update project set weekend='1000001' where weekend_days_id=1;
 update project set weekend='0000011' where weekend_days_id=2;
 update project set weekend='0000110' where weekend_days_id=3;
-
-alter table project drop foreign key project_ibfk_6;
-alter table project drop column weekend_days_id;
 
 alter table project_task add column status INT default 1; -- 1 not started, 2 started, 3 finished
 

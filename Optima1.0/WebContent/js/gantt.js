@@ -15,7 +15,59 @@ function getGanttSource() {
   } else {
     var result = rpcClient.taskService.findAllByProject(projectId);
     if (result.result == 0) {
+//      result.data.listsplice (4,18);
       var taskData = result.data;
+    //*
+      var isDependent = function(t1,t2) {
+        if (t2.asDependency && t2.asDependency.list) {
+          for (var i=0;i<t2.asDependency.list.length;i++) {
+            if (t2.asDependency.list[i].dependent==t1.taskId) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+      var swapElements = function(list,x,y) {
+        var b = list[y];
+        list[y] = list[x];
+        list[x] = b;
+      }
+      
+      //sort tasks starting at the same time based on dependencies
+     for (var i=0;i<taskData.list.length;i++) {
+        var tsk = taskData.list[i];
+        var sameStartTasks = [];
+        sameStartTasks.push(tsk);
+        var p=i+1;
+        for (;p<taskData.list.length;p++) {
+          var tsk2 = taskData.list[p];
+          if (tsk.calendarStartDate.time === tsk2.calendarStartDate.time) {
+            sameStartTasks.push(tsk2);
+          } else {
+            break;
+          }
+        }
+        
+        //now sort sameStartTasks
+        if (sameStartTasks.length>1) {
+          var changed = false;
+          for (var x=0;x<sameStartTasks.length-1;x++) {
+            for (var y=x+1;y<sameStartTasks.length;y++) {
+              if (isDependent(sameStartTasks[x],sameStartTasks[y])) {
+                swapElements(sameStartTasks,x,y);
+                changed = true;
+              }
+            }
+          }
+          if (changed) {
+            taskData.list.splice.apply(taskData.list,[i,sameStartTasks.length].concat(sameStartTasks));
+          }
+        }
+        i = p-1;
+      }
+     //*/
+      
       var fmt = new DateFmt(
           "%n %d, %y");
       for (var i = 0; i < taskData.list.length; i++) {
@@ -36,9 +88,9 @@ function getGanttSource() {
           var daysOff = taskData.list[i].project.daysOffs.list;
           if (daysOff) {
             window.holidays = [];
-            for (var i = 0; i < daysOff.length; i++) {
-              var t = daysOff[i].dayOff.time;
-              window.holidays[i] = utcTime2LocalDate(t);
+            for (var i2 = 0; i2 < daysOff.length; i2++) {
+              var t = daysOff[i2].dayOff.time;
+              window.holidays[i2] = utcTime2LocalDate(t);
             }
           }
         }
