@@ -239,6 +239,9 @@ public class ProjectTask implements Serializable  {
 	}
 
 	public Integer getStatus() {
+		if (status==null) {
+			return ProjectTask.STATUS_NOT_STARTED; 
+		}
 		return status;
 	}
 

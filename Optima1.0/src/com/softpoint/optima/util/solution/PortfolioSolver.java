@@ -923,6 +923,9 @@ public class PortfolioSolver {
 			return;
 		}
 		Date taskStart = taskNode.getCalculatedTaskStart();
+		if (taskStart==null) {
+			taskStart = taskNode.getTask().getProject().getPropusedStartDate();
+		}
 		if (taskStart.before(end)) {
 			tasks.add(taskNode);
 			for (TaskTreeNode child : taskNode.getChildren()) {

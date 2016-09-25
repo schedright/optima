@@ -85,6 +85,9 @@ public class PrimaveraManager {
 				if (primaveraProject.getProject() == null) {
 					sb.append("<li>Creating new project \"" + name + "\"</li>");
 					Project proj = new Project();
+					proj.setDelayPenaltyAmount(BigDecimal.valueOf(0.0));
+					proj.setCollectPaymentPeriod(0);
+					proj.setPaymentRequestPeriod(0);
 					primaveraProject.setProject(proj);
 					primaveraProject.getProject().setProjectCode(name);
 				} else {

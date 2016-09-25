@@ -439,7 +439,7 @@ $(function() {
 
         var overHeadPerDayTxt = $("#overHeadPerDayTxt").val();
 
-        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(overHeadPerDayTxt)) {
+        if (!/^-?\d*(\.\d+)?$/.test(overHeadPerDayTxt)) {
           $("#overHeadPerDayTxt").addClass("ui-state-error");
           bValid = false;
         }
@@ -520,6 +520,8 @@ $(function() {
           } else {
             showMessage("Update Project", "Error:" + call.message, 'error');
           }
+        } else {
+          showMessage("Invalid or missing values", "One or more value is not provided properly, check all project tab and fix any value that is marked with error");
         }
       });
 
