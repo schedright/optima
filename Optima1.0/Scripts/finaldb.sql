@@ -193,7 +193,7 @@ project_id INT unique,
 CONSTRAINT FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE 
 );
 
-create table Payment (
+create table payment (
 Payment_id INT NOT null AUTO_INCREMENT primary key, 
 project_id INT, 
 payment_date DATE, 
@@ -222,13 +222,13 @@ INSERT INTO `user_role` VALUES (1,'testuser','admin'),(2,'testuser','optima');
 alter table portfolio add column solve_date timestamp;
 alter table project add column solve_date timestamp;
 
-alter table Project add column last_updated timestamp default now() on update now() ;
+alter table project add column last_updated timestamp default now() on update now() ;
 alter table project_task add column last_updated timestamp default now() on update now() ;
 alter table portfolio_finance add column last_updated timestamp default now() on update now() ;
 alter table days_off add column last_updated timestamp default now() on update now() ;
 
 
-alter table Payment add column last_updated timestamp default now() on update now() ;
+alter table payment add column last_updated timestamp default now() on update now() ;
 alter table capicatl_plan_projects add column last_updated timestamp default now() on update now() ;
 
 alter table portfolio_finance add column interest_rate numeric(16,13);
@@ -257,6 +257,7 @@ update project set weekend='0000110' where weekend_days_id=3;
 alter table project_task add column status INT default 1; -- 1 not started, 2 started, 3 finished
 
 alter table task_dependency add column lag INT default 0;
+alter table project_task add column type INT default 0; -- 0 normal, 1 start, 2 finish
 
 commit;
 

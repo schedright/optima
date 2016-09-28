@@ -26,7 +26,7 @@ add constraint  capicatl_plan_projects_ibfk_1
 FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) on delete cascade ;
 
 
-create table Payment (
+create table payment (
 Payment_id INT NOT null AUTO_INCREMENT primary key, 
 project_id INT, 
 payment_date DATE, 
@@ -50,11 +50,11 @@ create table user_role (
 
 alter table portfolio add column solve_timestamp timestamp;
 
-alter table Project add column last_updated timestamp default now() on update now() ;
+alter table project add column last_updated timestamp default now() on update now() ;
 alter table project_task add column last_updated timestamp default now() on update now() ;
 alter table portfolio_finance add column last_updated timestamp default now() on update now() ;
 alter table capicatl_plan_projects add column last_updated timestamp default now() on update now() ;
-alter table Payment add column last_updated timestamp default now() on update now() ;
+alter table payment add column last_updated timestamp default now() on update now() ;
 
 alter table project drop foreign key project_ibfk_1;
 alter table project drop foreign key project_ibfk_2;

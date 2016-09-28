@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.softpoint.optima.OptimaException;
+import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.control.ProjectController;
@@ -121,6 +122,7 @@ public class PrimaveraManager {
 
 				SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+				deleteVacations(session, primaveraProject.getProject());
 				List<DaysOff> vacations = ImportVacations(primaveraProject, doc, formatter2);
 
 				try {
@@ -164,7 +166,7 @@ public class PrimaveraManager {
 					if (depCount > 0) {
 						sb.append("<Li>Removed " + depCount + " dependencies and they will be updated from the imported file</li>");
 					}
-					removeDependenciesByProjectId(session, primaveraProject.getProject().getProjectId());
+					removeDependenciesByProject(session, primaveraProject.getProject());
 				}
 				importTaskDependencies(project, newDependencies, updatedDependencies, objectId2TaskMap);
 
@@ -179,8 +181,9 @@ public class PrimaveraManager {
 				if (depCount > 0) {
 					sb.append("<Li>Created " + depCount + " dependency</li>");
 				}
-
+				
 				EntityController<DaysOff> vacController = new EntityController<DaysOff>(session.getServletContext());
+				
 				for (DaysOff dayo : vacations) {
 					vacController.persist(dayo);
 				}
@@ -196,12 +199,27 @@ public class PrimaveraManager {
 		return sb.toString();
 	}
 
-	public static void removeDependenciesByProjectId(HttpSession session, int projectId) throws OptimaException {
+	private void deleteVacations(HttpSession session, Project project) {
+		EntityController<DaysOff> controller = new EntityController<DaysOff>(session.getServletContext());
+		for (DaysOff dayoff : project.getDaysOffs()) {
+			try {
+				controller.remove(DaysOff.class, dayoff.getDayoffId());
+			} catch (EntityControllerException e) {
+				e.printStackTrace();
+			}			
+		}
+	}
+
+	public static void removeDependenciesByProject(HttpSession session, Project project) throws OptimaException {
 		EntityController<TaskDependency> controller = new EntityController<TaskDependency>(session.getServletContext());
-		try {
-			controller.dml(TaskDependency.class, "delete FROM task_dependency where dependant_task_id in (select task_id from project_task where project_id=?1)", projectId);
-		} catch (EntityControllerException e) {
-			e.printStackTrace();
+		for (ProjectTask tsk : project.getProjectTasks()) {
+			for (TaskDependency dep:tsk.getAsDependency()) {
+				try {
+					controller.remove(TaskDependency.class, dep.getDependencyId());
+				} catch (EntityControllerException e) {
+					e.printStackTrace();
+				}			
+			}
 		}
 	}
 
@@ -232,6 +250,7 @@ public class PrimaveraManager {
 					String ttype = getElementChildAttributeValue(taskNode, "type");
 					String objectId = getElementChildAttributeValue(taskNode, "objectid");
 					Double cost = activityCost.get(objectId);
+					int type = ProjectTask.TYPE_NPRMAL;
 					if (cost == null) {
 						cost = (double) 0;
 					}
@@ -245,7 +264,11 @@ public class PrimaveraManager {
 						primaveraProject.getProject().setOverheadPerDay(BigDecimal.valueOf(overhead));
 						projE = projE.getNextSibling();
 						continue;
-					}
+					} else if ("start milestone".equals(ttype.toLowerCase())) {
+						type = ProjectTask.TYPE_MILESTONE_START;
+					} else if ("finish milestone".equals(ttype.toLowerCase())) {
+						type = ProjectTask.TYPE_MILESTONE_END;
+					} 
 
 					String tname = getElementChildAttributeValue(taskNode, "name");
 
@@ -263,6 +286,7 @@ public class PrimaveraManager {
 						task.setUniformDailyIncome(BigDecimal.ZERO);
 						task.setTaskDescription("");
 					}
+					task.setType(type);
 					task.setTaskName(tname);
 					// task.setTentativeStartDate(tStart);
 					task.setDuration(duration);

@@ -21,6 +21,10 @@ public class ProjectTask implements Serializable  {
 	public static int STATUS_STARTED = 2;
 	public static int STATUS_FINISHED = 3;
 	
+	public static int TYPE_NPRMAL = 0;
+	public static int TYPE_MILESTONE_START = 1;
+	public static int TYPE_MILESTONE_END = 2;
+	
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -49,6 +53,9 @@ public class ProjectTask implements Serializable  {
 
 	@Column(name="status")
 	private Integer status;
+
+	@Column(name="type")
+	private Integer type;
 
 	@Column(name="task_description")
 	private String taskDescription;
@@ -252,6 +259,17 @@ public class ProjectTask implements Serializable  {
 	@Override
 	public String toString() {
 		return "ProjectTask [taskName=" + taskName + "]";
+	}
+
+	public Integer getType() {
+		if (type==null) {
+			return 0;
+		}
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
 	}
 	
 	
