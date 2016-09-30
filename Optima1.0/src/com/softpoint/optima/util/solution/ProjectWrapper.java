@@ -15,6 +15,7 @@ public class ProjectWrapper {
 	Project project;
 	List<TaskTreeNode> tasks;
 	List<TaskTreeNode> rootTasks;
+
 	public Boolean getFinished() {
 		return finished;
 	}
@@ -28,12 +29,15 @@ public class ProjectWrapper {
 	}
 
 	List<TaskTreeNode> completedTasks;
-	Map<ProjectTask,TaskTreeNode> allTreeNodesMap;
+	Map<ProjectTask, TaskTreeNode> allTreeNodesMap;
 	List<TaskTreeNode> allTasks;
+	List<ProjectTask> eventTasks;
+	
 	Boolean finished;
 	private String projectWeekends;
 	private List<DaysOff> projectVacations;
 	int totalTasks;
+
 	public ProjectWrapper(Project project) {
 		super();
 		this.project = project;
@@ -42,42 +46,62 @@ public class ProjectWrapper {
 		rootTasks = new ArrayList<TaskTreeNode>();
 		completedTasks = new ArrayList<TaskTreeNode>();
 		allTasks = new ArrayList<TaskTreeNode>();
+		eventTasks = new ArrayList<ProjectTask>();
 		projectWeekends = project.getWeekend();
 		projectVacations = project.getDaysOffs();
-		
-		allTreeNodesMap = new HashMap<ProjectTask,TaskTreeNode>();
+
+		allTreeNodesMap = new HashMap<ProjectTask, TaskTreeNode>();
 		List<ProjectTask> allTasks = project.getProjectTasks();
 		totalTasks = allTasks.size();
-		for (ProjectTask tsk:allTasks) {
-			addTaskNodes(tsk);
+		for (ProjectTask tsk : allTasks) {
+			if (tsk.getType() == ProjectTask.TYPE_NPRMAL) {
+				addTaskNodes(tsk);
+			} else {
+				eventTasks.add(tsk);
+			}
 		}
-		
-		for (ProjectTask tsk:allTasks) {
-			TaskTreeNode node = allTreeNodesMap.get(tsk);
-			this.allTasks.add(node);
-			if (node.parents.size()==0) {
-				tasks.add(node);
-				rootTasks.add(node);
+
+		for (ProjectTask tsk : allTasks) {
+			if (tsk.getType() == ProjectTask.TYPE_NPRMAL) {
+				TaskTreeNode node = allTreeNodesMap.get(tsk);
+				this.allTasks.add(node);
+				if (node.parents.size() == 0) {
+					tasks.add(node);
+					rootTasks.add(node);
+				}
 			}
 		}
 
 		allTreeNodesMap.clear();
-		allTreeNodesMap=null;
+		allTreeNodesMap = null;
+	}
+
+	private void addDep(TaskTreeNode n1, ProjectTask depT) {
+		if (depT.getType()==ProjectTask.TYPE_NPRMAL) {
+			addTaskNodes(depT);
+			TaskTreeNode tsk2Node = allTreeNodesMap.get(depT);
+			n1.children.add(tsk2Node);
+			tsk2Node.parents.add(n1);
+			
+		} else {
+			for (TaskDependency dep : depT.getAsDependency()) {
+				ProjectTask tsk2 = project.findTask(dep.getDependent());
+				addDep(n1,tsk2);
+			}
+		}
+		
 	}
 	
 	private void addTaskNodes(ProjectTask tsk) {
 		TaskTreeNode node = allTreeNodesMap.get(tsk);
-		if (node==null) {
+		if (node == null) {
 			node = new TaskTreeNode(tsk, this);
 			allTreeNodesMap.put(tsk, node);
-			
+
 			List<TaskDependency> dependencies = tsk.getAsDependency();
-			for (TaskDependency dep:dependencies) {
+			for (TaskDependency dep : dependencies) {
 				ProjectTask tsk2 = project.findTask(dep.getDependent());
-				addTaskNodes(tsk2);
-				TaskTreeNode tsk2Node = allTreeNodesMap.get(tsk2);
-				node.children.add(tsk2Node);
-				tsk2Node.parents.add(node);
+				addDep(node, tsk2);
 			}
 		}
 	}
@@ -85,7 +109,6 @@ public class ProjectWrapper {
 	public List<TaskTreeNode> getTasks() {
 		return tasks;
 	}
-	
 
 	public String getProjectWeekends() {
 		return projectWeekends;
@@ -98,10 +121,10 @@ public class ProjectWrapper {
 	public int getProjectDuratoin() {
 		int maxDuration = Integer.MIN_VALUE;
 		Date projectStart = project.getPropusedStartDate();
-		for (TaskTreeNode task:rootTasks) {
+		for (TaskTreeNode task : rootTasks) {
 			Date ts = task.getCalculatedTaskStart();
 			int shift = (int) PortfolioSolver.differenceInDays(projectStart, ts);
-			
+
 			int temp = task.getDurationWithChildren() + shift;
 			if (maxDuration < temp) {
 				maxDuration = temp;

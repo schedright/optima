@@ -23,6 +23,7 @@ import com.softpoint.optima.db.Portfolio;
 import com.softpoint.optima.db.PortfolioFinance;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectTask;
+import com.softpoint.optima.db.TaskDependency;
 import com.softpoint.optima.util.PaymentUtil;
 import com.softpoint.optima.util.PeriodLogGeneratorNew;
 import com.softpoint.optima.util.ProjectSolutionDetails;
@@ -225,6 +226,65 @@ public class PortfolioSolver {
 		}
 	}
 
+	void getStartBoundaries(ProjectWrapper project, ProjectTask tsk, List<ProjectTask> endBoundaries) {
+		for (TaskDependency dep : tsk.getAsDependency()) {
+			ProjectTask tsk2 = project.getProject().findTask(dep.getDependent());
+			if (!project.eventTasks.contains(tsk2)) {
+				endBoundaries.add(tsk2);
+			} else {
+				getStartBoundaries(project, tsk2,endBoundaries);
+			}
+		}
+	}
+
+	void getEndBoundaries(ProjectWrapper project, ProjectTask tsk,List<ProjectTask> endBoundaries) {
+		for (TaskDependency dep : tsk.getAsDependent()) {
+			ProjectTask tsk2 = project.getProject().findTask(dep.getDependency());
+			if (!project.eventTasks.contains(tsk2)) {
+				endBoundaries.add(tsk2);
+			} else {
+				getEndBoundaries(project, tsk2, endBoundaries);
+			}
+		}
+	}
+
+	private Date calcTaskBoundaries(ProjectWrapper project, ProjectTask tsk) {
+		List<ProjectTask> startBoundaries = new ArrayList<ProjectTask>();
+		List<ProjectTask> endBoundaries = new ArrayList<ProjectTask>();
+		getStartBoundaries(project,tsk,startBoundaries);
+		getEndBoundaries(project,tsk,endBoundaries);
+		Date minDate = null;
+		Date maxDate = null;
+		for (ProjectTask t:startBoundaries) {
+			Date d = t.getCalendarStartDate();
+			if (maxDate==null || maxDate.after(d)) {
+				maxDate = d;
+			}
+		}
+		for (ProjectTask t:endBoundaries) {
+			Date d = TaskUtil.addDays(t.getCalendarStartDate(),t.getCalenderDuration());
+			if (minDate==null || minDate.before(d)) {
+				minDate = d;
+			}
+		}
+
+		Date newDate = null;
+		if (tsk.getType() == ProjectTask.TYPE_MILESTONE_START) {
+			if (maxDate!=null) {
+				newDate = maxDate;
+			} else if (minDate!=null) {
+				newDate = minDate;
+			}
+		} else if (tsk.getType() == ProjectTask.TYPE_MILESTONE_END) {
+			if (minDate!=null) {
+				newDate = minDate;
+			} else if (maxDate!=null) {
+				newDate = maxDate;
+			}
+		}
+		return newDate;
+	}
+	
 	public void commitSolution(EntityController<ProjectTask> taskController, ProjectWrapper project, ConcurrentMap<String, Object> solStatus) {
 		try {
 			Integer i = (Integer) solStatus.get(DONE);
@@ -237,6 +297,43 @@ public class PortfolioSolver {
 				solStatus.put(DONE, i);
 				updateTask(taskController, task, commitedTasks);
 			}
+			
+			while (!project.eventTasks.isEmpty()) {
+				ProjectTask tsk = project.eventTasks.get(0);
+				
+				Date d = calcTaskBoundaries(project,tsk);
+				if (d != null) {
+					tsk.setScheduledStartDate(d);
+					tsk.setCalendarStartDate(d);
+					tsk.setCalenderDuration(0);
+					taskController.mergeTransactionMerge(tsk);
+				}
+				project.eventTasks.remove(tsk);
+			}
+	/*			for (ProjectTask tsk : project.eventTasks) {
+					Date mind = getEventMinDate(project, tsk);
+					Date maxd = getEventMaxDate(project, tsk);
+					Date d = null;
+					if (tsk.getType() == ProjectTask.TYPE_MILESTONE_START) {
+						if (maxd == null) {
+							d = mind;
+						} else {
+							d = maxd;
+						}
+					} else {
+						if (mind == null) {
+							d = maxd;
+						} else {
+							d = mind;
+						}
+					}
+					if (d != null) {
+						tsk.setScheduledStartDate(d);
+						tsk.setCalendarStartDate(d);
+						tsk.setCalenderDuration(0);
+						taskController.mergeTransactionMerge(tsk);
+					}
+				}*/
 
 		} catch (EntityControllerException e) {
 			e.printStackTrace();
@@ -457,14 +554,14 @@ public class PortfolioSolver {
 			}
 
 			try {
-//				new Thread() {
-//					public void run() {
-						for (ProjectWrapper p : allProjects) {
-							ProjectSolutionDetails details = new ProjectSolutionDetails(false, p.getProject());
-							details.savePaymentToDB(session);
-						}
-//					}
-//				}.start();
+				// new Thread() {
+				// public void run() {
+				for (ProjectWrapper p : allProjects) {
+					ProjectSolutionDetails details = new ProjectSolutionDetails(false, p.getProject());
+					details.savePaymentToDB(session);
+				}
+				// }
+				// }.start();
 			} catch (Exception e) {
 
 			}
@@ -704,7 +801,7 @@ public class PortfolioSolver {
 	Date getMaxProjectEnd(ProjectWrapper p) {
 		Date maxDate = null;
 		for (TaskTreeNode tsk : p.getAllTasks()) {
-			if (maxDate == null || maxDate.before(tsk.getCalculatedTaskEnd())) {
+			if (tsk.getTask().getType() == ProjectTask.TYPE_NPRMAL && (maxDate == null || maxDate.before(tsk.getCalculatedTaskEnd()))) {
 				maxDate = tsk.getCalculatedTaskEnd();
 			}
 		}
@@ -764,6 +861,9 @@ public class PortfolioSolver {
 			Boolean projectDone = isAfterProjectEnd(projectW, date);
 			if (projectDone && !firstPeriod) {
 				for (TaskTreeNode tsk : projectW.getAllTasks()) {
+					if (tsk.getTask().getType() != ProjectTask.TYPE_NPRMAL) {
+						continue;
+					}
 					if (!tsk.getCalculatedTaskStart().before(p1End)) {
 						projectDone = false;
 						break;
@@ -792,8 +892,8 @@ public class PortfolioSolver {
 				currentProjectDayDetails.addBalance(-O);
 				currentProjectDayDetails.addOverhead(O);
 			}
-			
-			if (!projectDone && pfd!=null && date.after(pfd)) {
+
+			if (!projectDone && pfd != null && date.after(pfd)) {
 				Double p = projectW.getProject().getDelayPenaltyAmount().doubleValue();
 				currentProjectDayDetails.addBalance(-p);
 			}
@@ -923,7 +1023,7 @@ public class PortfolioSolver {
 			return;
 		}
 		Date taskStart = taskNode.getCalculatedTaskStart();
-		if (taskStart==null) {
+		if (taskStart == null) {
 			taskStart = taskNode.getTask().getProject().getPropusedStartDate();
 		}
 		if (taskStart.before(end)) {
