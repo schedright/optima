@@ -262,7 +262,7 @@ public class PortfolioSolver {
 			}
 		}
 		for (ProjectTask t:endBoundaries) {
-			Date d = TaskUtil.addDays(t.getCalendarStartDate(),t.getCalenderDuration());
+			Date d = t.getType()==ProjectTask.TYPE_MILESTONE_END?t.getCalendarStartDate():TaskUtil.addDays(t.getCalendarStartDate(),t.getCalenderDuration()-1);
 			if (minDate==null || minDate.before(d)) {
 				minDate = d;
 			}
@@ -273,7 +273,7 @@ public class PortfolioSolver {
 			if (maxDate!=null) {
 				newDate = maxDate;
 			} else if (minDate!=null) {
-				newDate = minDate;
+				newDate = TaskUtil.addDays(minDate,1);
 			}
 		} else if (tsk.getType() == ProjectTask.TYPE_MILESTONE_END) {
 			if (minDate!=null) {

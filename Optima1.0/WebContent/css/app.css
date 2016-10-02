@@ -1467,3 +1467,9 @@ h2 {
 	background-image: url(../images/diamond.png);
     margin-left: -9px;
 }
+.finish-diamond {
+	width: 18px;
+    height: 18px;
+	background-image: url(../images/fdiamond.png);
+    margin-left: 14px;
+}

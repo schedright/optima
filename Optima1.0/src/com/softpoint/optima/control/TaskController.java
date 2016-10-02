@@ -13,6 +13,7 @@ import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.db.Project;
 import com.softpoint.optima.db.ProjectTask;
 import com.softpoint.optima.db.TaskDependency;
+import com.softpoint.optima.struct.TaskSolution;
 import com.softpoint.optima.util.PaymentUtil;
 import com.softpoint.optima.util.ProjectSolutionDetails;
 import com.softpoint.optima.util.TaskUtil;
@@ -438,6 +439,11 @@ public class TaskController {
 				cal.add(Calendar.DATE, task.getCalenderDuration() + getLag(task, nextTask));
 				if (nextTask.getCalendarStartDate() == null || nextTask.getCalendarStartDate().before(cal.getTime())) {
 					Date newDate = adjustStart(project, cal.getTime());
+					if (nextTask.getType()==ProjectTask.TYPE_MILESTONE_END) {
+						newDate = task.getType()==ProjectTask.TYPE_NPRMAL?adjustStartBackword(project,TaskUtil.addDays(newDate, -1)):task.getCalendarStartDate();
+					} else if (nextTask.getType()==ProjectTask.TYPE_MILESTONE_START && task.getType()==ProjectTask.TYPE_MILESTONE_END) {
+						newDate = adjustStart(project, TaskUtil.addDays(cal.getTime(),1));
+					}
 					if (nextTaskStartDate == null || nextTaskStartDate.before(newDate)) {
 						nextTask.setCalendarStartDate(newDate);
 						nextTask.setTentativeStartDate(newDate);
@@ -454,7 +460,11 @@ public class TaskController {
 	 * @param task
 	 */
 	protected void calculateCalederDuration(Project project, ProjectTask task) {
-		task.setCalenderDuration(getDuration(project, task.getCalendarStartDate(), task.getDuration()));
+		if (task.getType()==ProjectTask.TYPE_NPRMAL) {
+			task.setCalenderDuration(getDuration(project, task.getCalendarStartDate(), task.getDuration()));
+		} else {
+			task.setCalenderDuration(0);
+		}
 
 	}
 
@@ -511,6 +521,20 @@ public class TaskController {
 		}
 	}
 
+	private static Date adjustStartBackword(Project project, Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		while (true) {
+			if (!PaymentUtil.isDayOff(date, project.getDaysOffs()) && !TaskUtil.isWeekendDay(date, project.getWeekend())) {
+				return date;
+			}
+
+			calendar.add(Calendar.DATE, -1);
+			date = calendar.getTime();
+		}
+	}
+
+	
 	public ServerResponse resetScheduling(HttpSession session, int projectId) {
 		adjustStartDateBasedOnTaskDependency(session, projectId, true);
 		return new ServerResponse("0", "Success", null);

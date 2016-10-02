@@ -1,6 +1,8 @@
 package com.softpoint.optima.util;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -17,6 +19,7 @@ import java.util.Map;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -27,7 +30,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.softpoint.optima.OptimaException;
-import com.softpoint.optima.ServerResponse;
 import com.softpoint.optima.control.EntityController;
 import com.softpoint.optima.control.EntityControllerException;
 import com.softpoint.optima.control.ProjectController;
@@ -42,7 +44,7 @@ import com.softpoint.optima.db.TaskDependency;
 
 public class PrimaveraManager {
 	private static final DateFormat PRIMAVERA_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	
+
 	public String importPrimaveraFile(File xmlFile, HttpSession session) throws Exception {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<ul>");
@@ -181,9 +183,9 @@ public class PrimaveraManager {
 				if (depCount > 0) {
 					sb.append("<Li>Created " + depCount + " dependency</li>");
 				}
-				
+
 				EntityController<DaysOff> vacController = new EntityController<DaysOff>(session.getServletContext());
-				
+
 				for (DaysOff dayo : vacations) {
 					vacController.persist(dayo);
 				}
@@ -206,19 +208,19 @@ public class PrimaveraManager {
 				controller.remove(DaysOff.class, dayoff.getDayoffId());
 			} catch (EntityControllerException e) {
 				e.printStackTrace();
-			}			
+			}
 		}
 	}
 
 	public static void removeDependenciesByProject(HttpSession session, Project project) throws OptimaException {
 		EntityController<TaskDependency> controller = new EntityController<TaskDependency>(session.getServletContext());
 		for (ProjectTask tsk : project.getProjectTasks()) {
-			for (TaskDependency dep:tsk.getAsDependency()) {
+			for (TaskDependency dep : tsk.getAsDependency()) {
 				try {
 					controller.remove(TaskDependency.class, dep.getDependencyId());
 				} catch (EntityControllerException e) {
 					e.printStackTrace();
-				}			
+				}
 			}
 		}
 	}
@@ -268,7 +270,7 @@ public class PrimaveraManager {
 						type = ProjectTask.TYPE_MILESTONE_START;
 					} else if ("finish milestone".equals(ttype.toLowerCase())) {
 						type = ProjectTask.TYPE_MILESTONE_END;
-					} 
+					}
 
 					String tname = getElementChildAttributeValue(taskNode, "name");
 
@@ -533,13 +535,13 @@ public class PrimaveraManager {
 				project.appendChild(n);
 			} else {
 				Node c = n.getFirstChild();
-				while (c!=null) {
+				while (c != null) {
 					Node c2 = c.getNextSibling();
 					n.removeChild(c);
 					c = c2;
 				}
 			}
-	        n.appendChild(project.getOwnerDocument().createTextNode(value));
+			n.appendChild(project.getOwnerDocument().createTextNode(value));
 		} catch (Exception e) {
 			// if a
 		}
@@ -650,6 +652,7 @@ public class PrimaveraManager {
 		}
 
 	}
+
 	public String exportPrimaveraProject(int projectId, HttpSession session) throws Exception {
 		try {
 			PrimaveraProject primaveraProject = getPrimaveraProject(session, projectId);
@@ -658,7 +661,7 @@ public class PrimaveraManager {
 				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 				Document doc = dBuilder.parse(new java.io.ByteArrayInputStream(xml.getBytes()));
-				
+
 				Map<String, ProjectTask> existingGuid2TaskMap = new HashMap<String, ProjectTask>();
 				for (ProjectTask t : primaveraProject.getProject().getProjectTasks()) {
 					if (t.getTaskGuid() != null) {
@@ -674,10 +677,10 @@ public class PrimaveraManager {
 
 							// Map<String, Double> activityCost = getTasksCost(project);
 							Map<String, ProjectTask> guid2TaskMap = new HashMap<String, ProjectTask>();
-							for (ProjectTask pt:primaveraProject.getProject().getProjectTasks()) {
+							for (ProjectTask pt : primaveraProject.getProject().getProjectTasks()) {
 								guid2TaskMap.put(pt.getTaskGuid(), pt);
 							}
-							
+
 							Node projE = project.getFirstChild();
 							Node overheadActivity = null;
 							Node theProjectNode = null;
@@ -699,9 +702,9 @@ public class PrimaveraManager {
 										 */
 										String tguid = getElementChildAttributeValue(taskNode, "guid");
 										ProjectTask task = existingGuid2TaskMap.get(tguid);
-										if (task != null && (task.getStatus()==null || task.getStatus() == ProjectTask.STATUS_NOT_STARTED)) {
+										if (task != null && (task.getStatus() == null || task.getStatus() == ProjectTask.STATUS_NOT_STARTED)) {
 											Date d = task.getCalendarStartDate();
-											
+
 											setElementChildAttributeValue(taskNode, "PlannedStartDate", PRIMAVERA_DATE_FORMATTER.format(d));
 											setElementChildAttributeValue(taskNode, "PlannedFinishDate", PRIMAVERA_DATE_FORMATTER.format(TaskUtil.addDays(d, task.getCalenderDuration())));
 										}
@@ -709,8 +712,8 @@ public class PrimaveraManager {
 								}
 								projE = projE.getNextSibling();
 							}
-							
-							if (overheadActivity!=null) {
+
+							if (overheadActivity != null) {
 								String objectId = getElementChildAttributeValue(overheadActivity, "objectid");
 								Double oldOverheadCost = getActivityExpense(project, objectId);
 
@@ -718,11 +721,11 @@ public class PrimaveraManager {
 								Date[] projDates = PaymentUtil.getProjectExtendedDateRanges(controller, primaveraProject.getProject());
 								int projDuration = PaymentUtil.daysBetween(projDates[0], projDates[1]) + 1;
 								Double totalOverhead = projDuration * primaveraProject.getProject().getOverheadPerDay().doubleValue();
-								if (projDates.length==2 && totalOverhead!=oldOverheadCost) {
+								if (projDates.length == 2 && totalOverhead != oldOverheadCost) {
 									setElementChildAttributeValue(overheadActivity, "PlannedStartDate", PRIMAVERA_DATE_FORMATTER.format(projDates[0]));
 									setElementChildAttributeValue(overheadActivity, "PlannedFinishDate", PRIMAVERA_DATE_FORMATTER.format(projDates[1]));
-									
-									updateActivityExpense(project,objectId,totalOverhead/oldOverheadCost);
+
+									updateActivityExpense(project, objectId, totalOverhead / oldOverheadCost);
 								}
 							}
 
@@ -732,46 +735,49 @@ public class PrimaveraManager {
 						}
 					}
 				}
-				
-				File zipFile = writeDocumentToFile(doc,primaveraProject.getProject().getProjectName());
+
+				File zipFile = writeDocumentToFile(doc, primaveraProject.getProject().getProjectName());
 
 				byte[] encoded = Files.readAllBytes(Paths.get(zipFile.getPath()));
-//				String contents = new String(Files.readAllBytes(Paths.get(zipFile.getAbsolutePath())));
-				if (encoded!=null) {
+				// String contents = new String(Files.readAllBytes(Paths.get(zipFile.getAbsolutePath())));
+				if (encoded != null) {
 					return new String(Base64.getEncoder().encode(encoded), "UTF-8");
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 		return null;
 	}
 
-	public static File writeDocumentToFile(Document document, String fileName) {
+	private static String getDocString(Document doc) throws Exception {
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+		// initialize StreamResult with File object to save to file
+		StreamResult result = new StreamResult(new StringWriter());
+		DOMSource source = new DOMSource(doc);
+		transformer.transform(source, result);
+
+		String xmlString = result.getWriter().toString();
+		return xmlString;
+	}
+
+	public static File writeDocumentToFile(Document document, String fileName) throws Exception {
 		File zipFile = null;
 		try {
 			File xmlFile = File.createTempFile(fileName, ".xml");
+
 			zipFile = File.createTempFile(fileName, ".zip");
-			
-			// Make a transformer factory to create the Transformer
-			TransformerFactory tFactory = TransformerFactory.newInstance();
 
-			// Make the Transformer
-			Transformer transformer = tFactory.newTransformer();
-
-			// Mark the document as a DOM (XML) source
-			DOMSource source = new DOMSource(document);
-
-			// Say where we want the XML to go
-			StreamResult result = new StreamResult(xmlFile);
-
-			// Write the XML to file
-			transformer.transform(source, result);
+			String xml = getDocString(document);
+			PrintWriter out = new PrintWriter(xmlFile.getAbsolutePath());
+			out.print(xml);
 			
 			UnzipUtility.zip(xmlFile.getAbsolutePath(), zipFile.getAbsolutePath(), fileName + ".xml");
-			
+
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 		return zipFile;
 	}

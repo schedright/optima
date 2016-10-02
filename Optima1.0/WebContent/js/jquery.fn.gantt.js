@@ -965,7 +965,7 @@
             // **Progress Bar**
             // Return an element representing a progress of position within
             // the entire chart
-            createProgressBar: function (days, cls, desc, label, dataObj, title) {
+            createProgressBar: function (days, cls, desc, label, dataObj, title, type) {
                 if (title) {
                 	title = " title='" + title + "' ";
                 }  else {
@@ -977,7 +977,12 @@
                 var bar = null
                 var child = "";
                 if (days==0) {
-                  child =  '<div class="diamond"' + title + '></div>';
+                  if (type==2) {
+                    child =  '<div class="finish-diamond"' + title + '></div>';
+                  } else {
+                    child =  '<div class="diamond"' + title + '></div>';
+                    
+                  }
                 } else {
                   child =  '<div class="fn-label"' + title + '>' + label + '</div>';
                 }
@@ -1226,7 +1231,8 @@
                                                 day.desc ? day.desc : "",
                                                 day.label ? day.label : "",
                                                 day.dataObj ? day.dataObj : null,
-                                                day.title
+                                                day.title,
+                                                day.type
                                         );
 
                                     // find row

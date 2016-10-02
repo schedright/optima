@@ -154,7 +154,9 @@ function getGanttSource() {
 
               dataObj : taskData.list[i].taskId,
 
-              title : title
+              title : title,
+              
+              type : taskData.list[i].type
 
             }
           ]
