@@ -144,6 +144,7 @@ public class PrimaveraManager {
 						sb.append("<li>Updating " + updated + " task</li>");
 					}
 					primController.merge(primaveraProject);
+					projectController.merge(primaveraProject.getProject());
 					taskController.mergeTransactionStart();
 					for (ProjectTask t : primaveraProject.getProject().getProjectTasks()) {
 						if (!guid2taskMap.values().contains(t)) {
@@ -244,6 +245,11 @@ public class PrimaveraManager {
 		Map<String, ProjectTask> guid2TaskMap = new HashMap<String, ProjectTask>();
 
 		Node projE = project.getFirstChild();
+		Double overheadCost = null;
+		Date overheadMinStart = null;
+		Date overheadMaxEnd = null;
+		int overheadDuration = 0;
+		
 		while (projE != null) {
 			if (projE instanceof Element) {
 				if ("activity".equals(((Element) projE).getTagName().toLowerCase())) {
@@ -261,9 +267,8 @@ public class PrimaveraManager {
 
 					if ("wbs summary".equals(ttype.toLowerCase())) {
 						cost += getActivityExpense(project, objectId);
-						double overhead = cost;
-						overhead /= duration;
-						primaveraProject.getProject().setOverheadPerDay(BigDecimal.valueOf(overhead));
+						overheadCost = cost;
+						overheadDuration = duration;
 						projE = projE.getNextSibling();
 						continue;
 					} else if ("start milestone".equals(ttype.toLowerCase())) {
@@ -273,12 +278,7 @@ public class PrimaveraManager {
 					}
 
 					String tname = getElementChildAttributeValue(taskNode, "name");
-
 					String tguid = getElementChildAttributeValue(taskNode, "guid");
-					// String temp2 = getElementChildAttributeValue(taskNode, "plannedstartdate");
-					// Date tStart = formatter.parse(temp2);
-					// temp2 = getElementChildAttributeValue(taskNode, "plannedfinishdate");
-					// Date tEnd = formatter.parse(temp2);
 					ProjectTask task = existingGuid2TaskMap.get(tguid);
 					if (task == null) {
 						task = new ProjectTask();
@@ -297,9 +297,44 @@ public class PrimaveraManager {
 					}
 					guid2TaskMap.put(tguid, task);
 					objectId2TaskMap.put(objectId, task);
+					try {
+						String temp = getElementChildAttributeValue(taskNode, "plannedstartdate");
+						if (temp.indexOf("T")!=-1) {
+							temp = temp .substring(0,temp.indexOf("T")) + "T00:00:00";
+						}
+						// 2016-05-01T00:00:00
+						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+						Date startDate = formatter.parse(temp);
+						if (overheadMinStart==null || overheadMinStart.after(startDate)) {
+							overheadMinStart = startDate;
+						}
+
+						temp = getElementChildAttributeValue(taskNode, "plannedfinishdate");
+						if (temp.indexOf("T")!=-1) {
+							temp = temp .substring(0,temp.indexOf("T")) + "T00:00:00";
+						}
+						// 2016-05-01T00:00:00
+						Date endDate = formatter.parse(temp);
+						if (overheadMaxEnd==null || overheadMaxEnd.before(endDate)) {
+							overheadMaxEnd = endDate;
+						}
+
+					} catch (Exception e) {
+					}
+
 				}
 			}
 			projE = projE.getNextSibling();
+		}
+		
+		if (overheadCost!=null) {
+			if (overheadMinStart!=null && overheadMaxEnd!=null) {
+				overheadDuration = PaymentUtil.daysBetween(overheadMinStart, overheadMaxEnd) + 1;	
+			}
+			double overhead = overheadCost;
+			overhead /= overheadDuration;
+			primaveraProject.getProject().setOverheadPerDay(BigDecimal.valueOf(overhead));
+
 		}
 	}
 
@@ -704,9 +739,19 @@ public class PrimaveraManager {
 										ProjectTask task = existingGuid2TaskMap.get(tguid);
 										if (task != null && (task.getStatus() == null || task.getStatus() == ProjectTask.STATUS_NOT_STARTED)) {
 											Date d = task.getCalendarStartDate();
+											String startDate = "";
+											String endDate = "";
+											if (task.getType() == ProjectTask.TYPE_MILESTONE_START) {
+												startDate = endDate = PRIMAVERA_DATE_FORMATTER.format(d).replace("00:00:00", "08:00:00");
+											} else if (task.getType() == ProjectTask.TYPE_MILESTONE_END) {
+												startDate = endDate = PRIMAVERA_DATE_FORMATTER.format(d).replace("00:00:00", "17:00:00");
+											} else {
+												startDate = PRIMAVERA_DATE_FORMATTER.format(d).replace("00:00:00", "08:00:00");
+												endDate = PRIMAVERA_DATE_FORMATTER.format(TaskUtil.addDays(d, task.getCalenderDuration()-1)).replace("00:00:00", "17:00:00");
+											} 
+											setElementChildAttributeValue(taskNode, "PlannedStartDate", startDate);
+											setElementChildAttributeValue(taskNode, "PlannedFinishDate", endDate);
 
-											setElementChildAttributeValue(taskNode, "PlannedStartDate", PRIMAVERA_DATE_FORMATTER.format(d));
-											setElementChildAttributeValue(taskNode, "PlannedFinishDate", PRIMAVERA_DATE_FORMATTER.format(TaskUtil.addDays(d, task.getCalenderDuration())));
 										}
 									}
 								}
@@ -718,7 +763,7 @@ public class PrimaveraManager {
 								Double oldOverheadCost = getActivityExpense(project, objectId);
 
 								EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
-								Date[] projDates = PaymentUtil.getProjectExtendedDateRanges(controller, primaveraProject.getProject());
+								Date[] projDates = PaymentUtil.getProjectDateRanges(controller, primaveraProject.getProject());
 								int projDuration = PaymentUtil.daysBetween(projDates[0], projDates[1]) + 1;
 								Double totalOverhead = projDuration * primaveraProject.getProject().getOverheadPerDay().doubleValue();
 								if (projDates.length == 2 && totalOverhead != oldOverheadCost) {
@@ -773,6 +818,7 @@ public class PrimaveraManager {
 			String xml = getDocString(document);
 			PrintWriter out = new PrintWriter(xmlFile.getAbsolutePath());
 			out.print(xml);
+			out.close();
 			
 			UnzipUtility.zip(xmlFile.getAbsolutePath(), zipFile.getAbsolutePath(), fileName + ".xml");
 

@@ -317,6 +317,29 @@ public class PaymentUtil {
 		return dates;
 	}
 	
+	public static Date[] getProjectDateRanges( EntityController<?> controller, Project project) throws EntityControllerException {
+		int projectId = project.getProjectId();
+		String query = "select min(calendar_start_date) , max(ADDDATE(calendar_start_date, calender_duration - 1))   from project_task where project_id  = ?1";
+		List<?> results = controller.nativeQuery(query, projectId);
+		Date[] dates = new Date[2];
+		
+		if (results != null && results.size() > 0) {
+			Object[] values = (Object[]) results.get(0);
+			if (values[0] != null)
+				dates[0] = (Date) values[0];
+			if (values[1] != null) {
+				String endDate = (String) values[1];
+				try {
+					dates[1] = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(endDate);
+				} catch (ParseException e) {
+					
+					e.printStackTrace();
+				}
+				
+			}
+		}
+		return dates;
+	}
 	
 	public static Date[] getProjectDateRanges( EntityController<?> controller, int projectId) throws EntityControllerException {
 		String query = "select min(calendar_start_date) , max(ADDDATE(calendar_start_date, calender_duration - 1))   from project_task where project_id  = ?1";
