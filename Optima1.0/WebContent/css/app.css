@@ -73,11 +73,12 @@ select option {
 
 .fn-gantt {
 	width: 100%;
+	height: 100%;
+	position : relative;
 }
 
 .fn-gantt .fn-content {
 	overflow: hidden;
-	position: relative;
 	width: 100%;
 }
 
@@ -149,7 +150,6 @@ select option {
 .fn-gantt .scoll-container {
 	overflow-y: auto;
 	overflow-x: hidden;
-	max-height: 380px;
 	height:100%;
 }
 
@@ -293,6 +293,8 @@ select option {
 	clear: both;
 	background-color: #FFF0D3;
 	width: 100%;
+	position:absolute;
+	bottom:0px;
 }
 
 .fn-gantt .navigate {
@@ -693,11 +695,8 @@ important
 }
 
 #projectTabs {
-	/* width: 960px; */
-	top:455px;
 	width:100%;
-	bottom:0px;
-	position:absolute;
+	height:100%;
 	z-index:2000;
 	
 }

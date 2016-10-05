@@ -4,9 +4,7 @@
 <%@ include file="header.html"%>
 
 <div class="mainContainer">
-	<div id="main" style="width: 100%;top:0px" class="main-body">
-
-		<div id="tasksGantt" class="gantt tasksgantt" style="height: 420px;position:absolute;top:35px"></div>
+	<div id="main" class="main-body">
 
 		<div id="projectTabs" >
 
@@ -18,6 +16,7 @@
 				<li><a href="#projTasks">Project Tasks</a></li>
 				<li><a href="#projFinanceData">Project Financial Data</a></li>
 				<li><a href="#financialPeriodsData">Financial Periods</a></li>
+				<li><a href="#tasksBarChart">Tasks Bar chart</a></li>
 			</ul>
 			<div id="projInfo">
 				<%@ include file="views/projectInfo.html"%>
@@ -36,6 +35,10 @@
 			<div id="financialPeriodsData">
 				<%@ include file="views/projectFinancialPeriods.html"%>
 			</div>
+			<div id="tasksBarChart">
+				<div id="tasksGantt" class="gantt tasksgantt" style="height: 100%;width:100%"></div>
+			</div>
+
 		</div>
 		<div id="projectButtons" class="ui-dialog-buttonset">
 			<button id="resetSchedulingBtn" style="width:200px">Reset Project Scheduling</button>

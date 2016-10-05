@@ -772,10 +772,11 @@ $(function() {
   });
 
   var windowResizeFunc = function() {
-    $('#projectTabs').height($('#main').height() - $('#tasksGantt').height())
+    $(".scoll-container").height($('#tasksGantt').height() - 41)
   };
   $(window).resize(windowResizeFunc);
-  windowResizeFunc();
+  setTimeout(function() {windowResizeFunc()},0);
+  
 
 });
 

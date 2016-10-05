@@ -731,6 +731,7 @@ display:table ; .div-table {
 	position: absolute;
 	top: 35px;
 	bottom: 0px;
+	width:100%;
 }
 
 /*
