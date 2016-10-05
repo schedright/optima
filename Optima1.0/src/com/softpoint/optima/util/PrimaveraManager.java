@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -687,6 +688,22 @@ public class PrimaveraManager {
 		}
 
 	}
+	
+	private static int countWorkingDays(Project project, Date date, Date d2) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		int count = 0;
+		while (!date.after(d2)) {
+			if (!PaymentUtil.isDayOff(date, project.getDaysOffs()) && !TaskUtil.isWeekendDay(date, project.getWeekend())) {
+				count++;
+			}
+
+			calendar.add(Calendar.DATE, 1);
+			date = calendar.getTime();
+		}
+		return count;
+	}
+
 
 	public String exportPrimaveraProject(int projectId, HttpSession session) throws Exception {
 		try {
@@ -764,9 +781,11 @@ public class PrimaveraManager {
 
 								EntityController<Project> controller = new EntityController<Project>(session.getServletContext());
 								Date[] projDates = PaymentUtil.getProjectDateRanges(controller, primaveraProject.getProject());
+								int workingDays = countWorkingDays(primaveraProject.getProject(),projDates[0],projDates[1]);
 								int projDuration = PaymentUtil.daysBetween(projDates[0], projDates[1]) + 1;
 								Double totalOverhead = projDuration * primaveraProject.getProject().getOverheadPerDay().doubleValue();
 								if (projDates.length == 2 && totalOverhead != oldOverheadCost) {
+									setElementChildAttributeValue(overheadActivity, "PlannedDuration", String.valueOf(workingDays*8));
 									setElementChildAttributeValue(overheadActivity, "PlannedStartDate", PRIMAVERA_DATE_FORMATTER.format(projDates[0]));
 									setElementChildAttributeValue(overheadActivity, "PlannedFinishDate", PRIMAVERA_DATE_FORMATTER.format(projDates[1]));
 

@@ -312,11 +312,11 @@ public class PortfolioController {
 				double profitBefore = totalIncome - totalCost - penaltiesBefore - overHeadBefore;
 				double profitAfter = totalIncome - totalCost - penaltiesAfter - overHeadAfter;
 
-				projDetails.put("profit_original", profitBefore);
+				projDetails.put("profit_original", Math.round(profitBefore*100.0)/100.0);
 				projDetails.put("end_original", format.format(lastDate));
 
 				if (solved) {
-					projDetails.put("profit_final", profitAfter);
+					projDetails.put("profit_final", Math.round(profitAfter*100.0)/100.0);
 					projDetails.put("end_final", format.format(scheduledEnd));
 				}
 			}
