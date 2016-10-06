@@ -84,7 +84,7 @@ select option {
 
 .fn-gantt .leftPanel {
 	float: left;
-	width: 240px;
+	width: 270px;
 	overflow: hidden;
 	border-right: 1px solid #DDD;
 	position: relative;
@@ -103,7 +103,7 @@ select option {
 .fn-gantt .leftPanel .fn-label {
 	display: inline-block;
 	color: #484A4D;
-	width: 235px;
+	width: 265px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
@@ -123,8 +123,7 @@ select option {
 }
 
 .fn-gantt .leftPanel .name {
-	width: 235px;
-	font-weight: 700;
+	width: 265px;
 }
 
 .fn-gantt .leftPanel .desc {
@@ -258,7 +257,6 @@ select option {
 
 .fn-gantt .bar .fn-label {
 	line-height: 18px;
-	font-weight: 700;
 	white-space: nowrap;
 	width: 100%;
 	text-overflow: ellipsis;
@@ -303,7 +301,7 @@ select option {
 
 .fn-gantt .navigate {
 	border-top: 1px solid #DDD;
-	padding: 10px 20px 10px 230px;
+	padding: 10px 20px 10px 260px;
 }
 
 .fn-gantt .navigate .nav-slider {

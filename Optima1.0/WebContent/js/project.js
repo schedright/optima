@@ -558,7 +558,7 @@ $(function() {
             showMessage("Update Project", "Error:" + call.message, 'error');
           }
         } else {
-          showMessage("Invalid or missing values", "One or more value is not provided properly, check all project tab and fix any value that is marked with error");
+          showMessage("Invalid or missing values", "One or more attribute has invalid value, fix them and try to save again");
         }
       });
 
