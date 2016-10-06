@@ -225,6 +225,10 @@ select option {
 	height: 0px !Important;
 }
 
+.tasksgantt {
+	padding-bottom:34px;
+    box-sizing: border-box;
+}
 .fn-gantt-hint {
 	border: 5px solid #edc332;
 	background-color: #fff5d4;
@@ -299,7 +303,7 @@ select option {
 
 .fn-gantt .navigate {
 	border-top: 1px solid #DDD;
-	padding: 10px 20px 10px 150px;
+	padding: 10px 20px 10px 230px;
 }
 
 .fn-gantt .navigate .nav-slider {
@@ -524,7 +528,6 @@ select option {
 .one-column {
 	float: left;
 	width: 90%;
-	margin: 20px 20px 20px 20px;
 }
 
 .two-columns.right {
@@ -687,11 +690,9 @@ important
 
 #projectButtons {
 	float: right;
-	margin: 20px 100px;
-	position:absolute;
 	bottom:0px;
 	right:0px;
-	z-index:100001;
+	padding-right:20px;
 }
 
 #projectTabs {
@@ -1471,4 +1472,19 @@ h2 {
     height: 18px;
 	background-image: url(../images/fdiamond.png);
     margin-left: 14px;
+}
+.grouped-section {
+	border-radius: 8px;
+    border: 2px solid #c0c0c0;
+    color : #5C82AE;
+    padding: 0px 15px;
+    box-sizing: border-box;
+    margin-bottom:15px 
+}
+.project-info-container {
+	width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: auto;
+    padding-right : 15px;
 }

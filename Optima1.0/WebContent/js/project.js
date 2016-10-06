@@ -1,4 +1,8 @@
-  $('#depsTabs').tabs();
+var windowResizeFunc = function() {
+  $(".scoll-container").height($('#tasksGantt').height() - 41)
+};
+
+$('#depsTabs').tabs();
 
 $(function() {
   $(document).tooltip({
@@ -55,7 +59,7 @@ $(function() {
     showOn : "button",
     buttonImage : "images/calendar.png",
     buttonImageOnly : true,
-    dateFormat: 'MM dd, yy'
+    dateFormat : 'MM dd, yy'
   });
 
   $('textarea').resizable();
@@ -85,6 +89,8 @@ $(function() {
       }
     }, projectId);
   });
+  
+  var gantInitialized = false;
 
   /** End code for Project Days off */
   $('#projectTabs').tabs({
@@ -93,9 +99,21 @@ $(function() {
       $.cookie('project-selected-tab', ui.newTab.index(), {
         path : '/'
       });
+      if (ui.newTab.index()==2) {
+        if (!gantInitialized) {
+          initializeTaskGantt();
+          gantInitialized = true;
+        }
+        windowResizeFunc();
+      }
     },
     active : $.cookie('project-selected-tab')
   });
+
+  if ($.cookie('project-selected-tab')==2) {
+    initializeTaskGantt();
+    gantInitialized = true;
+  }
 
   $('#projectTabs button').button();
 
@@ -126,22 +144,19 @@ $(function() {
       var fmt2 = new DateFmt(
           "%n %d, %y");
       if (d.tentativeStartDate != null) {
-        var tenStartDate = utcTime2LocalDate(
-            d.tentativeStartDate.time);
+        var tenStartDate = utcTime2LocalDate(d.tentativeStartDate.time);
         tenStartDate = fmt2.format(tenStartDate);
       }
 
       var scStartDate = "";
       if (d.scheduledStartDate != null) {
-        scStartDate = utcTime2LocalDate(
-            d.scheduledStartDate.time);
+        scStartDate = utcTime2LocalDate(d.scheduledStartDate.time);
         scStartDate = fmt2.format(scStartDate);
       }
 
       var actStartDate = "";
       if (d.actualStartDate != null) {
-        actStartDate = utcTime2LocalDate(
-            d.actualStartDate.time);
+        actStartDate = utcTime2LocalDate(d.actualStartDate.time);
         actStartDate = fmt2.format(actStartDate);
       }
 
@@ -178,221 +193,243 @@ $(function() {
 
   });
 
-  $("#projTasksDialog").dialog({
-    autoOpen : false,
-    width : 740,
-    height : 'auto',
-    modal : true,
-    show : {
-      effect : "blind",
-      duration : 300
-    },
-    hide : {
-      effect : "fade",
-      duration : 300
-    },
+  $("#projTasksDialog").dialog(
+      {
+        autoOpen : false,
+        width : 740,
+        height : 'auto',
+        modal : true,
+        show : {
+          effect : "blind",
+          duration : 300
+        },
+        hide : {
+          effect : "fade",
+          duration : 300
+        },
 
-    close : function() {
-      // $(this).data('taskId','');
-      clearDialogFields($(this).attr('id'));
-    },
-    open : function() {
+        close : function() {
+          // $(this).data('taskId','');
+          clearDialogFields($(this).attr('id'));
+        },
+        open : function() {
 
-      var task = $(this).data('task');
-
-      if (task == null) {// new task
-
-        // $('#divTasksDepends').hide();
-        $($("#depsTabs").find("li")[1]).hide()
-
-        $("#depsTabs").tabs({
-          active : 0
-        });
-
-      } else {// in case of update task
-        $($("#depsTabs").find("li")[1]).show()
-        // $('#divTasksDepends').show();
-
-        var allTaskCall = rpcClient.taskService.findAllByProjectForCertainTask(projectId, task.taskId);
-        if (allTaskCall.result == 0) {
-          var allTasks = allTaskCall.data.list;
-          for (var i = 0; i < allTasks.length; i++) {
-            // if (allTasks[i].taskId != task.taskId) {
-            var li = $('<li></li>').addClass('ui-state-default').attr('id', allTasks[i].taskId).text(allTasks[i].taskName);
-            li.attr('title', allTasks[i].taskName);
-            li.attr('description', allTasks[i].taskDescription);
-            $("#allTasks").append(li);
-            // }
-          }
-          var tasksMap = {};
-          for (var p=0;p<task.project.projectTasks.list.length;p++) {
-            var t = task.project.projectTasks.list[p];
-            tasksMap[t.taskId] = t.taskName;
-          }
-          var depList = task.asDependent.list;
-
-          for (var i = 0; i < depList.length; i++) {
-
-            var li = $('<li></li>').addClass('ui-state-default').attr('id', depList[i].dependency).text(tasksMap[depList[i].dependency]);
-            li.attr('title', tasksMap[depList[i].dependency]);
-            li.attr('description', tasksMap[depList[i].dependency].taskDescription);
-            $("#dependencies").append(li);
-
-          }
-
-          $("#allTasks, #dependencies").sortable({
-            connectWith : ".sortable",
-            item : '> li:not(.ui-state-disabled)',
-            dropOnEmpty : true,
-
-          }).disableSelection();
-
-          $("#allTasks").droppable({
-            accept : "#dependencies li",
-            hoverClass : "ui-state-hover",
-            drop : function(ev,
-                ui) {
-
-              var remDepCall = rpcClient.taskService.removeTaskDependency(task.taskId, ui.draggable.attr("id"));
-              if (remDepCall.result == 0) {
-                ui.draggable.remove();
-                $(this).append(ui.draggable);
-                return true;
-              } else {
-                return false;
-              }
-            }
-          });
-
-          $("#dependencies").droppable({
-            accept : "#allTasks li",
-            hoverClass : "ui-state-hover",
-            drop : function(ev,
-                ui) {
-
-              var addDepCall = rpcClient.taskService.addTaskDependency(ui.draggable.attr("id"), task.taskId);
-              if (addDepCall.result == 0) {
-                ui.draggable.remove();
-                $(this).append(ui.draggable);
-                return true;
-              } else {
-                return false;
-              }
-
-            }
-          });
-
-        } else {
-          showMessage("Load Tasks", 'error:' + allTaskCall.message, 'error')
-        }
-      }
-    },
-    buttons : {
-      "Submit" : function() {
-        $("#durationTxt").removeClass("ui-state-error");
-
-        if (projectId == null) {
-          return false;
-        }
-        var bValid = true;
-
-        bValid = bValid && checkLength($("#taskNameTxt"), "taskNameTxt", 3, 256);
-
-        var tentativeStartDate = $("#sDateTentative").val();
-
-        var duration = $("#durationTxt").val();
-
-        if (duration == null || duration.length == 0) {
-          $("#durationTxt").addClass("ui-state-error");
-          bValid = false;
-        }
-
-        if (!/^[0-9]+$/.test(duration)) {
-          $("#durationTxt").addClass("ui-state-error");
-          bValid = false;
-        }
-
-        var dailyCostTxt = $("#dailyCostTxt").val();
-        if (dailyCostTxt == null || dailyCostTxt.length == 0) {
-          dailyCostTxt = "0"
-        }
-        ;
-
-        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(dailyCostTxt)) {
-          $("#dailyCostTxt").addClass("ui-state-error");
-          bValid = false;
-        }
-        var dailyIncomeTxt = $("#dailyIncomeTxt").val();
-        if (dailyIncomeTxt == null || dailyIncomeTxt.length == 0) {
-          dailyIncomeTxt = "0"
-        }
-        ;
-
-        if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(dailyIncomeTxt)) {
-          $("#dailyIncomeTxt").addClass("ui-state-error");
-          bValid = false;
-        }
-        var scheduledStartDate = $("#sDateScheduled").val();
-        if (scheduledStartDate != null && scheduledStartDate.length != 0) {
-          scheduledStartDate = new Date(
-              scheduledStartDate);
-        } else {
-          scheduledStartDate = null;
-        }
-        var actualStartDate = $("#sDateActual").val();
-        if (actualStartDate != null && actualStartDate.length != 0) {
-          actualStartDate = new Date(
-              actualStartDate);
-        } else {
-          actualStartDate = null;
-        }
-        if (bValid) {
           var task = $(this).data('task');
-          if (task != null) { // in case of updating
-            var d = null;
-            if ($("#sDateTentative").val()) {
-              d = new Date(
-                  $("#sDateTentative").val());
-            }
-            // task
-            var updCall = rpcClient.taskService.update(task.taskId, projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, localDateToUTCDate(d), localDateToUTCDate(scheduledStartDate), localDateToUTCDate(actualStartDate), $("#statusId").val());
 
-            if (updCall.result == 0) {
-              $(this).dialog("close");
-              location.reload(true)
+          if (task == null) {// new task
+
+            // $('#divTasksDepends').hide();
+            $($("#depsTabs").find("li")[1]).hide()
+
+            $("#depsTabs").tabs({
+              active : 0
+            });
+
+          } else {// in case of update task
+            $($("#depsTabs").find("li")[1]).show()
+            // $('#divTasksDepends').show();
+
+            var allTaskCall = rpcClient.taskService.findAllByProjectForCertainTask(projectId, task.taskId);
+            if (allTaskCall.result == 0) {
+              var allTasks = allTaskCall.data.list;
+              for (var i = 0; i < allTasks.length; i++) {
+                // if (allTasks[i].taskId != task.taskId) {
+                var li = $('<li></li>').addClass('ui-state-default').attr('id', allTasks[i].taskId).text(allTasks[i].taskName);
+                li.attr('title', allTasks[i].taskName);
+                li.attr('description', allTasks[i].taskDescription);
+                $("#allTasks").append(li);
+                // }
+              }
+              var tasksMap = {};
+              for (var p = 0; p < task.project.projectTasks.list.length; p++) {
+                var t = task.project.projectTasks.list[p];
+                tasksMap[t.taskId] = t.taskName;
+              }
+              var depList = task.asDependent.list;
+
+              for (var i = 0; i < depList.length; i++) {
+
+                var li = $('<li></li>').addClass('ui-state-default').attr('id', depList[i].dependency).text(tasksMap[depList[i].dependency]);
+                li.attr('title', tasksMap[depList[i].dependency]);
+                li.attr('description', tasksMap[depList[i].dependency].taskDescription);
+                $("#dependencies").append(li);
+
+              }
+
+              $("#allTasks, #dependencies").sortable({
+                connectWith : ".sortable",
+                item : '> li:not(.ui-state-disabled)',
+                dropOnEmpty : true,
+
+              }).disableSelection();
+
+              $("#allTasks").droppable({
+                accept : "#dependencies li",
+                hoverClass : "ui-state-hover",
+                drop : function(ev,
+                    ui) {
+
+                  var remDepCall = rpcClient.taskService.removeTaskDependency(task.taskId, ui.draggable.attr("id"));
+                  if (remDepCall.result == 0) {
+                    ui.draggable.remove();
+                    $(this).append(ui.draggable);
+                    return true;
+                  } else {
+                    return false;
+                  }
+                }
+              });
+
+              $("#dependencies").droppable({
+                accept : "#allTasks li",
+                hoverClass : "ui-state-hover",
+                drop : function(ev,
+                    ui) {
+
+                  var addDepCall = rpcClient.taskService.addTaskDependency(ui.draggable.attr("id"), task.taskId);
+                  if (addDepCall.result == 0) {
+                    ui.draggable.remove();
+                    $(this).append(ui.draggable);
+                    return true;
+                  } else {
+                    return false;
+                  }
+
+                }
+              });
+
             } else {
-              showMessage("Update Task", 'error:' + updCall.message, 'error')
+              showMessage("Load Tasks", 'error:' + allTaskCall.message, 'error')
             }
-
-          } else { // new task
-            var d = null;
-            if ($("#sDateTentative").val()) {
-              d = new Date(
-                  $("#sDateTentative").val());
-            }
-
-            var call = rpcClient.taskService.create(projectId, $("#taskNameTxt").val(), $("#taskDescTxt").val(), parseInt($("#durationTxt").val()), dailyCostTxt, dailyIncomeTxt, localDateToUTCDate(d), localDateToUTCDate(scheduledStartDate), localDateToUTCDate(actualStartDate), $("#statusId").val())
-
-            if (call.result == 0) {
-              $(this).dialog("close");
-              location.reload(true);
-            } else {
-              showMessage("Create Task", 'error:' + call.message, 'error')
-            }
-
           }
-          $(this).dialog("close");
-        } else { // Invalid
+        },
+        buttons : {
+          "Submit" : function() {
+            $("#durationTxt").removeClass("ui-state-error");
 
-          showMessage("Create Task", "Please fix your input. Data is invalid", 'error')
+            if (projectId == null) {
+              return false;
+            }
+            var bValid = true;
+
+            bValid = bValid && checkLength($("#taskNameTxt"), "taskNameTxt", 3, 256);
+
+            var tentativeStartDate = $("#sDateTentative").val();
+
+            var duration = $("#durationTxt").val();
+
+            if (duration == null || duration.length == 0) {
+              $("#durationTxt").addClass("ui-state-error");
+              bValid = false;
+            }
+
+            if (!/^[0-9]+$/.test(duration)) {
+              $("#durationTxt").addClass("ui-state-error");
+              bValid = false;
+            }
+
+            var dailyCostTxt = $("#dailyCostTxt").val();
+            if (dailyCostTxt == null || dailyCostTxt.length == 0) {
+              dailyCostTxt = "0"
+            }
+            ;
+
+            if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(dailyCostTxt)) {
+              $("#dailyCostTxt").addClass("ui-state-error");
+              bValid = false;
+            }
+            var dailyIncomeTxt = $("#dailyIncomeTxt").val();
+            if (dailyIncomeTxt == null || dailyIncomeTxt.length == 0) {
+              dailyIncomeTxt = "0"
+            }
+            ;
+
+            if (!/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/.test(dailyIncomeTxt)) {
+              $("#dailyIncomeTxt").addClass("ui-state-error");
+              bValid = false;
+            }
+            var scheduledStartDate = $("#sDateScheduled").val();
+            if (scheduledStartDate != null && scheduledStartDate.length != 0) {
+              scheduledStartDate = new Date(
+                  scheduledStartDate);
+            } else {
+              scheduledStartDate = null;
+            }
+            var actualStartDate = $("#sDateActual").val();
+            if (actualStartDate != null && actualStartDate.length != 0) {
+              actualStartDate = new Date(
+                  actualStartDate);
+            } else {
+              actualStartDate = null;
+            }
+            if (bValid) {
+              var task = $(this).data('task');
+              if (task != null) { // in case of updating
+                var d = null;
+                if ($("#sDateTentative").val()) {
+                  d = new Date(
+                      $("#sDateTentative").val());
+                }
+                // task
+                var updCall = rpcClient.taskService.update(
+                    task.taskId,
+                    projectId,
+                    $("#taskNameTxt").val(),
+                    $("#taskDescTxt").val(),
+                    parseInt($("#durationTxt").val()),
+                    dailyCostTxt,
+                    dailyIncomeTxt,
+                    localDateToUTCDate(d),
+                    localDateToUTCDate(scheduledStartDate),
+                    localDateToUTCDate(actualStartDate),
+                    $("#statusId").val());
+
+                if (updCall.result == 0) {
+                  $(this).dialog("close");
+                  location.reload(true)
+                } else {
+                  showMessage("Update Task", 'error:' + updCall.message, 'error')
+                }
+
+              } else { // new task
+                var d = null;
+                if ($("#sDateTentative").val()) {
+                  d = new Date(
+                      $("#sDateTentative").val());
+                }
+
+                var call = rpcClient.taskService.create(
+                    projectId,
+                    $("#taskNameTxt").val(),
+                    $("#taskDescTxt").val(),
+                    parseInt($("#durationTxt").val()),
+                    dailyCostTxt,
+                    dailyIncomeTxt,
+                    localDateToUTCDate(d),
+                    localDateToUTCDate(scheduledStartDate),
+                    localDateToUTCDate(actualStartDate),
+                    $("#statusId").val())
+
+                if (call.result == 0) {
+                  $(this).dialog("close");
+                  location.reload(true);
+                } else {
+                  showMessage("Create Task", 'error:' + call.message, 'error')
+                }
+
+              }
+              $(this).dialog("close");
+            } else { // Invalid
+
+              showMessage("Create Task", "Please fix your input. Data is invalid", 'error')
+            }
+          },
+          Cancel : function() {
+            $(this).dialog("close");
+          }
         }
-      },
-      Cancel : function() {
-        $(this).dialog("close");
-      }
-    }
 
-  });
+      });
 
   $('#addTaskBtn').button();
 
@@ -556,8 +593,7 @@ $(function() {
       var fmt2 = new DateFmt(
           "%n %d, %y");
       if (pData.propusedStartDate != null) {
-        $("#pStartDateTxt").val(fmt2.format(utcTime2LocalDate(
-            pData.propusedStartDate.time)));
+        $("#pStartDateTxt").val(fmt2.format(utcTime2LocalDate(pData.propusedStartDate.time)));
       }
       if (pData.proposedFinishDate != null) {
         $("#pFinishDateTxt").val(fmt2.format(new Date(
@@ -656,8 +692,7 @@ $(function() {
     daysList = daysOffList.data.list;
     for (var i = 0; i < daysList.length; i++) {
       var dayOff = daysList[i];
-      var theDate = utcTime2LocalDate(
-          dayOff.dayOff.time);
+      var theDate = utcTime2LocalDate(dayOff.dayOff.time);
 
       var li = $('<li></li>').addClass('ui-state-default').attr('id', dayOff.dayoffId).text(fmt.format(theDate));
 
@@ -686,7 +721,7 @@ $(function() {
         buttonImage : "images/calendar.png",
         buttonImageOnly : true,
         numberOfMonths : 3,
-        dateFormat: 'MM dd, yy'
+        dateFormat : 'MM dd, yy'
       });
     },
     buttons : {
@@ -771,12 +806,10 @@ $(function() {
     }
   });
 
-  var windowResizeFunc = function() {
-    $(".scoll-container").height($('#tasksGantt').height() - 41)
-  };
   $(window).resize(windowResizeFunc);
-  setTimeout(function() {windowResizeFunc()},0);
-  
+  setTimeout(function() {
+    windowResizeFunc()
+  }, 0);
 
 });
 

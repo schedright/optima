@@ -172,6 +172,7 @@ function getGanttSource() {
 
 }
 
+function initializeTaskGantt() {
 $("#tasksGantt").gantt({
 
   source : getGanttSource(),
@@ -210,6 +211,7 @@ $("#tasksGantt").gantt({
   }
 
 });
+}
 
 function getURLVariables() {
   var getVars = [];
