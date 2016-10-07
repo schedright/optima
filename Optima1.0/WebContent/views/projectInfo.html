@@ -1,16 +1,36 @@
-<div class="form-section grouped-section">
-	<H3>Project Information</H3>
+<div class="form-section grouped-section textOntpp">
+	<div class="PlaceTextOnTop">
+	<B>Project Information</B>
+	</div>
 	<div class="two-columns">
-		<label for="projnameTxt">Project Name</label> <input type="text"
-			id="projnameTxt" name="projnameTxt" class="" placeholder="Enter Project Name, from 3 to 128 characters" /> <input type="hidden"
-			id="portfolioId" />
+		<div class="one-column">
+			<label for="projnameTxt">Project Name</label> <input type="text"
+				id="projnameTxt" name="projnameTxt" class=""
+				placeholder="Enter Project Name, from 3 to 128 characters" /> <input
+				type="hidden" id="portfolioId" />
+		</div>
+		<div class="one-column">
+			<label for="pStartDateTxt">Proposed Start Date</label> <input
+				type="text" id="pStartDateTxt" class="datepicker"
+				name="pStartDateTxt" />
+		</div>
+		<div class="one-column">
+			<label for="pFinishDateTxt">Proposed Finish Date</label> <input
+				type="text" id="pFinishDateTxt" name="pFinishDateTxt"
+				class="datepicker" />
+		</div>
 	</div>
 	<div class="two-columns right">
+		<div class="one-column">
 		<label for="projCodeTxt">Project Code</label> <input type="text"
-			id="projCodeTxt" name="projCodeTxt" class="" placeholder="Enter Project Code, from 3 to 32 characters"/>
-	</div>
-	<div class="two-columns">
-		<label for="projectDescTxt">Project Description</label>
-		<textarea id="projectDescTxt" name="projectDescTxt" rows="5" placeholder="Enter Project Description, from 1 to 1024 characters"></textarea>
+			id="projCodeTxt" name="projCodeTxt" class=""
+			placeholder="Enter Project Code, from 3 to 32 characters" /> 
+		</div>
+		<div class="one-column">
+		<label
+			for="projectDescTxt">Project Description</label>
+		<textarea id="projectDescTxt" name="projectDescTxt" rows="5"
+			placeholder="Enter Project Description, from 1 to 1024 characters"></textarea>
+		</div>
 	</div>
 </div>

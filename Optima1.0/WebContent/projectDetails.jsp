@@ -20,7 +20,6 @@
 				<%@ include file="views/projectInfo.html"%>
 				<%@ include file="views/projectCal.html"%>
 				<%@ include file="views/projectFinanceNew.html"%>
-				<%@ include file="views/projectFinancialPeriods.html"%>
 				<div id="projectButtons" class="ui-dialog-buttonset">
 					<button id="saveProjectBtn" style="width:200px">Save Project</button>
 				</div>

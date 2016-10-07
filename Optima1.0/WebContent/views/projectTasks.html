@@ -1,119 +1,118 @@
-<div id="tasksList" class="form-section">
-	<div class="two-columns">
+<div id="tasksList" class="form-section" style="overflow:auto">
+	<table style="width: 100%; border: 0;margin-bottom:0;">
+		<tr style="height:50%;min-height:300px">
+			<td style="border: none;width:50%;">
+				<B>List of Tasks</B>
+				<div>
+					<ul id="mainAllTasks" data-role="listview" data-inset="true"
+						class="draggable"></ul>
+				</div>
+				<table style="width: 90%; border: 0px">
+					<tr>
+						<td style="border: 0px"><button id="addTaskBtn"
+								class="taskButton">Add</button></td>
+						<td style="border: 0px"><button id="deleteTaskBtn"
+								class="taskButton" style="float: right">Delete</button></td>
+					</tr>
+				</table>
+			</td>
+			<td style="border: none;width:50%">
+				<div  id="taskDetailsId" style="width:100%;jei;display:none">
+					<B>Task Details</B>
+					<div style="min-height: 300px; padding:5 5 5 5"
+						class="grouped-section">
+						<div class="two-columns">
 
-		<label>Available Tasks</label>
-		<ul id="mainAllTasks" data-role="listview" data-inset="true"
-			class="draggable"></ul>
-	</div>
-	<div class="two-columns" style="margin-top: 15px; width: 30%">
-		<button id="addTaskBtn" class="taskButton">Add</button>
-		<br />
-		<button id="deleteTaskBtn" class="taskButton">Delete</button>
-	</div>
+							<label>Task Name</label> <input type="text" id="taskNameTxt"
+								name="taskNameTxt"
+								placeholder="Enter Task Name, from 3 to 256 characters"
+								autofocus />
 
+						</div>
 
+						<div class="two-columns right" style="margin-left: 0px">
 
+							<label>Status</label> <select id="statusId" class="dropdown">
+
+								<option value="1">Not Started</option>
+
+								<option value="2">Started</option>
+
+								<option value="3">Finished</option>
+
+							</select>
+
+						</div>
+						<div class="form-section" style="width: 90%;height:80px">
+							<label>Task Description</label>
+
+							<textarea id="taskDescTxt" name="taskDescTxt"
+								style="width: 370px;height:40px"></textarea>
+						</div>
+
+						<div class="form-section">
+							<div class="three-columns">
+
+								<label>Duration (Days)</label> <input type="text"
+									id="durationTxt" class="spin" name="durationTxt" />
+
+							</div>
+							<div class="three-columns">
+								<label>Uniform daily cost ($)</label> <input type="text"
+									id="dailyCostTxt" name="dailyCostTxt" />
+							</div>
+							<div class="three-columns">
+								<label>Uniform daily income ($)</label> <input type="text"
+									id="dailyIncomeTxt" name="dailyIncomeTxt" />
+							</div>
+						</div>
+
+						<div class="form-section">
+							<div class="three-columns">
+								<label>Start Date (Tentative)</label> <input type="text"
+									id="sDateTentative" name="sDateTentative" class="datepicker" />
+							</div>
+							<div class="three-columns">
+								<label>Start Date (Scheduled)</label> <input type="text"
+									id="sDateScheduled" name="sDateScheduled" readonly />
+							</div>
+
+							<div class="three-columns">
+								<label>Start Date (Actual)</label> <input type="text"
+									id="sDateActual" name="sDateActual" class="datepicker" />
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+			</td>
+		</tr>
+		<tr id="relId" style="display:none" class="divTasksDepends">
+			<td style="border: none;width:50%">
+				<B>Task Relationship</B>
+				<label>All Tasks</label>
+				<ul id="allTasks" class="sortable">
+
+				</ul>
+			</td>
+			<td style="border: none;width:50%">
+				<B style="color:transparent">X</B>
+				<label>Dependencies</label>
+				<ul id="dependencies" class="sortable">
+				</ul>
+			</td>
+		</tr>
+		<tr id="saveRowId" style="display:none">
+			<td style="border: none" colspan="2">
+				<div id="projectButtons2" class="ui-dialog-buttonset">
+					<button id="saveTasksBtn" style="width:200px">Save Project Tasks</button>
+				</div>
+			</td>
+		</tr>
+		
+	</table>
 
 </div>
 
-
-<div id="projTasksDialog">
-	<div id="depsTabs">
-		<div id="loader-overlay"></div>
-
-		<ul>
-			<li><a href="#Details">Details</a></li>
-			<li><a href="#Deps">Dependencies</a></li>
-		</ul>
-
-		<div id="Details">
-			<div class="form-section">
-				<div class="two-columns">
-
-					<label>Task Name</label> <input type="text" id="taskNameTxt"
-						name="taskNameTxt"
-						placeholder="Enter Task Name, from 3 to 256 characters" autofocus />
-
-				</div>
-
-				<div class="two-columns right">
-
-					<label>Status</label> <select id="statusId" class="dropdown">
-
-						<option value="1">Not Started</option>
-
-						<option value="2">Started</option>
-
-						<option value="3">Finished</option>
-
-					</select>
-
-				</div>
-			</div>
-
-			<div class="form-section" style="width:90%">
-				<label>Task Description</label>
-
-				<textarea id="taskDescTxt" name="taskDescTxt" style="width:620px"></textarea>
-			</div>
-
-			<div class="form-section">
-				<div class="three-columns">
-
-					<label>Duration (Days)</label> <input type="text" id="durationTxt"
-						class="spin" name="durationTxt" />
-
-				</div>
-				<div class="three-columns">
-					<label>Uniform daily cost ($)</label> <input type="text"
-						id="dailyCostTxt" name="dailyCostTxt" />
-				</div>
-				<div class="three-columns">
-					<label>Uniform daily income ($)</label> <input type="text"
-						id="dailyIncomeTxt" name="dailyIncomeTxt" />
-				</div>
-			</div>
-
-			<div class="form-section">
-				<div class="three-columns">
-					<label>Start Date (Tentative)</label> <input type="text"
-						id="sDateTentative" name="sDateTentative" class="datepicker" />
-				</div>
-				<div class="three-columns">
-					<label>Start Date (Scheduled)</label> <input type="text"
-						id="sDateScheduled" name="sDateScheduled" readonly />
-				</div>
-
-				<div class="three-columns">
-					<label>Start Date (Actual)</label> <input type="text"
-						id="sDateActual" name="sDateActual" class="datepicker" />
-				</div>
-
-			</div>
-
-		</div>
-		<div id="Deps">
-			<div id="divTasksDepends" class="form-section"
-				style="width: 100%; height: 100%">
-				<div class="two-columns">
-					<label>All Tasks</label>
-					<ul id="allTasks" class="sortable">
-
-					</ul>
-				</div>
-				<div id="listConnect"></div>
-				<div class="two-columns">
-					<label>Dependencies</label>
-					<ul id="dependencies" class="sortable">
-
-					</ul>
-				</div>
-
-			</div>
-		</div>
-
-	</div>
-
-
-</div>
 

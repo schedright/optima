@@ -1533,9 +1533,12 @@
                         element.loader.remove();
                     }
                     
-                    try {
-                      $(".scoll-container").height($('#tasksGantt').height() - 41);
-                    } catch (e) {
+                    if (element.id=='tasksGantt') {
+                      try {
+                        $(".scoll-container").height($('#tasksGantt').height() - 41);
+                      } catch (e) {
+                      	var x = 0;
+                      }
                     }
 
                     element.loader = null;

@@ -30,7 +30,9 @@ function getGanttSource() {
 
 				dataObj : proj.Project.projectId,
 				
-				title : title
+				title : title, 
+				
+				type : 0
 
 			} ]
 		});

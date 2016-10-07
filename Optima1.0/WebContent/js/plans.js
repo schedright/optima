@@ -138,7 +138,7 @@ $(function() {
   $('#planTabs').tabs({
     activate : function(e,
         ui) {
-      if (ui.newTab.index()==2) {
+      if (ui.newTab.index()==1) {
         pGrid.resizeCanvas();
       }
       $.cookie('plan-selected-tab', ui.newTab.index(), {
@@ -149,7 +149,7 @@ $(function() {
   });
 
   var windowResizeFunc = function() {
-    $('#planTabs').height($('#main').height() - $('#projectsGantt').height())
+//    $('#planTabs').height($('#main').height() - $('#projectsGantt').height())
     pGrid.resizeCanvas();
   }; 
   $(window).resize(windowResizeFunc);
