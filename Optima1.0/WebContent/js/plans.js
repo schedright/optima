@@ -134,12 +134,25 @@ $(function() {
         enableCellNavigation : true,
         enableColumnReorder : true
       });
+  var windowResizeFunc = function() {
+    $(".scoll-container").height($('#tasksGantt').height() - 41)
+    pGrid.resizeCanvas();
+  }; 
+
+  var gantInitialized = false;
 
   $('#planTabs').tabs({
     activate : function(e,
         ui) {
       if (ui.newTab.index()==1) {
         pGrid.resizeCanvas();
+      } else if (ui.newTab.index()==2) {
+        if (!gantInitialized) {
+          initializeProjectGantt();
+          gantInitialized = true;
+        }
+
+        windowResizeFunc();
       }
       $.cookie('plan-selected-tab', ui.newTab.index(), {
         path : '/'
@@ -148,10 +161,11 @@ $(function() {
     active : $.cookie('plan-selected-tab')
   });
 
-  var windowResizeFunc = function() {
-//    $('#planTabs').height($('#main').height() - $('#projectsGantt').height())
-    pGrid.resizeCanvas();
-  }; 
+  if ($.cookie('plan-selected-tab') == 2) {
+    initializeProjectGantt();
+    gantInitialized = true;
+  }
+
   $(window).resize(windowResizeFunc);
   windowResizeFunc();
 

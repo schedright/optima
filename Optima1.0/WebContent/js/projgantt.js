@@ -43,6 +43,7 @@ function getGanttSource() {
 
 }
 
+function initializeProjectGantt() {
 var toDate = function(strDate) {
 	var dateParts = strDate.split("/");
 	var date = new Date(dateParts[2], (dateParts[0] - 1), dateParts[1]);
@@ -89,7 +90,7 @@ $("#projectsGantt").gantt({
 	}
 
 });
-
+}
 
 function getURLVariables() {
 	var getVars = [];

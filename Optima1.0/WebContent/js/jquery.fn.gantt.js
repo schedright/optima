@@ -1539,6 +1539,12 @@
                       } catch (e) {
                       	var x = 0;
                       }
+                    } else {
+                      try {
+                        $(".scoll-container").height($('#projectsGantt').height() - 41);
+                      } catch (e) {
+                        var x = 0;
+                      }
                     }
 
                     element.loader = null;
