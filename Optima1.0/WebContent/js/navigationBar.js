@@ -6,7 +6,7 @@ $(document).ready(function() {
   var currentUser = rpcClient.usersService.getCurrentUser();
 
   $("#allProjectsNavBar").append("<a href=\"allprojects.jsp\">Projects<img class=\"menuIcon\" src=\"css/header/images/icon_projects.png\" /></a>");
-  $("#portfoliosNavBar").append("<a href=\"enterprise.jsp\">Enterprise<img class=\"menuIcon\" src=\"css/header/images/icon_portfolio.png\" /></a>");
+  $("#portfoliosNavBar").append("<a href=\"portfolio.jsp\">Portfolio<img class=\"menuIcon\" src=\"css/header/images/icon_portfolio.png\" /></a>");
   $("#financingNavBar").append("<a href=\"#\">Constraint/Schedule<img class=\"menuIcon\" src=\"css/header/images/icon_financing.png\" /></a>");
   $("#cashflowNavBar").append("<a href=\"#\">Cashflow<img class=\"menuIcon\" src=\"css/header/images/icon_cashflow.png\" /></a>");
   $("#financialNavBar").append("<a href=\"#\">Results<img class=\"menuIcon\" src=\"css/header/images/icon_results2.png\" /></a>");
@@ -45,9 +45,9 @@ $(document).ready(function() {
     if (link1 == 'portfolioId=') {
       var result = rpcClient.portfolioService.findLight(link2);
       if (result.result == 0 && result.data) {
-        $('#financingNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
-        $('#cashflowNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
-        $('#financialNavBar').attr('title', "Enterprise: " + result.data.portfolioName);
+        $('#financingNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
+        $('#cashflowNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
+        $('#financialNavBar').attr('title', "Portfolio: " + result.data.portfolioName);
         return true;
       }
     } else {
@@ -55,7 +55,7 @@ $(document).ready(function() {
       if (result.result == 0 && result.data) {
         var name = "";
         if (result.data.portfolio) {
-          name = "Enterprise: " + result.data.portfolio.portfolioName;
+          name = "Portfolio: " + result.data.portfolio.portfolioName;
         } else {
           name = "Project: " + result.data.projectName;
         }

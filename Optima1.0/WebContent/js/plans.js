@@ -1,5 +1,11 @@
 $('#titleDiv').html('Capital Plan');
 
+var context = {};
+context.dependencyActionsStack = {
+    add : [],
+    remove : []
+  };
+
 var planRet = rpcClient.projectService.getPlan();
 var planDates = rpcClient.projectService.getPlanDates();
 var plansList = planRet.data.map;
@@ -28,9 +34,9 @@ $(function() {
   allYears.sort();
   var pColumns = [
     {
-      id : "Year",
-      name : "Year",
-      field : "Year",
+      id : "Project",
+      name : "Project",
+      field : "Project",
       minWidth : 120
     }
   ];
@@ -97,7 +103,7 @@ $(function() {
     var yearsMap = proj.Details.map;
 
     var row = {
-      "Year" : proj.Project.projectCode
+      "Project" : proj.Project.projectCode
     };
     var t = 0;
     for (var p = 0; p < allYears.length; p++) {
@@ -121,7 +127,7 @@ $(function() {
     }
   }
 
-  totalsRow["Year"] = "Total";
+  totalsRow["Project"] = "Total";
   totalsRow["Total"] = parseFloat(allTotal).toFixed(2);
   pData.push(totalsRow);
 
@@ -189,9 +195,38 @@ $(function() {
     var sd = $("#pStartDateTxt").val();
     var ed = $("#pFinishDateTxt").val();
     var ret = rpcClient.projectService.savePlanDates(sd, ed);
-    if (ret.result == 0) {
-      location.reload();
+    if (ret.result != 0) {
     }
+    
+    if (context.dependencyActionsStack && context.dependencyActionsStack.remove) {
+      for (var x = 0; x < context.dependencyActionsStack.remove.length; x++) {
+        var tid = context.dependencyActionsStack.remove[x];
+        try {
+          var remDepCall = rpcClient.projectService.changePlanProject(tid,false);
+          if (remDepCall.result != 0) {
+            depFailed = true;
+          }
+        } catch (e) {
+          depFailed = true;
+        }
+      }
+    }
+
+    if (context.dependencyActionsStack && context.dependencyActionsStack.add) {
+      for (var x = 0; x < context.dependencyActionsStack.add.length; x++) {
+        var tid = context.dependencyActionsStack.add[x];
+        try {
+          var remDepCall = rpcClient.projectService.changePlanProject(tid, true);
+          if (remDepCall.result != 0) {
+            depFailed = true;
+          }
+        } catch (e) {
+          depFailed = true;
+        }
+      }
+    }
+
+    location.reload();
   });
 
   var allProjectsCall = rpcClient.projectService.findAllLight();
@@ -231,9 +266,17 @@ $(function() {
       hoverClass : "ui-state-hover",
       drop : function(ev,
           ui) {
-        var res = rpcClient.projectService.changePlanProject(ui.draggable.attr("id"), false);
+        var tid = ui.draggable.attr("id");
+        if (context.dependencyActionsStack.add.indexOf(tid) == -1) {
+          context.dependencyActionsStack.remove.push(tid)
+        } else {
+          context.dependencyActionsStack.add.splice(context.dependencyActionsStack.add.indexOf(tid), 1);
+        }
+        return true;
+
+      /*  var res = rpcClient.projectService.changePlanProject(ui.draggable.attr("id"), false);
         $('#refreshPlanBtn').prop('disabled', false);
-        return res.result == 0;
+        return res.result == 0;*/
       }
     });
 
@@ -242,10 +285,18 @@ $(function() {
       hoverClass : "ui-state-hover",
       drop : function(ev,
           ui) {
-        var res = rpcClient.projectService.changePlanProject(ui.draggable.attr("id"), true);
+        var tid = ui.draggable.attr("id");
+        if (context.dependencyActionsStack.remove.indexOf(tid) == -1) {
+          context.dependencyActionsStack.add.push(tid)
+        } else {
+          context.dependencyActionsStack.remove.splice(context.dependencyActionsStack.remove.indexOf(tid), 1);
+        }
+        return true;
+        
+/*        var res = rpcClient.projectService.changePlanProject(ui.draggable.attr("id"), true);
         $('#refreshPlanBtn').prop('disabled', false);
         return res.result == 0;
-      }
+*/      }
     });
 
   }

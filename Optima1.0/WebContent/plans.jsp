@@ -20,7 +20,7 @@
 					</div>
 					<div class="two-columns">
 
-						<label for="pStartDateTxt">Plan Start Date</label> <input
+						<label for="pStartDateTxt">Plan Start Date:</label> <input
 							type="text" id="pStartDateTxt" class="datepicker"
 							name="pStartDateTxt" />
 
@@ -28,7 +28,7 @@
 
 					<div class="two-columns right">
 
-						<label for="pFinishDateTxt">Plan Finish Date</label> <input
+						<label for="pFinishDateTxt">Plan Finish Date:</label> <input
 							type="text" id="pFinishDateTxt" name="pFinishDateTxt"
 							class="datepicker" />
 
@@ -37,19 +37,19 @@
 
 				<div class="form-section grouped-section textOntpp">
 					<div class="PlaceTextOnTop">
-						<B>Project Calendar</B>
+						<B>Select Projects</B>
 					</div>
 
 					<div class="form-section divTasksDepends">
 						<div class="two-columns">
-							<label>All Projects</label>
+							<label>All Projects:</label>
 							<ul id="allProjects" class="sortable">
 	
 							</ul>
 						</div>
 						<div id="listConnect"></div>
 						<div class="two-columns">
-							<label>Plan Projects</label>
+							<label>Plan Projects:</label>
 							<ul id="includedProjects" class="sortable">
 							</ul>
 						</div>

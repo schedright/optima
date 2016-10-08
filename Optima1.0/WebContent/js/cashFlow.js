@@ -17,7 +17,7 @@ $(function() {
     rpcClient.portfolioService.findLight(function(result,
         exception) {
       if (result.result == 0) {
-        $('#titleDiv').html("Enterprise: " + result.data.portfolioName);
+        $('#titleDiv').html("Portfolio: " + result.data.portfolioName);
       }
     }, portfolioId);
   } else if (projectId) {
@@ -25,7 +25,7 @@ $(function() {
         exception) {
       if (result.result == 0) {
         if (result.data.portfolio) {
-          $('#titleDiv').html("Enterprise: " + result.data.portfolio.portfolioName);
+          $('#titleDiv').html("Portfolio: " + result.data.portfolio.portfolioName);
         } else {
           $('#titleDiv').html("Project: " + result.data.projectName);
         }
@@ -207,7 +207,7 @@ $(function() {
       }
 
       pData[rowCount] = {};
-      pData[rowCount]["day"] = "Enterprise Totals:";
+      pData[rowCount]["day"] = "Portfolio Totals:";
       rowCount++;
       currentCashOutRow = rowCount;
       pData[rowCount] = {};
@@ -290,7 +290,7 @@ $(function() {
     if (solutionResponse.result == 0 && solutionResponse.data && solutionResponse.data == 'TRUE') {
       var result = rpcClient.portfolioService.isInvalidSolution(portfolioId, projectId);
       if (result) {
-        showMessage('Enterprise has changed', 'The enterprise has changed after last solve, you might need to re-solve again', 'info');
+        showMessage('Portfolio has changed', 'The portfolio has changed after last solve, you might need to re-solve again', 'info');
 
       }
     }

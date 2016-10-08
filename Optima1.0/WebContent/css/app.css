@@ -27,7 +27,7 @@ textarea {
 
 select {
 	/* width: 82% !important; */
-	padding: 10px 8px !important;
+	padding: 7px 8px !important;
 	background: none #FFFFFF !important;
 	border: 1px solid #D3D3D3 !important;
 	border-collapse: separate !important;
@@ -540,7 +540,7 @@ select option {
 }
 
 .one-column label, .two-columns label, .three-columns label {
-	color: #5C82AE;
+	color: #212121;
 	font-size: 14px;
 	margin: 0 !important;
 	width: 100% !important;
@@ -742,7 +742,7 @@ important
 }
 
 .draggable, .divTasksDepends ul, #ulContainer ul {
-	height: 100px;
+	height: 90px;
 	border: 1px solid #D3D3D3;
 	border-radius: 2px;
 	overflow-y: auto;
@@ -1475,10 +1475,11 @@ h2 {
 .grouped-section {
 	border-radius: 8px;
     border: 2px solid #c0c0c0;
-    color : #5C82AE;
+    color : #212121;
     padding: 0px 15px;
     box-sizing: border-box;
-    margin-bottom:2px 
+    margin-bottom:2px;
+    padding-bottom:3px; 
 }
 .textOntpp {
 	margin-top: 10px;
@@ -1505,5 +1506,5 @@ h2 {
 }
 
 #mainAllTasks {
-	min-height:250px
+	min-height:220px
 }

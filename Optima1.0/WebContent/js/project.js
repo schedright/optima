@@ -227,7 +227,7 @@ $(function() {
     dateFormat : 'MM dd, yy'
   });
 
-  $('textarea').resizable();
+//  $('textarea').resizable();
 
   var projectId = null;
 
