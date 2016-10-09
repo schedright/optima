@@ -1,3 +1,41 @@
+/* Forms */
+select{
+	/* width: 82% !important; */
+	padding: 7px 8px !important;
+	background: none #FFFFFF !important;
+	border: 1px solid #D3D3D3 !important;
+	border-collapse: separate !important;
+	border-radius: 4px 4px 4px 4px !important;
+	font-size:14px !important;
+	font-family: Verdana, Arial, sans-serif !important;
+	color:#212121 !important;
+}
+
+select option , #mainContainer select option {
+	font-size:14px !important;
+	font-family: Verdana, Arial, sans-serif !important;
+	color:#212121 !important;
+}
+
+input {
+	padding: 7px 3px !important;
+	border: 1px solid #D3D3D3 !important;
+	border-collapse: separate !important;
+	border-radius: 4px 4px 4px 4px !important;
+	font-size:14px !important;
+	font-family: Verdana, Arial, sans-serif !important;
+	color:#212121 !important;	
+}
+
+.draggable li {
+	margin: 0 5px 5px 5px !important;
+    padding: 2px !important;
+    font-size: 14px !important;
+    width: 95% !important;
+    cursor: move !important;
+}
+
+/* Forms */
 #moduleContainer {
 	margin: 0 auto;
 	padding: 40px;
