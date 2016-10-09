@@ -725,11 +725,11 @@ important
 	cursor: move;
 }
 
-#projectButtons, #projectButtons2 {
+.rightButtons {
 	float: right;
 	bottom:0px;
 	right:0px;
-	padding-right:20px;
+	/* padding-right:20px; */
 }
 
 #projectTabs {
@@ -1545,4 +1545,19 @@ h2 {
 
 #mainAllTasks {
 	min-height:220px
+}
+
+.saveButton {
+	border: 1px solid #d3d3d3 !important;
+    background: #e6e6e6 url(images/ui-bg_glass_75_e6e6e6_1x400.png) 50% 50% repeat-x !important;
+    font-weight: normal !important;
+    color: #212121 !important;
+    font-size:14px !important;
+	font-family: Verdana, Arial, sans-serif !important;
+	border-radius: 4px 4px 4px 4px !important;
+	padding: 5px 5px !important;
+	min-width:120px !important;
+}
+.saveButton span {
+	padding: 0px 0px !important;
 }

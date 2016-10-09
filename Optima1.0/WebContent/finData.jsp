@@ -16,7 +16,7 @@
 					style="width: 90%;">
 					<div id="ulContainer" class="form-section">
 						<div class="two-columns">
-							<label>Constraints</label>
+							<label>Constraints:</label>
 							<ul id="financeList" class="sortable" style="height: initial">
 
 							</ul>
@@ -43,7 +43,7 @@
 					style="width: 90%;">
 					<div id="ulContainer" class="form-section">
 						<div class="two-columns">
-							<label style="padding-bottom:8px">Projects Priority</label>
+							<label style="padding-bottom:8px">Projects Priority:</label>
 							<ul id="mainAllProjects" data-role="listview" data-inset="true"
 							class="draggable"></ul>
 						</div>
@@ -76,11 +76,11 @@
 
 				<form id="addUserForm" autocomplete="off">
 					<fieldset>
-						<label for="financeAmount">Fund Amount</label> <input
+						<label for="financeAmount">Fund Amount:</label> <input
 							type="text" id="financeAmount" name="financeAmount" class="" style="width:100%;margin-top:3px;margin-bottom:6px" />
-						<label for="interestRate">Interest Rate</label> <input type="text"
+						<label for="interestRate">Interest Rate:</label> <input type="text"
 							id="interestRate" name="interestRate" class="" style="width:100%;margin-top:3px;margin-bottom:6px"/> <label
-							for="financeDate" style="margin-bottom:-5px">End Date</label> <input type="text"
+							for="financeDate" style="margin-bottom:-5px">End Date:</label> <input type="text"
 							id="financeDate" name="financeDate" class="" style="width:100%;margin-top:3px;margin-bottom:6px"/>
 					</fieldset>
 				</form>

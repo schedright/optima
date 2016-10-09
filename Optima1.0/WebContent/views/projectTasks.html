@@ -7,14 +7,13 @@
 					<ul id="mainAllTasks" data-role="listview" data-inset="true"
 						class="draggable"></ul>
 				</div>
-				<table style="width: 90%; border: 0px; margin-bottom:0px">
-					<tr>
-						<td style="border: 0px"><button id="addTaskBtn"
-								class="taskButton">Add</button></td>
-						<td style="border: 0px"><button id="deleteTaskBtn"
-								class="taskButton" style="float: right">Delete</button></td>
-					</tr>
-				</table></td>
+						<div class="rightButtons" style="padding-top:6px">
+						<button id="addTaskBtn"
+								class="saveButton">Add</button>
+						<button id="deleteTaskBtn"
+								class="saveButton" style="float: right">Delete</button>
+						</div>
+				</td>
 			<td style="border: none; width: 50%">
 				<div id="taskDetailsId" style="width: 100%; jei; display: none">
 					<div style="min-height: 200px; padding-right: 0px"
@@ -24,7 +23,7 @@
 						</div>
 						<div class="two-columns">
 
-							<label>Task Name</label> <input type="text" id="taskNameTxt"
+							<label>Task Name:</label> <input type="text" id="taskNameTxt"
 								name="taskNameTxt" style="width: 100% !important"
 								placeholder="Enter Task Name, from 3 to 256 characters"
 								autofocus />
@@ -33,7 +32,7 @@
 
 						<div class="two-columns right" style="margin-left: 0px">
 
-							<label>Status</label> <select id="statusId" class="dropdown">
+							<label>Status:</label> <select id="statusId" class="dropdown">
 
 								<option value="1">Not Started</option>
 
@@ -45,7 +44,7 @@
 
 						</div>
 						<div class="form-section" style="font-size:14px">
-							<label>Task Description</label>
+							<label>Task Description:</label>
 
 							<textarea id="taskDescTxt" name="taskDescTxt"
 								style="width: 85%; height: 40px"></textarea>
@@ -54,16 +53,16 @@
 						<div class="form-section">
 							<div class="three-columns">
 
-								<label>Duration (Days)</label> <input type="text"
+								<label>Duration:</label> <input type="text"
 									id="durationTxt" name="durationTxt" />
 
 							</div>
 							<div class="three-columns">
-								<label>Daily cost</label> <input type="text" id="dailyCostTxt"
+								<label>Daily cost:</label> <input type="text" id="dailyCostTxt"
 									name="dailyCostTxt" />
 							</div>
 							<div class="three-columns">
-								<label>Daily income</label> <input type="text"
+								<label>Daily income:</label> <input type="text"
 									id="dailyIncomeTxt" name="dailyIncomeTxt" />
 							</div>
 						</div>
@@ -73,16 +72,16 @@
 							<B style="font-size: 14">Start Date</B>
 						</div>
 						<div class="three-columns">
-							<label>Tentative</label> <input type="text" id="sDateTentative"
+							<label>Tentative:</label> <input type="text" id="sDateTentative"
 								name="sDateTentative" class="datepicker" style="width:95% !important"/>
 						</div>
 						<div class="three-columns">
-							<label>Scheduled</label> <input type="text" id="sDateScheduled"
+							<label>Scheduled:</label> <input type="text" id="sDateScheduled"
 								name="sDateScheduled" style="width:95% !important" readonly  />
 						</div>
 
 						<div class="three-columns">
-							<label>Actual</label> <input type="text" id="sDateActual"
+							<label>Actual:</label> <input type="text" id="sDateActual"
 								name="sDateActual" style="width:95% !important" class="datepicker" />
 						</div>
 
@@ -98,9 +97,9 @@
 					<div class="two-columns">
 
 						<div class="PlaceTextOnTop">
-							<B style="font-size:14px">Task Relationship</B>
+							<B style="font-size:14px">Task Relationships</B>
 						</div>
-						<label style="font-size: 14px; color: #212121">All Tasks</label>
+						<label style="font-size: 14px; color: #212121">All Tasks:</label>
 						<ul id="allTasks" class="sortable" style="padding-bottom: 4px;min-height:120px">
 
 						</ul>
@@ -117,10 +116,6 @@
 		</tr>
 		<tr id="saveRowId" style="display: none">
 			<td style="border: none" colspan="2">
-				<div id="projectButtons2" class="ui-dialog-buttonset">
-					<button id="saveTasksBtn" style="width: 200px">Save
-						Project Tasks</button>
-				</div>
 			</td>
 		</tr>
 

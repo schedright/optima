@@ -57,9 +57,8 @@
 					</div>
 				</div>
 								
-				<div id="projectButtons" class="ui-dialog-buttonset">
-					<button id="savePlanDatesBtn"
-						style="padding: 0.4em 1em; color: #555555">Save/Refresh Plan Setup</button>
+				<div class="ui-dialog-buttonset rightButtons">
+					<button id="savePlanDatesBtn" class="saveButton">Save/Refresh Plan Setup</button>
 				</div>
 				</div>
 			</div>

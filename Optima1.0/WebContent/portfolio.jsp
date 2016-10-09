@@ -31,10 +31,10 @@
 	
 		<form id="newPortfolioForm">
 			<fieldset>
-				<label for="portName">Name</label> <input type="text"
+				<label for="portName">Name:</label> <input type="text"
 					name="portName" id="portName"
 					class="text ui-widget-content ui-corner-all" placeholder="Enter Portfolio Name, from 3 to 32 characters"/> <label
-					for="portDescription">Description</label> <input type="text"
+					for="portDescription">Description:</label> <input type="text"
 					name="portDescription" id="portDescription" value=""
 					class="text ui-widget-content ui-corner-all" placeholder="Enter Description, up to 1024 characters"/>
 			</fieldset>
@@ -42,7 +42,7 @@
 	</div>
 
 	<div id="linkToProjectDialog" title="Include Project">
-		<p class="validateTips">Select project to include</p>
+		<p class="validateTips">Select project to include:</p>
 	
 		<form id="newPortfolioForm">
 			<fieldset>

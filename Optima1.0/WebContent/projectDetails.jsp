@@ -20,8 +20,8 @@
 				<%@ include file="views/projectInfo.html"%>
 				<%@ include file="views/projectCal.html"%>
 				<%@ include file="views/projectFinanceNew.html"%>
-				<div id="projectButtons" class="ui-dialog-buttonset">
-					<button id="saveProjectBtn" style="width:200px">Save Project</button>
+				<div id="projectButtons" class="ui-dialog-buttonset rightButtons">
+					<button id="saveProjectBtn" class="saveButton" style="width:200px">Save Project Details</button>
 				</div>
 				</div>
 			</div>
@@ -30,7 +30,7 @@
 			</div>
 			<div id="tasksBarChart">
 				<div id="tasksGantt" class="gantt tasksgantt" style="height: 100%;width:100%;"></div>
-				<div id="projectButtons" class="ui-dialog-buttonset">
+				<div id="projectButtons" class="ui-dialog-buttonset rightButtons">
 					<button id="resetSchedulingBtn" style="width:200px;margin-top:-35px">Reset Project Scheduling</button>
 				</div>
 			</div>

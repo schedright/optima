@@ -33,17 +33,17 @@
 
 			<form id="addUserForm" autocomplete="off">
 				<fieldset>
-					<label for="addUserFormUserName">Username</label> <input
+					<label for="addUserFormUserName">Username:</label> <input
 						type="text" name="addUserFormUserName" id="addUserFormUserName"
 						class="text ui-widget-content ui-corner-all"
 						placeholder="Enter user name, from 6 to 20 characters"
-						autocomplete="off" /> <label for="addUserFormPassword1">Password</label>
+						autocomplete="off" /> <label for="addUserFormPassword1">Password:</label>
 					<input type="password" name="addUserFormPassword1"
 						id="addUserFormPassword1" value=""
 						class="text ui-widget-content ui-corner-all"
 						placeholder="Enter Password, from 6 to 20 characters"
 						autocomplete="off" /> <label for="addUserFormPassword2">Confirm
-						Password</label> <input type="password" name="addUserFormPassword2"
+						Password:</label> <input type="password" name="addUserFormPassword2"
 						id="addUserFormPassword2" value=""
 						class="text ui-widget-content ui-corner-all"
 						placeholder="Enter Password, from 6 to 20 characters"

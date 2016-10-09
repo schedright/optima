@@ -4,7 +4,7 @@
 <%@ include file="header.html"%>
 <div class="mainContainer">
 	<div id="main" style="width: 100%;" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
-		<label>Projects Priority</label>
+		<label>Projects Priority:</label>
 		<div class="form-section">
 			<div class="one-column project-priorities">
 				<ul id="mainAllProjects" data-role="listview" data-inset="true"  class="draggable"></ul>
