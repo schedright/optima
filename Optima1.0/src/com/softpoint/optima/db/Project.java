@@ -2,6 +2,7 @@ package com.softpoint.optima.db;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -203,6 +204,9 @@ public class Project implements Serializable {
 	}
 
 	public List<DaysOff> getDaysOffs() {
+		if (this.daysOffs==null) {
+			return Collections.emptyList();
+		}
 		return this.daysOffs;
 	}
 
