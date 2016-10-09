@@ -157,8 +157,6 @@ $(function() {
           initializeProjectGantt();
           gantInitialized = true;
         }
-
-        windowResizeFunc();
       }
       $.cookie('plan-selected-tab', ui.newTab.index(), {
         path : '/'
