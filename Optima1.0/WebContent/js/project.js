@@ -182,28 +182,6 @@ var showHideTaskDetails = function(projectId,
 $('#depsTabs').tabs();
 
 $(function() {
-  $(document).tooltip({
-    items : "#mainAllTasks li, #allTasks li",
-    content : function() {
-      var element = $(this);
-
-      var output = $("<div></div>");
-
-      output.addClass('divToolTip');
-
-      if (element.is("[title]")) {
-        // var text = element.text();
-        output.append("<h3>Name:</h3><p>" + element.attr('title') + "</p>");
-      }
-
-      if (element.is("[description]")) {
-        // var text = element.text();
-        output.append("<h3>Desciption:</h3><p>" + element.attr('description') + "</p>");
-      }
-      return output.html();
-    }
-  });
-
   $.widget("ui.pcntspinner", $.ui.spinner, {
     _format : function(value) {
       return value + '%';
@@ -633,7 +611,7 @@ $(function() {
       if (pData.portfolio && pData.portfolio.portfolioId) {
         portId = pData.portfolio.portfolioId;
       }
-      $('#titleDiv').html(pData.projectName);
+      $('#titleDiv').html("Project: " + pData.projectName);
 
       $("#portfolioId").val(portId);
       $("#projnameTxt").val(pData.projectName);
