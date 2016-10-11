@@ -16,7 +16,7 @@
 				<div class="project-info-container">
 				<div class="form-section grouped-section textOntpp">
 					<div class="PlaceTextOnTop">
-						<B>Project Calendar</B>
+						<B>Capital Plan Period</B>
 					</div>
 					<div class="two-columns">
 
@@ -43,14 +43,14 @@
 					<div class="form-section divTasksDepends">
 						<div class="two-columns">
 							<label>All Projects:</label>
-							<ul id="allProjects" class="sortable">
+							<ul id="allProjects" class="sortable" style="min-height:300px">
 	
 							</ul>
 						</div>
 						<div id="listConnect"></div>
 						<div class="two-columns">
 							<label>Plan Projects:</label>
-							<ul id="includedProjects" class="sortable">
+							<ul id="includedProjects" class="sortable" style="min-height:300px">
 							</ul>
 						</div>
 	

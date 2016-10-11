@@ -45,7 +45,7 @@ $(function() {
       },
       {
         id : "projectCode",
-        name : "Project Code",
+        name : "Project ID",
         field : "projectCode",
         minWidth : 200
       },

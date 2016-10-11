@@ -68,7 +68,7 @@ $(function() {
         id : formattedDate,
         name : formattedDate,
         field : formattedDate,
-        minWidth : 160,
+        minWidth : 120,
         formatter : Slick.Formatters.Currency
       });
 
@@ -124,7 +124,7 @@ $(function() {
       var totalNetBalance = [];
       for (var i = 0; i < projects.length; i++) {
         pData[rowCount] = {};
-        pData[rowCount]["day"] = "Project " + projects[i].projectCode + ":";
+        pData[rowCount]["day"] = "Project " + projects[i].projectName + ":";
         rowCount++;
         var projectCashFlowData = allResults.data.map[projects[i].projectId];
 
@@ -205,7 +205,7 @@ $(function() {
           $("#cashflowChartDiv").append(svgGraphCall.data);
         }
       }
-
+      
       pData[rowCount] = {};
       pData[rowCount]["day"] = "Portfolio Totals:";
       rowCount++;
@@ -273,15 +273,20 @@ $(function() {
 
     };
 
+    //remove the last elementif it empty
+    if (pData && pData.length && typeof pData[pData.length-1].day==='string' && pData[pData.length-1].day=="") {
+      pData.splice(-1,1);
+    }
+
     var pGrid = new Slick.Grid(
         "#cashFlowGrid",
         pData,
         pColumns,
         {
-          editable : true,
-          enableAddRow : true,
+          editable : false,
+          enableAddRow : false,
           enableCellNavigation : true,
-          enableColumnReorder : true
+          enableColumnReorder : false
         });
   }
 
