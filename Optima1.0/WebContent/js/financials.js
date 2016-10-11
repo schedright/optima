@@ -48,7 +48,7 @@ $(function() {
 	  ul += "</ul>";
 	  $("#schedResults").append(ul);
 	  for (var i = 0; i < solutionResponse.data.list.length; i++) {
-	    var tab = $('<div style="padding-top:60px" id="proj' + i + '"></div>').appendTo("#schedResults");
+	    var tab = $('<div style="padding-top:90px" id="proj' + i + '"></div>').appendTo("#schedResults");
 //	    var tab = $("#schedResults").append('<div id="proj' + i + '"></div>');
 			var projDetails = solutionResponse.data.list[i].map;
 			tab

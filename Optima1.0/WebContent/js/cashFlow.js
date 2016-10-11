@@ -3,7 +3,7 @@ $(function() {
   var portfolioId = 0;
   var projectId = 0;
 
-  $('#accordion').tabs();
+  $('#projectTabs').tabs();
 
   for ( var i in getURLVariables()) {
     if (i == "portfolioId") {
