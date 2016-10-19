@@ -147,6 +147,7 @@ select option {
 	text-overflow: ellipsis;
 	overflow: hidden;
 	margin: 0 0 0 5px;
+	font-size: 12px;
 }
 
 .fn-gantt .leftPanel .row0 {
@@ -1462,6 +1463,11 @@ h2 {
 	font-size: 16 !important;
     padding: 3px 3px !important;
     color:#222222 !important;
+    float:left;
+    font-size:14px !important;
+    margin-top:5px;
+    margin-left:10px;
+    /* style="width: 200px;margin-top:5px;float:left;margin-left:10px" */
 } 
 .projectsSelect {
 	min-width:420px !important;

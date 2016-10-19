@@ -68,7 +68,7 @@ $(function() {
         id : formattedDate,
         name : formattedDate,
         field : formattedDate,
-        minWidth : 120,
+        minWidth : 160,
         formatter : Slick.Formatters.Currency
       });
 
@@ -124,7 +124,7 @@ $(function() {
       var totalNetBalance = [];
       for (var i = 0; i < projects.length; i++) {
         pData[rowCount] = {};
-        pData[rowCount]["day"] = "Project " + projects[i].projectName + ":";
+        pData[rowCount]["day"] = "<B>" + projects[i].projectName + ":</B>";
         rowCount++;
         var projectCashFlowData = allResults.data.map[projects[i].projectId];
 
@@ -207,7 +207,7 @@ $(function() {
       }
       
       pData[rowCount] = {};
-      pData[rowCount]["day"] = "Portfolio Totals:";
+      pData[rowCount]["day"] = "<B>Portfolio:</B>";
       rowCount++;
       currentCashOutRow = rowCount;
       pData[rowCount] = {};
@@ -286,7 +286,14 @@ $(function() {
           editable : false,
           enableAddRow : false,
           enableCellNavigation : true,
-          enableColumnReorder : false
+          enableColumnReorder : false,
+          defaultFormatter : function(row, cell, value, columnDef, dataContext) {
+            if (value == null) {
+              return "";
+            } else {
+              return value;
+            }
+          }
         });
   }
 

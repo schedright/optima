@@ -324,8 +324,14 @@
             // Create and return the left panel with labels
             leftPanel: function (element) {
                 /* Left panel */
+                var txt = "";
+                if (settings.type=='tasks') {
+                  txt = '<div style="padding-top:45px;padding-left:80px"><B>Project Tasks</B></div>'
+                } else {
+                  txt = '<div style="padding-top:22px;padding-left:100px"><B>Projects</B></div>'
+                }
                 var ganttLeftPanel = $('<div class="leftPanel"/>')
-                    .append($('<div id="leftTopSpacer" class="row spacer"/>')
+                    .append($('<div id="leftTopSpacer" class="row spacer">' + txt + "</div>")
                     .css("height", tools.getCellSize() * element.headerRows + "px")
                     .css("width", "100%"));
                 

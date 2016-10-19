@@ -192,6 +192,7 @@ $("#tasksGantt").gantt({
 
   weekdays_classes : window.weekdays,
   holidays : window.holidays,
+  type: 'tasks',
 
   onItemClick : function(data) {
 
@@ -207,6 +208,7 @@ $("#tasksGantt").gantt({
   },
 
   onRender : function() {
+    $( "#projectTabs" ).tabs( { disabled: [] } );
 
   }
 

@@ -127,6 +127,8 @@ public class ProjectController {
 			project.setProjectName(name);
 			project.setProjectCode(code);
 			project.setProjectDescription(descritpion);
+			Boolean differentStart = proposedStartDate==null || project.getPropusedStartDate() == null || !proposedStartDate.equals(project.getPropusedStartDate());
+			
 			project.setPropusedStartDate(proposedStartDate);
 			project.setProposedFinishDate(proposedFinishDate);
 			project.setOverheadPerDay(new BigDecimal(overheadPerDay));
@@ -155,6 +157,10 @@ public class ProjectController {
 			refreshJPAClass(session, PortfolioLight.class);
 			refreshJPAClass(session, ProjectLight.class);
 
+			if (differentStart) {
+				taskController.adjustStartDateBasedOnTaskDependency(session, project.getProjectId(), true);
+			}
+			
 			return new ServerResponse("0", PortfolioSolver.SUCCESS, project);
 		} catch (EntityControllerException e) {
 			e.printStackTrace();

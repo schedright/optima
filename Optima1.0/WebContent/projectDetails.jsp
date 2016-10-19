@@ -13,7 +13,7 @@
 			<ul>
 				<li><a href="#projInfo">Project Details</a></li>
 				<li><a href="#projTasks">Project Tasks</a></li>
-				<li><a href="#tasksBarChart">Tasks Bar chart</a></li>
+				<li><a href="#tasksBarChart">Tasks Bar Chart</a></li>
 			</ul>
 			<div id="projInfo">
 				<div class="project-info-container">

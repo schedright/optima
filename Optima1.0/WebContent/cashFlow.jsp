@@ -12,7 +12,7 @@
 
 			<ul>
 				<li><a href="#cashFlow">Cash Flow</a></li>
-				<li><a href="#flowChart">Cash flow chart</a></li>
+				<li><a href="#flowChart">Cash Flow Chart</a></li>
 			</ul>
 
 			<div id="cashFlow">

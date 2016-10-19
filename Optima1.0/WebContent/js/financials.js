@@ -48,7 +48,7 @@ $(function() {
 	  ul += "</ul>";
 	  $("#schedResults").append(ul);
 	  for (var i = 0; i < solutionResponse.data.list.length; i++) {
-	    var tab = $('<div style="padding-top:90px" id="proj' + i + '"></div>').appendTo("#schedResults");
+	    var tab = $('<div style="padding-top:50px" id="proj' + i + '"></div>').appendTo("#schedResults");
 //	    var tab = $("#schedResults").append('<div id="proj' + i + '"></div>');
 			var projDetails = solutionResponse.data.list[i].map;
 			tab
@@ -69,7 +69,7 @@ $(function() {
 				formatter : function(row, cell, value, columnDef, dataContext) {
 					return value.name;
 				},
-				minWidth : 200
+				minWidth : 320
 			});
 
 			if (projDetails.end_final) {
@@ -85,7 +85,7 @@ $(function() {
 									return "<div style=\"width:16px;height:16px\" class=\"shiftedTaskInLogo\"></div>"
 								}
 							},
-							minWidth : 200
+							minWidth : 100
 						});
 			}
 
@@ -124,7 +124,7 @@ $(function() {
 				id : "pn" + i,
 				name : projDetails.name,
 				field : "name",
-				minWidth : 200
+				minWidth : 320
 			} ];
 			if (projDetails.end_final) {
 				projectCol
@@ -151,7 +151,7 @@ $(function() {
 									}
 								}
 							},
-							minWidth : 200
+							minWidth : 100
 						});
 			}
 			projectCol.push({

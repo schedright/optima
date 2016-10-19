@@ -6,7 +6,8 @@
 	<div id="main" style="width: 100%;"
 		class="main-body">
 		<div id="toolbarContainer" style="width: 100%;height:40px;padding-top:6px;">
-		<select id="portfolioSelect" class="portfolioSelect">
+			<Label for="portfolioSelect" style="float:left;padding-top:12px">Select Portfolio: </Label>
+			<select id="portfolioSelect" class="portfolioSelect" >
 		</select>
 		<div class="portfolioButtonsContainer">
 		</div>
@@ -20,7 +21,7 @@
 		</div>
 		
 		</div>
-		<div class="gridScroll">
+		<div class="gridScroll" style="top:46px">
 			<div id="gridContainer" class="projectsGrid"></div>
 		</div>
 

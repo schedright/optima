@@ -148,6 +148,9 @@ public class Project implements Serializable {
 	}
 
 	public BigDecimal getOverheadPerDay() {
+		if (this.overheadPerDay==null) {
+			return BigDecimal.valueOf(0);
+		}
 		return this.overheadPerDay;
 	}
 

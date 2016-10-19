@@ -244,6 +244,7 @@ $(function() {
       });
       if (ui.newTab.index() == 2) {
         if (!gantInitialized) {
+          $( "#projectTabs" ).tabs( { disabled: [1, 2, 3] } );
           initializeTaskGantt();
           gantInitialized = true;
         }
