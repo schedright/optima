@@ -263,7 +263,7 @@ public class PrimaveraManager {
 					if (cost == null) {
 						cost = (double) 0;
 					}
-					String tduration = getElementChildAttributeValue(taskNode, "plannedduration");
+					String tduration = getElementChildAttributeValue(taskNode, "atcompletionduration");
 					int duration = Integer.valueOf(tduration) / 8;
 
 					if ("wbs summary".equals(ttype.toLowerCase())) {
@@ -299,7 +299,10 @@ public class PrimaveraManager {
 					guid2TaskMap.put(tguid, task);
 					objectId2TaskMap.put(objectId, task);
 					try {
-						String temp = getElementChildAttributeValue(taskNode, "plannedstartdate");
+						String temp = getElementChildAttributeValue(taskNode, "actualstartdate");
+						if (temp==null || temp.isEmpty()) {
+							temp = getElementChildAttributeValue(taskNode, "plannedstartdate");
+						}
 						if (temp.indexOf("T")!=-1) {
 							temp = temp .substring(0,temp.indexOf("T")) + "T00:00:00";
 						}
@@ -622,7 +625,7 @@ public class PrimaveraManager {
 			try {
 				if (child instanceof Element && "resourceassignment".equals(((Element) child).getTagName().toLowerCase())) {
 					String activityObjetId = getElementChildAttributeValue(child, "activityobjectid");
-					String temp = getElementChildAttributeValue(child, "plannedcost");
+					String temp = getElementChildAttributeValue(child, "atcompletioncost");
 					Double cost = Double.valueOf(temp);
 
 					if (tasksCost.containsKey(activityObjetId)) {
@@ -647,7 +650,7 @@ public class PrimaveraManager {
 				if (child instanceof Element && "activityexpense".equals(((Element) child).getTagName().toLowerCase())) {
 					String activityObjetId = getElementChildAttributeValue(child, "activityobjectid");
 					if (activityObjetId.equals(objId)) {
-						String temp = getElementChildAttributeValue(child, "plannedcost");
+						String temp = getElementChildAttributeValue(child, "atcompletioncost");
 						ret += Double.valueOf(temp);
 					}
 				}
@@ -748,10 +751,6 @@ public class PrimaveraManager {
 											overheadActivity = taskNode;
 										}
 
-										/*
-										 * String ttype = getElementChildAttributeValue(taskNode, "type"); String objectId = getElementChildAttributeValue(taskNode, "objectid"); String tduration = getElementChildAttributeValue(taskNode,
-										 * "plannedduration"); int duration = Integer.valueOf(tduration) / 8; String tname = getElementChildAttributeValue(taskNode, "name");
-										 */
 										String tguid = getElementChildAttributeValue(taskNode, "guid");
 										ProjectTask task = existingGuid2TaskMap.get(tguid);
 										if (task != null && (task.getStatus() == null || task.getStatus() == ProjectTask.STATUS_NOT_STARTED)) {
