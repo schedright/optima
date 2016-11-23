@@ -1,6 +1,7 @@
 var windowResizeFunc = function() {
   $(".scoll-container").height($('#tasksGantt').height() - 41)
 };
+var selectedTask = 0;
 
 var context = {};
 
@@ -50,6 +51,30 @@ var showHideDependencies = function(projectId,
 
       }
 
+      $("#dependencies li").dblclick(function() {
+        var tgtTsk = $(this).attr('id');
+
+          var srcTsk = selectedTask;
+          if (srcTsk == "undefined" || tgtTsk == "undefined") {
+            return false;
+          }
+
+          tgtTsk = parseInt(tgtTsk);
+          
+          if (selectedTask.asDependent && selectedTask.asDependent.list) {
+            for (var i=0;i<selectedTask.asDependent.list.length;i++) {
+              var dep = selectedTask.asDependent.list[i];
+              if (dep && dep.dependency==tgtTsk) {
+                $("#taskLagDialog").data("dependency",dep).dialog("open");
+                break;
+              }
+              
+            }
+          }
+          
+          
+      });
+      
       $("#allTasks, #dependencies").sortable({
         connectWith : ".sortable",
         item : '> li:not(.ui-state-disabled)',
@@ -107,6 +132,7 @@ var showHideDependencies = function(projectId,
 var showHideTaskDetails = function(projectId,
     task,
     isNew) {
+  selectedTask = task;
   if (isNew) {
     $("#taskDetailsId").css('display', '');
     $("#relId").css('display', 'none');
@@ -1014,4 +1040,39 @@ $('#mainAllTasks').on('click', function(e) {
 
   // sets the input field's value to the data value of the clicked a element
   $('#mainAllTasks').val($(this).data('value'));
+});
+
+
+$("#taskLagDialog").dialog({
+  autoOpen : false,
+  height : 200,
+  width : 450,
+  modal : true,
+  show : {
+    effect : "blind",
+    duration : 300
+  },
+  hide : {
+    effect : "fade",
+    duration : 300
+  },
+  open : function() {
+    var dep = $(this).data("dependency");
+    $("#taskLag").val(dep.lag);
+  },
+
+  buttons : {
+    "Save" : function() {
+      var lag = $("#taskLag").val();
+      var dep = $(this).data("dependency");
+      rpcClient.taskService.updateTaskDependency(dep.dependencyId,lag);
+      dep.lag = lag;
+      $(this).dialog("close");
+    },
+    Cancel : function() {
+      $(this).dialog("close");
+    }
+  },
+  close : function() {
+  }
 });
