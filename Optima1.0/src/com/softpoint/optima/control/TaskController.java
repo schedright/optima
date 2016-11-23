@@ -314,6 +314,19 @@ public class TaskController {
 		}
 	}
 
+	public ServerResponse updateTaskDependency(HttpSession session, int taskDependencyId, int lag) throws OptimaException {
+		EntityController<TaskDependency> controller = new EntityController<TaskDependency>(session.getServletContext());
+		try {
+			TaskDependency dependency = controller.find(TaskDependency.class, taskDependencyId);
+			dependency.setLag(lag);
+			controller.merge(dependency);
+			return new ServerResponse("0", "Success", null);
+		} catch (EntityControllerException e) {
+			e.printStackTrace();
+			return new ServerResponse("TASK0008", String.format("Error removing TaskDependency %d: %s", taskDependencyId, e.getMessage()), e);
+		}
+	}
+
 	/**
 	 * @param session
 	 * @param taskDependencyId
